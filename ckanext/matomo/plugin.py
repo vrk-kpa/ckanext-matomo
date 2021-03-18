@@ -15,7 +15,7 @@ class MatomoPlugin(plugins.SingletonPlugin):
         toolkit.add_public_directory(config_, 'public')
         toolkit.add_resource('fanstatic', 'matomo')
 
-    #IConfigurable
+    # IConfigurable
 
     def configure(self, config):
 
@@ -27,11 +27,9 @@ class MatomoPlugin(plugins.SingletonPlugin):
             if not config.get(config_option):
                 raise Exception(u"Config option `{0}` must be set to use Matomo".format(config_option))
 
-
     # ITemplateHelpers
 
     def get_helpers(self):
         return {
             "matomo_snippet": helpers.matomo_snippet
         }
-

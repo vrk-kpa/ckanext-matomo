@@ -1,5 +1,6 @@
 from ckan.plugins.toolkit import render_snippet, config
 
+
 def matomo_snippet():
     data = {
         "matomo_domain": config.get('ckanext.matomo.domain'),
