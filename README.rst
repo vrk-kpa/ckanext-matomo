@@ -76,12 +76,16 @@ To install ckanext-matomo:
 Config Settings
 ---------------
 
-Document any optional config settings here. For example::
 
-    # The minimum number of hours to wait before re-checking a resource
-    # (optional, default: 24).
-    ckanext.matomo.some_setting = some_default_value
+    # The domain used for matomo analytics
+    ckanext.matomo.domain = http://example.com/
 
+    # The site id used in matomo
+    ckanext.matomo.site_id = 1
+
+    # The domain where matomo script is downloaded
+    # (optional, default ckanext.matomo.domain)
+    ckanext.matomo.script_domain
 
 ------------------------
 Development Installation
