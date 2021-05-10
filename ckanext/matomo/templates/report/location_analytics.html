@@ -1,0 +1,91 @@
+{% resource "ytp_dataset_js/d3.js" %}
+{% resource "ckanext-matomo_js/chart-doughnut.js" %}
+{% resource "ckanext-matomo_js/chart-column.js" %}
+
+<script>
+  var chartData = {
+    finland_vs_world_last_month: [
+      {% for row in data['data']['finland_vs_world_last_month'] %}
+        {
+          value: {{ row.total_visits or 0}},
+          label: '{{ row.location_name }}'
+        },
+      {% endfor %}
+    ],
+    finland_vs_world_all: [
+      {% for row in data['data']['finland_vs_world_all'] %}
+        {
+          value: {{ row.total_visits }},
+          label: '{{ row.location_name }}'
+        },
+      {% endfor %}
+    ],
+    visitors_by_months: [
+      {% for row in data['data']['sessions_by_month'] %}
+        {
+          value: {{ row.visits }},
+          label: '{{ row.date }}'
+        },
+      {% endfor %}
+    ]
+  }
+</script>
+
+<div class="report-chart-row">
+  <div data-module="chartData-column"
+    data-module-field="visitors_by_months"
+    data-module-title="{% trans %}Sessions by month{% endtrans %}"
+    data-module-legendx="{% trans %}Dates{% endtrans %}"
+    data-module-legendy="{% trans %}Sessions{% endtrans %}"
+    id="locationColumnChart"
+    class="report-column-chart flex-1">
+  </div>
+</div>
+<div class="report-chart-row">
+  <div data-module="chartData-doughnut"
+    data-module-field="finland_vs_world_last_month"
+    data-module-title="{% trans %}Sessions last month{% endtrans %}"
+    data-module-legend="true"
+    data-module-width="100"
+    data-module-height="100"
+    id="locationChartLegend"
+    class="report-pie-chart flex-1">
+  </div>
+  <div data-module="chartData-doughnut"
+    data-module-field="finland_vs_world_last_month"
+    data-module-title="{% trans %}Sessions last month{% endtrans %}"
+    data-module-chart="true"
+    id="locationChartMonth"
+    class="report-pie-chart flex-2">
+  </div>
+  <div data-module="chartData-doughnut"
+    data-module-field="finland_vs_world_all"
+    data-module-title="{% trans %}Sessions total{% endtrans %}"
+    data-module-chart="true"
+    id="locationChartAll"
+    class="report-pie-chart flex-2">
+  </div>
+</div>
+<hr class="page-break">
+<div>
+  <h2>{% trans %}Audience locations{% endtrans %}</h2> 
+  <p>{% trans %}Collected since{% endtrans %} {{ h.render_datetime(data['data']['first_date']) }}</p>
+  {% if data['data']['top_locations'] %}
+    <table class="table table-condensed table-bordered table-striped">
+      <tr>
+        <th>{% trans %}Countries{% endtrans %}</th>
+        <th>{% trans %}Sessions (since recording started){% endtrans %}</th>
+        <th>{% trans %}Sessions{% endtrans %} (%)</th>
+      </tr>
+      {% for toplocation in data['data']['top_locations'] %}
+        <tr>
+          <td>{{ _(toplocation.location_name) }}</td>
+          <td>{{ toplocation.total_visits }}</td>
+          <td>{{ toplocation.percent_visits|round(2) }} %</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>{% trans %}No statistics found for audience locations.{% endtrans %}</p>
+  {% endif %}
+</div>
