@@ -3,11 +3,16 @@ import logging
 
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
-from ckanext.report.interfaces import IReport
 from ckanext.matomo import helpers, tracking, reports
 from flask import Blueprint
 
 from routes.mapper import SubMapper
+
+try:
+    from ckanext.report.interfaces import IReport
+except ImportError:
+    class IReport():
+        pass
 
 log = logging.getLogger(__name__)
 
