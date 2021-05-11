@@ -10,8 +10,8 @@ from routes.mapper import SubMapper
 try:
     from ckanext.report.interfaces import IReport
 except ImportError:
-    class IReport():
-        pass
+    IReport = None
+
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +22,9 @@ class MatomoPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurable)
     plugins.implements(plugins.IBlueprint)
     plugins.implements(plugins.IRoutes, inherit=True)
-    plugins.implements(IReport)
+
+    if IReport is not None:
+        plugins.implements(IReport)
 
     # IConfigurer
 
