@@ -1,4 +1,3 @@
-import queue
 import logging
 
 import ckan.plugins as plugins
@@ -24,9 +23,6 @@ class MatomoPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IBlueprint)
     plugins.implements(plugins.IRoutes, inherit=True)
     plugins.implements(IReport)
-
-    tracking_event_queue = queue.Queue()
-    tracking_event_threads = []
 
     # IConfigurer
 
