@@ -31,7 +31,8 @@ matomo_group = paster_click_group(
 def fetch(ctx, config, dryrun, since, until):
     load_config(config or ctx.obj['config'])
 
-    since_date = datetime.datetime.strptime(since, DATE_FORMAT).date() if since else PackageStats.get_latest_update_date().date()
+    since_date = (datetime.datetime.strptime(since, DATE_FORMAT) if since else
+                  PackageStats.get_latest_update_date()).date()
     until_date = datetime.datetime.strptime(until, DATE_FORMAT).date() if until else datetime.date.today()
 
     if since_date > until_date:
