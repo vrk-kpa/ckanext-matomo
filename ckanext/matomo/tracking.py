@@ -4,7 +4,7 @@ import datetime
 from ckan.views.api import action as ckan_action
 import ckan.plugins.toolkit as toolkit
 
-from matomo_api import MatomoAPI
+from ckanext.matomo.matomo_api import MatomoAPI
 
 log = logging.getLogger(__name__)
 
