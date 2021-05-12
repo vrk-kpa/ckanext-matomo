@@ -151,4 +151,5 @@ def fetch(ctx, config, dryrun, since, until):
 def init_db(ctx, config):
     from ckanext.matomo.model import init_tables
     import ckan.model as model
+    load_config((config or ctx.obj['config']))
     init_tables(model.meta.engine)
