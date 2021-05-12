@@ -1,0 +1,13 @@
+{% set percent = 0 %}
+{% if total_visits != 0 %}{% set percent = ((total_entrances / total_visits) * 100)|round(1, 'floor') %}{% endif %}
+{% set percent_class = 'color_danger' %}
+{% if percent > 25 %}
+  {% set percent_class = 'color_warning' %}
+    {% if percent > 50 %}
+      {% set percent_class = 'color_info' %}
+      {% if percent > 75 %}
+        {% set percent_class = 'color_success' %}
+      {% endif %}
+    {% endif %}
+{% endif %}
+<td class="{{ percent_class }}">{{ percent }}%</td>

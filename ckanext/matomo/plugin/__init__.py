@@ -1,0 +1,77 @@
+import logging
+
+import ckan.plugins as plugins
+import ckan.plugins.toolkit as toolkit
+
+from ckanext.matomo.cli import get_commands
+from ckanext.matomo import helpers, reports
+
+try:
+    from ckanext.report.interfaces import IReport
+except ImportError:
+    IReport = None
+
+try:
+    toolkit.requires_ckan_version("2.9")
+except toolkit.CkanVersionException:
+    from ckanext.matomo.plugin.pylons_plugin import MixinPlugin
+else:
+    from ckanext.matomo.plugin.flask_plugin import MixinPlugin
+
+
+log = logging.getLogger(__name__)
+
+
+class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin):
+    plugins.implements(plugins.IConfigurer)
+    plugins.implements(plugins.ITemplateHelpers)
+    plugins.implements(plugins.IConfigurable)
+
+    if IReport is not None:
+        plugins.implements(IReport)
+
+    if toolkit.check_ckan_version(min_version="2.9"):
+        plugins.implements(plugins.IClick)
+
+    # IConfigurer
+
+    def update_config(self, config_):
+        toolkit.add_template_directory(config_, '../templates')
+        toolkit.add_public_directory(config_, 'public')
+        toolkit.add_resource('fanstatic', 'matomo')
+        toolkit.add_resource('public/javascript/', 'ckanext-matomo_js')
+
+    # IConfigurable
+
+    def configure(self, config):
+
+        self.config = config
+
+        for config_option in (
+            u'ckanext.matomo.domain',
+            u'ckanext.matomo.site_id',
+        ):
+            if not config.get(config_option):
+                raise Exception(u"Config option `{0}` must be set to use Matomo".format(config_option))
+
+    # ITemplateHelpers
+
+    def get_helpers(self):
+        return {
+            "matomo_snippet": helpers.matomo_snippet
+        }
+
+    # IReport
+    def register_reports(self):
+        """Register details of an extension's reports"""
+        return [reports.matomo_dataset_report_info,
+                reports.matomo_resource_report_info,
+                reports.matomo_location_report_info,
+                reports.matomo_dataset_least_popular_report_info,
+                reports.matomo_organizations_with_most_popular_datasets_info,
+                reports.matomo_most_popular_search_terms_info]
+
+    # IClick
+
+    def get_commands(self):
+        return get_commands()

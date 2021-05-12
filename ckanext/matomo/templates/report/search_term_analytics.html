@@ -1,0 +1,20 @@
+<div class="module-content">
+  <h2>{% trans %}Most popular search terms{% endtrans %}</h2> 
+    {% if data['table'] %}
+      <table class="table table-condensed table-bordered table-striped">
+      <tr>
+        <th>{% trans %}Search term{% endtrans %}</th>
+        <th>{% trans %}Total searches{% endtrans %}</th>
+      </tr>
+        {% for toppackage in table %}
+          <tr>
+            <td>{{ toppackage.search_term }}</td>
+            <td>{{ toppackage.count }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p>{% trans %}No analytics found for most popular search terms{% endtrans %}</p>
+    {% endif %}
+
+ </div>

@@ -1,0 +1,26 @@
+<div class="module-content">
+  <h2>{% trans %}Organizations with most viewed datasets{% endtrans %}</h2> 
+    {% if data['table'] %}
+      <table class="table table-condensed table-bordered table-striped">
+      <tr>
+        <th>{% trans %}Organization{% endtrans %}</th>
+        <th>{% trans %}Total views{% endtrans %}</th>
+        <th>{% trans %}Initial entrance{% endtrans %}</th>
+        <th>{% trans %}Entrances of total views{% endtrans %}</th>
+        <th>{% trans %}Downloads{% endtrans %}</th>
+      </tr>
+        {% for toppackage in table %}
+          <tr>
+            <td>{{ h.link_to(toppackage.organization_name, h.url_for(controller='organization', action='read', id=toppackage.organization_name)) }}</td>
+            <td>{{ toppackage.total_visits }}</td>
+            <td>{{ toppackage.total_entrances }}</td>
+            {% snippet "report/snippets/entrances_percentage_td.html", total_visits=toppackage.total_visits, total_entrances=toppackage.total_entrances %}
+            <td>{{ toppackage.total_downloads }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p>{% trans %}No analytics found for organizations with most visited datasets.{% endtrans %}</p>
+    {% endif %}
+
+ </div>
