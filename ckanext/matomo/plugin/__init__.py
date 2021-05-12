@@ -2,28 +2,30 @@ import logging
 
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
-from ckanext.matomo import helpers, tracking, reports
-from flask import Blueprint
-
-from routes.mapper import SubMapper
 
 from ckanext.matomo.cli import get_commands
+from ckanext.matomo import helpers, reports
 
 try:
     from ckanext.report.interfaces import IReport
 except ImportError:
     IReport = None
 
+try:
+    toolkit.requires_ckan_version("2.9")
+except toolkit.CkanVersionException:
+    from ckanext.matomo.plugin.pylons_plugin import MixinPlugin
+else:
+    from ckanext.matomo.plugin.flask_plugin import MixinPlugin
+
 
 log = logging.getLogger(__name__)
 
 
-class MatomoPlugin(plugins.SingletonPlugin):
+class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.ITemplateHelpers)
     plugins.implements(plugins.IConfigurable)
-    plugins.implements(plugins.IBlueprint)
-    plugins.implements(plugins.IRoutes, inherit=True)
 
     if IReport is not None:
         plugins.implements(IReport)
@@ -34,7 +36,7 @@ class MatomoPlugin(plugins.SingletonPlugin):
     # IConfigurer
 
     def update_config(self, config_):
-        toolkit.add_template_directory(config_, 'templates')
+        toolkit.add_template_directory(config_, '../templates')
         toolkit.add_public_directory(config_, 'public')
         toolkit.add_resource('fanstatic', 'matomo')
         toolkit.add_resource('public/javascript/', 'ckanext-matomo_js')
@@ -58,28 +60,6 @@ class MatomoPlugin(plugins.SingletonPlugin):
         return {
             "matomo_snippet": helpers.matomo_snippet
         }
-
-    # IRoutes
-    # TODO: Port to flask like action tracking when resource_download is ported
-
-    def before_map(self, map):
-        with SubMapper(map, controller='ckanext.matomo.tracking:TrackedResourceController') as m:
-            m.connect('/dataset/{id}/resource/{resource_id}/download', action='resource_download')
-            m.connect('/dataset/{id}/resource/{resource_id}/download/{filename}', action='resource_download')
-        return map
-
-    # IBlueprint
-
-    def get_blueprint(self):
-        blueprint = Blueprint('matomo', self.__module__)
-        rules = [
-            ('/api/action/<logic_function>', 'tracked_action', tracking.tracked_action),
-            ('/api/<ver>/action/<logic_function>', 'tracked_action', tracking.tracked_action),
-        ]
-        for rule in rules:
-            blueprint.add_url_rule(*rule)
-
-        return blueprint
 
     # IReport
     def register_reports(self):

@@ -2,9 +2,7 @@ import logging
 import datetime
 
 from ckan.views.api import action as ckan_action
-from ckan.plugins import plugin_loaded
 import ckan.plugins.toolkit as toolkit
-from ckan.controllers.package import PackageController
 
 from matomo_api import MatomoAPI
 
@@ -12,26 +10,11 @@ log = logging.getLogger(__name__)
 
 
 def tracked_action(logic_function, ver=3):
-    _post_analytics('API / Action / {}'.format(logic_function))
+    post_analytics('API / Action / {}'.format(logic_function))
     return ckan_action(logic_function, ver)
 
 
-# Ugly hack since ckanext-cloudstorage replaces resource_download action
-# and we can't inherit from the correct controller,
-# googleanalytics needs to before cloudstorage in plugin list
-OptionalController = PackageController
-if plugin_loaded('cloudstorage'):
-    from ckanext.cloudstorage.controller import StorageController
-    OptionalController = StorageController
-
-
-class TrackedResourceController(OptionalController):
-    def resource_download(self, id, resource_id, filename=None):
-        _post_analytics('Resource / Download', download=True)
-        return OptionalController.resource_download(self, id, resource_id, filename)
-
-
-def _post_analytics(action_name, download=False):
+def post_analytics(action_name, download=False):
     now = datetime.datetime.now()
     event = {'action_name': action_name,
              'url': toolkit.request.url,
