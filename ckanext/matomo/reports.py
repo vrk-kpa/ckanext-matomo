@@ -1,6 +1,10 @@
-from ckan.common import OrderedDict
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
 from datetime import datetime, timedelta
+
+try:
+    from ckan.common import OrderedDict
+except ImportError:
+    from collections import OrderedDict
 
 
 def last_week():
