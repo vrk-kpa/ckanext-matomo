@@ -7,7 +7,7 @@ from flask import Blueprint
 
 from routes.mapper import SubMapper
 
-from commands import get_commands
+from ckanext.matomo.cli import get_commands
 
 try:
     from ckanext.report.interfaces import IReport

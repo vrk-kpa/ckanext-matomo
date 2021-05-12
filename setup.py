@@ -86,7 +86,7 @@ setup(
         ckan = ckan.lib.extract:extract_ckan
 
         [paste.paster_command]
-        matomo = ckanext.matomo.commands:matomo_group
+        matomo = ckanext.matomo.paster:matomo
     ''',
 
     # If you are changing from the default layout of your extension, you may

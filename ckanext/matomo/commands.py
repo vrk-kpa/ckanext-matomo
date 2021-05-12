@@ -1,13 +1,5 @@
 import datetime
-import click
-
-from ckan.lib.cli import (
-    load_config,
-    paster_click_group,
-    click_config_option,
-)
 import ckan.plugins.toolkit as toolkit
-
 from ckanext.matomo.matomo_api import MatomoAPI
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
 
@@ -15,27 +7,7 @@ from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDa
 DATE_FORMAT = '%Y-%m-%d'
 
 
-def get_commands():
-    return [matomo_group]
-
-
-matomo_group = paster_click_group(
-    summary=u'Matomo related commands.'
-)
-
-
-@matomo_group.command(
-    u'fetch',
-    help='Fetches data from Matomo to local database'
-)
-@click_config_option
-@click.pass_context
-@click.option(u'--dryrun', is_flag=True, help="Prints what would be updated without making any changes.")
-@click.option(u'--since', help="First date to fetch in YYYY-MM-DD format. Default: latest PackageStats entry date.")
-@click.option(u'--until', help="Last date to fetch in YYYY-MM-DD format. Default: current date.")
-def fetch(ctx, config, dryrun, since, until):
-    load_config(config or ctx.obj['config'])
-
+def fetch(dryrun, since, until):
     since_date = (datetime.datetime.strptime(since, DATE_FORMAT) if since else
                   PackageStats.get_latest_update_date()).date()
     until_date = datetime.datetime.strptime(until, DATE_FORMAT).date() if until else datetime.date.today()
@@ -147,14 +119,7 @@ def fetch(ctx, config, dryrun, since, until):
                 SearchStats.update_search_term_count(search_term, date, count)
 
 
-@matomo_group.command(
-    u'init_db',
-    help='Initializes analytics database tables'
-)
-@click_config_option
-@click.pass_context
-def init_db(ctx, config):
+def init_db():
     from ckanext.matomo.model import init_tables
     import ckan.model as model
-    load_config((config or ctx.obj['config']))
     init_tables(model.meta.engine)
