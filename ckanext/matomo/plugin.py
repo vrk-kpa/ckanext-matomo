@@ -7,6 +7,8 @@ from flask import Blueprint
 
 from routes.mapper import SubMapper
 
+from commands import get_commands
+
 try:
     from ckanext.report.interfaces import IReport
 except ImportError:
@@ -25,6 +27,9 @@ class MatomoPlugin(plugins.SingletonPlugin):
 
     if IReport is not None:
         plugins.implements(IReport)
+
+    if toolkit.check_ckan_version(min_version="2.9"):
+        plugins.implements(plugins.IClick)
 
     # IConfigurer
 
@@ -85,3 +90,8 @@ class MatomoPlugin(plugins.SingletonPlugin):
                 reports.matomo_dataset_least_popular_report_info,
                 reports.matomo_organizations_with_most_popular_datasets_info,
                 reports.matomo_most_popular_search_terms_info]
+
+    # IClick
+
+    def get_commands(self):
+        return get_commands()

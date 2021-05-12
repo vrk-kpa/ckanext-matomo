@@ -14,6 +14,11 @@ from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDa
 
 DATE_FORMAT = '%Y-%m-%d'
 
+
+def get_commands():
+    return [matomo_group]
+
+
 matomo_group = paster_click_group(
     summary=u'Matomo related commands.'
 )
