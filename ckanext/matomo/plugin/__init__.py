@@ -5,6 +5,7 @@ import ckan.plugins.toolkit as toolkit
 
 from ckanext.matomo.cli import get_commands
 from ckanext.matomo import helpers, reports
+import ckanext.matomo.logic as logic
 
 try:
     from ckanext.report.interfaces import IReport
@@ -26,6 +27,7 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.ITemplateHelpers)
     plugins.implements(plugins.IConfigurable)
+    plugins.implements(plugins.IActions)
 
     if IReport is not None:
         plugins.implements(IReport)
@@ -37,9 +39,9 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin):
 
     def update_config(self, config_):
         toolkit.add_template_directory(config_, '../templates')
-        toolkit.add_public_directory(config_, 'public')
-        toolkit.add_resource('fanstatic', 'matomo')
-        toolkit.add_resource('public/javascript/', 'ckanext-matomo_js')
+        toolkit.add_public_directory(config_, '../public')
+        toolkit.add_resource('../fanstatic', 'matomo')
+        toolkit.add_resource('../public/javascript/', 'ckanext-matomo_js')
 
     # IConfigurable
 
@@ -75,3 +77,8 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin):
 
     def get_commands(self):
         return get_commands()
+
+    # IActions
+
+    def get_actions(self):
+        return {'most_visited_packages': logic.most_visited_packages}
