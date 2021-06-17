@@ -18,9 +18,9 @@ def fetch(dryrun, since, until):
 
     matomo_url = toolkit.config.get('ckanext.matomo.domain')
     matomo_site_id = toolkit.config.get('ckanext.matomo.site_id')
-    matomo_auth_token = toolkit.config.get('ckanext.matomo.auth_token')
+    matomo_token_auth = toolkit.config.get('ckanext.matomo.token_auth')
 
-    api = MatomoAPI(matomo_url, matomo_site_id, matomo_auth_token)
+    api = MatomoAPI(matomo_url, matomo_site_id, matomo_token_auth)
     params = {'period': 'day', 'date': MatomoAPI.date_range(since_date, until_date)}
     package_show = toolkit.get_action('package_show')
 
