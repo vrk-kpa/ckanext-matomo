@@ -7,7 +7,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 import ckan.model as model
 import requests
-from ckan.plugins.toolkit import config, aslist, get_action, NotFound
+from ckan.plugins.toolkit import config, aslist, get_action, ObjectNotFound
+
 
 log = __import__('logging').getLogger(__name__)
 
@@ -352,7 +353,7 @@ class PackageStats(Base):
                 return package.get('organization').get('name')
             else:
                 return None
-        except NotFound:
+        except ObjectNotFound:
             return None
 
     @classmethod
