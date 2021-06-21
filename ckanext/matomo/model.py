@@ -6,8 +6,8 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 import ckan.model as model
-import requests
-from ckan.plugins.toolkit import config, aslist
+from ckan.plugins.toolkit import config, aslist, get_action, ObjectNotFound
+
 
 log = __import__('logging').getLogger(__name__)
 
@@ -346,15 +346,14 @@ class PackageStats(Base):
 
     @classmethod
     def get_organization(cls, dataset_name):
-        url = config.get("ckan.site_url") + "/data/api/3/action/package_show?id=" + dataset_name
-        response = requests.get(url)
-        if response:
-            try:
-                return response.json()['result']['organization']['name']
-            except TypeError:
+        try:
+            package = get_action('package_show')({}, {'id': dataset_name})
+            if package.get('organization'):
+                return package.get('organization').get('name')
+            else:
                 return None
-        else:
-            response.raise_for_status()
+        except ObjectNotFound:
+            return None
 
     @classmethod
     def get_organizations_with_most_popular_datasets(cls, start_date, end_date, limit=20):
