@@ -6,7 +6,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 import ckan.model as model
-import requests
 from ckan.plugins.toolkit import config, aslist, get_action, ObjectNotFound
 
 
