@@ -759,7 +759,8 @@ class AudienceLocationDate(Base):
 
         location_id = cls.get_location_id_by_name(location_name)
         if location_id:
-            total_visits = model.Session.query(func.sum(cls.visits)).filter(maybe_negate(cls.location_id, location_id, negate)) \
+            total_visits = model.Session.query(func.sum(cls.visits))\
+                .filter(maybe_negate(cls.location_id, location_id, negate)) \
                 .filter(cls.date >= start_date) \
                 .filter(cls.date <= end_date) \
                 .scalar()
@@ -796,7 +797,7 @@ class AudienceLocationDate(Base):
         })
 
         for r in result:
-            if all_visits is not 0:
+            if all_visits != 0:
                 r['percent_visits'] = 100.0 * r.get('total_visits', 0.0) / all_visits
             else:
                 r['percent_visits'] = float('nan')
