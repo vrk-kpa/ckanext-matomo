@@ -789,8 +789,7 @@ class AudienceLocationDate(Base):
             .all()
 
         result = cls.convert_list_to_dicts(locations)
-        all_visits = AudienceLocationDate.get_total_visits().get('total_visits', 0)
-        all_visits = all_visits if all_visits else 0
+        all_visits = AudienceLocationDate.get_total_visits().get('total_visits', 0) or 0
         result.append({
             'location_name': 'Other',
             'total_visits': all_visits - sum(x.get('total_visits', 0) for x in result)
@@ -800,7 +799,7 @@ class AudienceLocationDate(Base):
             if all_visits != 0:
                 r['percent_visits'] = 100.0 * r.get('total_visits', 0.0) / all_visits
             else:
-                r['percent_visits'] = float('nan')
+                r['percent_visits'] = 0.0
 
         return result
 
