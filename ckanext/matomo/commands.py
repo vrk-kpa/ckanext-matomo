@@ -65,8 +65,10 @@ def fetch(dryrun, since, until):
         for package_id, stats_list in date_statistics.items():
             if package_id in updated_package_ids:
                 continue
-
-            downloads = sum(stats.get('nb_hits', 0) for stats in stats_list)
+            downloads = 0
+            for stats_key in stats_list:
+                for stats in stats_list[stats_key]:
+                    downloads += stats.get('nb_hits', 0)
             if dryrun:
                 print('Would update download stats: package_id={}, date={}, downloads={}'
                       .format(package_id, date, downloads))
