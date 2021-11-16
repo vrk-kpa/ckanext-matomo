@@ -3,7 +3,6 @@ import ckan.plugins.toolkit as toolkit
 from ckanext.matomo.matomo_api import MatomoAPI
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
 
-
 DATE_FORMAT = '%Y-%m-%d'
 
 
@@ -36,10 +35,13 @@ def fetch(dryrun, since, until):
         updated_package_ids_by_date[date_str] = updated_package_ids
 
         for package_name, stats_list in date_statistics.items():
+            package_name = package_name.split('?')[0]
+            if not package_name.strip():
+                continue
             try:
                 package = package_show({'ignore_auth': True}, {'id': package_name})
             except toolkit.ObjectNotFound:
-                print('Package "{}" not found, skipping...'.format(package_name))
+                print('Package "{}" not found, skipping...'.format(package_name.encode('iso-8859-1')))
                 continue
             package_id = package['id']
             visits = sum(stats.get('nb_hits', 0) for stats in stats_list)
