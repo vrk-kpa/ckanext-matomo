@@ -32,7 +32,6 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin, DefaultTranslation):
     plugins.implements(plugins.IConfigurable)
     plugins.implements(plugins.IActions)
     plugins.implements(plugins.ITranslation)
-    # if plugins.toolkit.check_ckan_version(min_version='2.5.0'):
 
     if IReport is not None:
         plugins.implements(IReport)
