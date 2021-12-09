@@ -1,7 +1,10 @@
+import os
 import logging
+import ckanext.matomo
 
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
+from ckan.lib.plugins import DefaultTranslation
 
 from ckanext.matomo.cli import get_commands
 from ckanext.matomo import helpers, reports
@@ -23,11 +26,12 @@ else:
 log = logging.getLogger(__name__)
 
 
-class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin):
+class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin, DefaultTranslation):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.ITemplateHelpers)
     plugins.implements(plugins.IConfigurable)
     plugins.implements(plugins.IActions)
+    plugins.implements(plugins.ITranslation)
 
     if IReport is not None:
         plugins.implements(IReport)
@@ -66,12 +70,12 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin):
     # IReport
     def register_reports(self):
         """Register details of an extension's reports"""
-        return [reports.matomo_dataset_report_info,
-                reports.matomo_resource_report_info,
-                reports.matomo_location_report_info,
-                reports.matomo_dataset_least_popular_report_info,
-                reports.matomo_organizations_with_most_popular_datasets_info,
-                reports.matomo_most_popular_search_terms_info]
+        return [reports.matomo_dataset_report_info(),
+                reports.matomo_resource_report_info(),
+                reports.matomo_location_report_info(),
+                reports.matomo_dataset_least_popular_report_info(),
+                reports.matomo_organizations_with_most_popular_datasets_info(),
+                reports.matomo_most_popular_search_terms_info()]
 
     # IClick
 
@@ -82,3 +86,11 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin):
 
     def get_actions(self):
         return {'most_visited_packages': logic.most_visited_packages}
+
+    # ITranslation
+    def i18n_directory(self):
+        u'''Change the directory of the .mo translation files'''
+        return os.path.join(
+            os.path.dirname(ckanext.matomo.__file__),
+            'i18n'
+        )

@@ -1,0 +1,9 @@
+[main]
+host = https://www.transifex.com
+
+[ytp.ckanext-matomo]
+file_filter = ckanext/matomo/i18n/<lang>/LC_MESSAGES/ckanext-matomo.po
+source_file = ckanext/matomo/i18n/ckanext-matomo.pot
+source_lang = en
+type = PO
+

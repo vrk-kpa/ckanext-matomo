@@ -1,5 +1,6 @@
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
 from datetime import datetime, timedelta
+from ckan.common import _
 
 try:
     from ckan.common import OrderedDict
@@ -62,15 +63,16 @@ def matomo_dataset_option_combinations():
         yield {'time': option}
 
 
-matomo_dataset_report_info = {
-    'name': 'matomo-dataset',
-    'title': 'Most popular datasets',
-    'description': 'Matomo showing top datasets with most views',
-    'option_defaults': OrderedDict((('time', 'month'),)),
-    'option_combinations': matomo_dataset_option_combinations,
-    'generate': matomo_dataset_report,
-    'template': 'report/dataset_analytics.html',
-}
+def matomo_dataset_report_info():
+    return {
+        'name': 'matomo-dataset',
+        'title': _('Most popular datasets'),
+        'description': _('Matomo showing top datasets with most views'),
+        'option_defaults': OrderedDict((('time', 'month'),)),
+        'option_combinations': matomo_dataset_option_combinations,
+        'generate': matomo_dataset_report,
+        'template': 'report/dataset_analytics.html',
+    }
 
 
 def matomo_dataset_least_popular_report(time):
@@ -96,15 +98,16 @@ def matomo_dataset_least_popular_option_combinations():
         yield {'time': option}
 
 
-matomo_dataset_least_popular_report_info = {
-    'name': 'matomo-dataset-least-popular',
-    'title': 'Least popular datasets',
-    'description': 'Matomo showing top datasets with least views',
-    'option_defaults': OrderedDict((('time', 'month'),)),
-    'option_combinations': matomo_dataset_least_popular_option_combinations,
-    'generate': matomo_dataset_least_popular_report,
-    'template': 'report/dataset_analytics.html',
-}
+def matomo_dataset_least_popular_report_info():
+    return {
+        'name': 'matomo-dataset-least-popular',
+        'title': _('Least popular datasets'),
+        'description': _('Matomo showing top datasets with least views'),
+        'option_defaults': OrderedDict((('time', 'month'),)),
+        'option_combinations': matomo_dataset_least_popular_option_combinations,
+        'generate': matomo_dataset_least_popular_report,
+        'template': 'report/dataset_analytics.html',
+    }
 
 
 def matomo_resource_report(last):
@@ -125,15 +128,16 @@ def matomo_resource_option_combinations():
         yield {'last': option}
 
 
-matomo_resource_report_info = {
-    'name': 'matomo-resource',
-    'title': 'Most popular resources',
-    'description': 'Matomo showing most downloaded resources',
-    'option_defaults': OrderedDict((('last', 20),)),
-    'option_combinations': matomo_resource_option_combinations,
-    'generate': matomo_resource_report,
-    'template': 'report/resource_analytics.html'
-}
+def matomo_resource_report_info():
+    return {
+        'name': 'matomo-resource',
+        'title': _('Most popular resources'),
+        'description': _('Matomo showing most downloaded resources'),
+        'option_defaults': OrderedDict((('last', 20),)),
+        'option_combinations': matomo_resource_option_combinations,
+        'generate': matomo_resource_report,
+        'template': 'report/resource_analytics.html'
+    }
 
 
 def matomo_location_report():
@@ -170,15 +174,16 @@ def matomo_location_report():
     }
 
 
-matomo_location_report_info = {
-    'name': 'matomo-location',
-    'title': 'Audience locations',
-    'description': 'Matomo showing most audience locations (bot traffic is filtered out)',
-    'option_defaults': None,
-    'option_combinations': None,
-    'generate': matomo_location_report,
-    'template': 'report/location_analytics.html'
-}
+def matomo_location_report_info():
+    return {
+        'name': 'matomo-location',
+        'title': _('Audience locations'),
+        'description': _('Matomo showing most audience locations (bot traffic is filtered out)'),
+        'option_defaults': None,
+        'option_combinations': None,
+        'generate': matomo_location_report,
+        'template': 'report/location_analytics.html'
+    }
 
 
 def matomo_organizations_with_most_popular_datasets(time):
@@ -189,15 +194,16 @@ def matomo_organizations_with_most_popular_datasets(time):
     }
 
 
-matomo_organizations_with_most_popular_datasets_info = {
-    'name': 'matomo-most-popular-organizations',
-    'title': 'Most popular organizations',
-    'description': 'Matomo showing most popular organizations by visited datasets',
-    'option_defaults': OrderedDict((('time', 'month'),)),
-    'option_combinations': matomo_dataset_option_combinations,
-    'generate': matomo_organizations_with_most_popular_datasets,
-    'template': 'report/organization_analytics.html'
-}
+def matomo_organizations_with_most_popular_datasets_info():
+    return {
+        'name': 'matomo-most-popular-organizations',
+        'title': _('Most popular organizations'),
+        'description': _('Matomo showing most popular organizations by visited datasets'),
+        'option_defaults': OrderedDict((('time', 'month'),)),
+        'option_combinations': matomo_dataset_option_combinations,
+        'generate': matomo_organizations_with_most_popular_datasets,
+        'template': 'report/organization_analytics.html'
+    }
 
 
 def matomo_most_popular_search_terms(time):
@@ -208,12 +214,13 @@ def matomo_most_popular_search_terms(time):
     }
 
 
-matomo_most_popular_search_terms_info = {
-    'name': 'matomo-most-popular-search-terms',
-    'title': 'Most popular search terms',
-    'description': 'Matomo showing most popular search terms',
-    'option_defaults': OrderedDict((('time', 'month'),)),
-    'option_combinations': matomo_dataset_option_combinations,
-    'generate': matomo_most_popular_search_terms,
-    'template': 'report/search_term_analytics.html'
-}
+def matomo_most_popular_search_terms_info():
+    return {
+        'name': 'matomo-most-popular-search-terms',
+        'title': _('Most popular search terms'),
+        'description': _('Matomo showing most popular search terms'),
+        'option_defaults': OrderedDict((('time', 'month'),)),
+        'option_combinations': matomo_dataset_option_combinations,
+        'generate': matomo_most_popular_search_terms,
+        'template': 'report/search_term_analytics.html'
+    }
