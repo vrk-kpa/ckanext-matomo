@@ -64,7 +64,11 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin, DefaultTranslation):
 
     def get_helpers(self):
         return {
-            "matomo_snippet": helpers.matomo_snippet
+            'matomo_snippet': helpers.matomo_snippet,
+            'get_visits_for_resource': helpers.get_visits_for_resource,
+            'get_visits_for_dataset': helpers.get_visits_for_dataset,
+            'get_visits_count_for_dataset_during_last_year': helpers.get_visits_count_for_dataset_during_last_year,
+            'get_download_count_for_dataset_during_last_year': helpers.get_download_count_for_dataset_during_last_year,
         }
 
     # IReport
