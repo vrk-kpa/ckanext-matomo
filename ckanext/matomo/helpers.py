@@ -1,4 +1,5 @@
 from ckan.plugins.toolkit import render_snippet, config
+import datetime
 
 
 def matomo_snippet():
