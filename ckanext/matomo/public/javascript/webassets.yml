@@ -1,0 +1,17 @@
+chart-column_js:
+  filter: rjsmin
+  output: ckanext-matomo/%(version)s_chart-column.js
+  extra:
+    preload:
+      - base/main
+  contents:
+    - chart-column.js
+
+chart-donut_js:
+  filter: rjsmin
+  output: ckanext-matomo/%(version)s_chart-donut.js
+  extra:
+    preload:
+      - base/main
+  contents:
+    - chart-donut.js

@@ -1,6 +1,12 @@
-{% asset "ytp_resources/d3_js" %}
-{% resource "ckanext-matomo_js/chart-doughnut.js" %}
-{% resource "ckanext-matomo_js/chart-column.js" %}
+{% if h.ckan_version().split('.')|map('int')|list >= [2, 9, 0] %}
+  {% asset "ytp_resources/d3_js" %}
+  {% asset "ckanext-matomo_js/chart-doughnut_js" %}
+  {% asset "ckanext-matomo_js/chart-column_js" %}
+{% else %}
+  {% resource "ytp_resources/d3.js" %}
+  {% resource "ckanext-matomo_js/chart-doughnut.js" %}
+  {% resource "ckanext-matomo_js/chart-column.js" %}
+{% endif %}
 
 <script>
   var chartData = {
