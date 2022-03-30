@@ -379,7 +379,7 @@ class PackageStats(Base):
                     }
 
         organization_list = []
-        for organization_name, stats in organization_stats.iteritems():
+        for organization_name, stats in organization_stats.items():
             organization_list.append(
                 {"organization_name": organization_name,
                  "total_visits": stats["visits"],
@@ -935,7 +935,7 @@ class SearchStats(Base):
                 search_term_counts[result.search_term] = {'count': result.count}
 
         search_term_list = []
-        for search_term, search_term_info in search_term_counts.iteritems():
+        for search_term, search_term_info in search_term_counts.items():
             search_term_list.append(
                 {"search_term": search_term,
                  "count": search_term_info['count']
