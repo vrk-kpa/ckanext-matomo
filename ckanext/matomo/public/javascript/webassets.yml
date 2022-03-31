@@ -7,11 +7,11 @@ chart-column_js:
   contents:
     - chart-column.js
 
-chart-donut_js:
+chart-doughnut_js:
   filter: rjsmin
-  output: ckanext-matomo/%(version)s_chart-donut.js
+  output: ckanext-matomo/%(version)s_chart-doughnut.js
   extra:
     preload:
       - base/main
   contents:
-    - chart-donut.js
+    - chart-doughnut.js
