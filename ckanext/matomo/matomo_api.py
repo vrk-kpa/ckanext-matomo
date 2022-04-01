@@ -87,7 +87,7 @@ class MatomoAPI(object):
 
             for datum in data:
                 # Request filter pattern ensures this is correct
-                resource_id = datum['label'].split('/')[-1]
+                resource_id = datum['label'].split('/')[-1].split('?', 1)[0]
                 result.setdefault(resource_id, []).append(datum)
 
             return result
