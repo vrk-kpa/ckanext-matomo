@@ -11,7 +11,7 @@
       </tr>
       {% for toppackage in data['top'] %}
         <tr>
-          <td>{{ h.link_to(toppackage.package_name, h.url_for(controller='package', action='read', id=toppackage.package_id)) }}</td>
+          <td>{{ h.link_to(toppackage.package_name, h.url_for('dataset.read', id=toppackage.package_id)) }}</td>
           <td>{{ toppackage.visits }}</td>
           <td>{{ toppackage.entrances }}</td>
           {% snippet "report/snippets/entrances_percentage_td.html", total_visits=toppackage.visits, total_entrances=toppackage.entrances %}

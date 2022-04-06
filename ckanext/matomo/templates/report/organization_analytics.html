@@ -11,7 +11,7 @@
       </tr>
         {% for toppackage in table %}
           <tr>
-            <td>{{ h.link_to(toppackage.organization_name, h.url_for(controller='organization', action='read', id=toppackage.organization_name)) }}</td>
+            <td>{{ h.link_to(toppackage.organization_name, h.url_for('organization.read', id=toppackage.organization_name)) }}</td>
             <td>{{ toppackage.total_visits }}</td>
             <td>{{ toppackage.total_entrances }}</td>
             {% snippet "report/snippets/entrances_percentage_td.html", total_visits=toppackage.total_visits, total_entrances=toppackage.total_entrances %}
