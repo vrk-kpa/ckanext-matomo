@@ -7,11 +7,18 @@ DATE_FORMAT = '%Y-%m-%d'
 
 
 def fetch(dryrun, since, until):
-    since_date = (datetime.datetime.strptime(since, DATE_FORMAT) if since else
-                  PackageStats.get_latest_update_date()).date()
+    if since:
+        since_date = datetime.datetime.strptime(since, DATE_FORMAT).date()
+    else:
+        latest_update_datetime = PackageStats.get_latest_update_date()
+        if latest_update_datetime is not None:
+            since_date = latest_update_datetime.date()
+        else:
+            since_date = 'lastYear'
+
     until_date = datetime.datetime.strptime(until, DATE_FORMAT).date() if until else datetime.date.today()
 
-    if since_date > until_date:
+    if isinstance(since_date, datetime.date) and isinstance(until_date, datetime.date) and since_date > until_date:
         print('Start date must not be greater than end date')
         return
 
@@ -38,27 +45,31 @@ def fetch(dryrun, since, until):
             package_name = package_name.split('?')[0]
             if not package_name.strip():
                 continue
+
             try:
-                package = package_show({'ignore_auth': True}, {'id': package_name})
-            except toolkit.ObjectNotFound:
-                print('Package "{}" not found, skipping...'.format(package_name.encode('iso-8859-1')))
-                continue
-            package_id = package['id']
-            visits = sum(stats.get('nb_hits', 0) for stats in stats_list)
-            entrances = sum(int(stats.get('entry_nb_visits', 0)) for stats in stats_list)
-            package_resources_statistics = resource_download_statistics.get(date_str, {}).get(package_id, {})
+                try:
+                    package = package_show({'ignore_auth': True}, {'id': package_name})
+                except toolkit.ObjectNotFound:
+                    print('Package "{}" not found, skipping...'.format(package_name.encode('iso-8859-1')))
+                    continue
+                package_id = package['id']
+                visits = sum(stats.get('nb_hits', 0) for stats in stats_list)
+                entrances = sum(int(stats.get('entry_nb_visits', 0)) for stats in stats_list)
+                package_resources_statistics = resource_download_statistics.get(date_str, {}).get(package_id, {})
 
-            downloads = sum(stats.get('nb_hits', 0)
-                            for resource_stats_list in package_resources_statistics.values()
-                            for stats in resource_stats_list)
+                downloads = sum(stats.get('nb_hits', 0)
+                                for resource_stats_list in package_resources_statistics.values()
+                                for stats in resource_stats_list)
 
-            if dryrun:
-                print('Would create or update: package_id={}, date={}, visits={}, entrances={}, downloads={}'
-                      .format(package_id, date, visits, entrances, downloads))
-            else:
-                PackageStats.create_or_update(package_id, date, visits, entrances, downloads)
+                if dryrun:
+                    print('Would create or update: package_id={}, date={}, visits={}, entrances={}, downloads={}'
+                          .format(package_id, date, visits, entrances, downloads))
+                else:
+                    PackageStats.create_or_update(package_id, date, visits, entrances, downloads)
 
-            updated_package_ids.add(package_id)
+                updated_package_ids.add(package_id)
+            except Exception as e:
+                print(f'Error updating dataset statistics for {package_name}: {e}')
 
     for date_str, date_statistics in resource_download_statistics.items():
         date = datetime.datetime.strptime(date_str, DATE_FORMAT)
@@ -68,13 +79,16 @@ def fetch(dryrun, since, until):
             if package_id in updated_package_ids:
                 continue
 
-            downloads = sum(stats.get('nb_hits', 0) for stats_lists in stats_list.values() for stats in stats_lists)
+            try:
+                downloads = sum(stats.get('nb_hits', 0) for stats_lists in stats_list.values() for stats in stats_lists)
 
-            if dryrun:
-                print('Would update download stats: package_id={}, date={}, downloads={}'
-                      .format(package_id, date, downloads))
-            else:
-                PackageStats.update_downloads(package_id, date, downloads)
+                if dryrun:
+                    print('Would update download stats: package_id={}, date={}, downloads={}'
+                          .format(package_id, date, downloads))
+                else:
+                    PackageStats.update_downloads(package_id, date, downloads)
+            except Exception as e:
+                print(f'Error updating download statistics for {package_id}: {e}')
 
     # Resource page views
 
@@ -83,11 +97,14 @@ def fetch(dryrun, since, until):
     for date_str, date_statistics in resource_page_statistics.items():
         date = datetime.datetime.strptime(date_str, DATE_FORMAT)
         for resource_id, stats_list in date_statistics.items():
-            visits = sum(stats.get('nb_hits', 0) for stats in stats_list)
-            if dryrun:
-                print('Would create or update: resource_id={}, date={}, visits={}'.format(resource_id, date, visits))
-            else:
-                ResourceStats.update_visits(resource_id, date, visits)
+            try:
+                visits = sum(stats.get('nb_hits', 0) for stats in stats_list)
+                if dryrun:
+                    print('Would create or update: resource_id={}, date={}, visits={}'.format(resource_id, date, visits))
+                else:
+                    ResourceStats.update_visits(resource_id, date, visits)
+            except Exception as e:
+                print(f'Error updating resource statistics for {resource_id}: {e}')
 
     # Visits by country
 
@@ -99,11 +116,14 @@ def fetch(dryrun, since, until):
             country_name = country_stats.get('label', '(not set)')
             visits = country_stats.get('nb_visits', 0)
 
-            if dryrun:
-                print("Would update country statistics: date={}, country={}, visits={}"
-                      .format(date, country_name, visits))
-            else:
-                AudienceLocationDate.update_visits(country_name, date, visits)
+            try:
+                if dryrun:
+                    print("Would update country statistics: date={}, country={}, visits={}"
+                          .format(date, country_name, visits))
+                else:
+                    AudienceLocationDate.update_visits(country_name, date, visits)
+            except Exception as e:
+                print(f'Error updating country statistics for {country_name}: {e}')
 
     # Search terms
 
@@ -115,11 +135,14 @@ def fetch(dryrun, since, until):
             search_term = search_term_stats.get('label', '(not set)')
             count = search_term_stats.get('nb_hits', 0)
 
-            if dryrun:
-                print("Would search term statistics: date={}, search_term={}, count={}"
-                      .format(date, search_term, count))
-            else:
-                SearchStats.update_search_term_count(search_term, date, count)
+            try:
+                if dryrun:
+                    print("Would search term statistics: date={}, search_term={}, count={}"
+                          .format(date, search_term, count))
+                else:
+                    SearchStats.update_search_term_count(search_term, date, count)
+            except Exception as e:
+                print(f'Error updating search term statistics for {search_term}: {e}')
 
 
 def init_db():
