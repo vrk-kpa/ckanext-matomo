@@ -69,7 +69,7 @@ def fetch(dryrun, since, until):
 
                 updated_package_ids.add(package_id)
             except Exception as e:
-                print(f'Error updating dataset statistics for {package_name}: {e}')
+                print('Error updating dataset statistics for {}: {}'.format(package_name, e))
 
     for date_str, date_statistics in resource_download_statistics.items():
         date = datetime.datetime.strptime(date_str, DATE_FORMAT)
@@ -88,7 +88,7 @@ def fetch(dryrun, since, until):
                 else:
                     PackageStats.update_downloads(package_id, date, downloads)
             except Exception as e:
-                print(f'Error updating download statistics for {package_id}: {e}')
+                print('Error updating download statistics for {}: {}'.format(package_id, e))
 
     # Resource page views
 
@@ -104,7 +104,7 @@ def fetch(dryrun, since, until):
                 else:
                     ResourceStats.update_visits(resource_id, date, visits)
             except Exception as e:
-                print(f'Error updating resource statistics for {resource_id}: {e}')
+                print('Error updating resource statistics for {}: {}'.format(resource_id, e))
 
     # Visits by country
 
@@ -123,7 +123,7 @@ def fetch(dryrun, since, until):
                 else:
                     AudienceLocationDate.update_visits(country_name, date, visits)
             except Exception as e:
-                print(f'Error updating country statistics for {country_name}: {e}')
+                print('Error updating country statistics for {}: {}'.format(country_name, e))
 
     # Search terms
 
@@ -142,7 +142,7 @@ def fetch(dryrun, since, until):
                 else:
                     SearchStats.update_search_term_count(search_term, date, count)
             except Exception as e:
-                print(f'Error updating search term statistics for {search_term}: {e}')
+                print('Error updating search term statistics for {}: {}'.format(search_term, e))
 
 
 def init_db():
