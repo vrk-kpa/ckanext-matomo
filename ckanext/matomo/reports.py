@@ -1,6 +1,5 @@
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
 from datetime import datetime, timedelta
-from ckan.common import _
 
 try:
     from ckan.common import OrderedDict
