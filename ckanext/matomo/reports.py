@@ -66,8 +66,8 @@ def matomo_dataset_option_combinations():
 def matomo_dataset_report_info():
     return {
         'name': 'matomo-dataset',
-        'title': _('Most popular datasets'),
-        'description': _('Matomo showing top datasets with most views'),
+        'title': 'Most popular datasets',
+        'description': 'Matomo showing top datasets with most views',
         'option_defaults': OrderedDict((('time', 'month'),)),
         'option_combinations': matomo_dataset_option_combinations,
         'generate': matomo_dataset_report,
@@ -101,8 +101,8 @@ def matomo_dataset_least_popular_option_combinations():
 def matomo_dataset_least_popular_report_info():
     return {
         'name': 'matomo-dataset-least-popular',
-        'title': _('Least popular datasets'),
-        'description': _('Matomo showing top datasets with least views'),
+        'title': 'Least popular datasets',
+        'description': 'Matomo showing top datasets with least views',
         'option_defaults': OrderedDict((('time', 'month'),)),
         'option_combinations': matomo_dataset_least_popular_option_combinations,
         'generate': matomo_dataset_least_popular_report,
@@ -131,8 +131,8 @@ def matomo_resource_option_combinations():
 def matomo_resource_report_info():
     return {
         'name': 'matomo-resource',
-        'title': _('Most popular resources'),
-        'description': _('Matomo showing most downloaded resources'),
+        'title': 'Most popular resources',
+        'description': 'Matomo showing most downloaded resources',
         'option_defaults': OrderedDict((('last', 20),)),
         'option_combinations': matomo_resource_option_combinations,
         'generate': matomo_resource_report,
@@ -177,8 +177,8 @@ def matomo_location_report():
 def matomo_location_report_info():
     return {
         'name': 'matomo-location',
-        'title': _('Audience locations'),
-        'description': _('Matomo showing most audience locations (bot traffic is filtered out)'),
+        'title': 'Audience locations',
+        'description': 'Matomo showing most audience locations (bot traffic is filtered out)',
         'option_defaults': None,
         'option_combinations': None,
         'generate': matomo_location_report,
@@ -197,8 +197,8 @@ def matomo_organizations_with_most_popular_datasets(time):
 def matomo_organizations_with_most_popular_datasets_info():
     return {
         'name': 'matomo-most-popular-organizations',
-        'title': _('Most popular organizations'),
-        'description': _('Matomo showing most popular organizations by visited datasets'),
+        'title': 'Most popular organizations',
+        'description': 'Matomo showing most popular organizations by visited datasets',
         'option_defaults': OrderedDict((('time', 'month'),)),
         'option_combinations': matomo_dataset_option_combinations,
         'generate': matomo_organizations_with_most_popular_datasets,
@@ -217,8 +217,8 @@ def matomo_most_popular_search_terms(time):
 def matomo_most_popular_search_terms_info():
     return {
         'name': 'matomo-most-popular-search-terms',
-        'title': _('Most popular search terms'),
-        'description': _('Matomo showing most popular search terms'),
+        'title': 'Most popular search terms',
+        'description': 'Matomo showing most popular search terms',
         'option_defaults': OrderedDict((('time', 'month'),)),
         'option_combinations': matomo_dataset_option_combinations,
         'generate': matomo_most_popular_search_terms,
