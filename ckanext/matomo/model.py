@@ -367,7 +367,7 @@ class PackageStats(Base):
 
             organization_name = cls.get_organization(package_id)
             if organization_name:
-                if(organization_name in organization_stats):
+                if (organization_name in organization_stats):
                     organization_stats[organization_name]["visits"] += visits
                     organization_stats[organization_name]["downloads"] += downloads
                     organization_stats[organization_name]["entrances"] += entrances
