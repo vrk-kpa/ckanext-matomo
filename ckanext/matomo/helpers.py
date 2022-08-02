@@ -37,3 +37,11 @@ def get_download_count_for_dataset_during_last_year(id):
     # This is why a 'get_visits' method is called.
     from ckanext.matomo.model import ResourceStats
     return len(ResourceStats.get_visits_during_last_calendar_year_by_dataset_id(id))
+
+
+def get_download_count_for_dataset_during_last_12_months(id):
+    # Downloads are visits for the Resource object.
+    # This is why a 'get_visits' method is called.
+    from ckanext.matomo.model import ResourceStats
+
+    return len(ResourceStats.get_download_count_for_dataset_during_last_12_months(id))
