@@ -471,7 +471,7 @@ class ResourceStats(Base):
         resource_stats = []
         # TODO: Reimplement in more efficient manner if needed (using RANK OVER and PARTITION in raw sql)
         unique_resources = model.Session.query(cls.resource_id, func.count(cls.visits)).group_by(cls.resource_id).order_by(
-            func.count(cls.visits).desc()).limit(limit).all()
+            func.count(cls.visits).desc()).join(model.Resource, model.Resource.id==cls.resource_id).limit(limit).all()
         # Adding last date associated to this package stat and filtering out private and deleted packages
         if unique_resources is not None:
             for resource in unique_resources:
