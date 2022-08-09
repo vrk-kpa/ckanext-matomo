@@ -69,6 +69,8 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin, DefaultTranslation):
             'get_visits_for_dataset': helpers.get_visits_for_dataset,
             'get_visits_count_for_dataset_during_last_year': helpers.get_visits_count_for_dataset_during_last_year,
             'get_download_count_for_dataset_during_last_year': helpers.get_download_count_for_dataset_during_last_year,
+            'get_download_count_for_dataset_during_last_12_months':
+                helpers.get_download_count_for_dataset_during_last_12_months,
         }
 
     # IReport
