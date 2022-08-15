@@ -552,10 +552,14 @@ class ResourceStats(Base):
     @classmethod
     def get_download_count_for_dataset_during_last_12_months(cls, package_id):
         from dateutil.relativedelta import relativedelta
+
         # Returns a list of visits during the last 12 months.
         first_day = datetime.now() - relativedelta(months=12)
         last_day = datetime.now()
-        return cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
+
+        visits = cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
+
+        return sum(visit.__dict__.get('visits') for visit in visits)
 
     @classmethod
     def get_visits_by_dataset_id_between_two_dates(cls, package_id, start_date, end_date):
