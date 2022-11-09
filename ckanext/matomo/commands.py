@@ -9,11 +9,11 @@ except ImportError:
 
 from ckanext.matomo.matomo_api import MatomoAPI
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
+import logging
+log = logging.getLogger(__name__)
 
 DATE_FORMAT = '%Y-%m-%d'
 
-import logging
-log = logging.getLogger(__name__)
 
 def fetch(dryrun, since, until):
     if since:
@@ -94,7 +94,8 @@ def fetch(dryrun, since, until):
                     try:
                         downloads = sum(stats.get('nb_hits', 0) for stats in resource_stats)
                         if dryrun:
-                            print('Would create or update: resource_id={}, date={}, downloads={}'.format(resource_id, date, visits))
+                            print('Would create or update: resource_id={}, date={}, downloads={}'
+                                  .format(resource_id, date, visits))
                         else:
                             ResourceStats.update_downloads(resource_id, date, downloads)
                     except Exception as e:
