@@ -1,10 +1,19 @@
 import datetime
 import ckan.plugins.toolkit as toolkit
+
+
+try:
+    from collections import OrderedDict  # from python 2.7
+except ImportError:
+    from sqlalchemy.util import OrderedDict
+
 from ckanext.matomo.matomo_api import MatomoAPI
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
 
 DATE_FORMAT = '%Y-%m-%d'
 
+import logging
+log = logging.getLogger(__name__)
 
 def fetch(dryrun, since, until):
     if since:
@@ -36,6 +45,7 @@ def fetch(dryrun, since, until):
     resource_download_statistics = api.resource_download_statistics(**params)
     updated_package_ids_by_date = {}
 
+    # Parse visits for datasets
     for date_str, date_statistics in dataset_page_statistics.items():
         date = datetime.datetime.strptime(date_str, DATE_FORMAT)
         updated_package_ids = set()
@@ -55,8 +65,9 @@ def fetch(dryrun, since, until):
                 package_id = package['id']
                 visits = sum(stats.get('nb_hits', 0) for stats in stats_list)
                 entrances = sum(int(stats.get('entry_nb_visits', 0)) for stats in stats_list)
-                package_resources_statistics = resource_download_statistics.get(date_str, {}).get(package_id, {})
 
+                # Check if there's download stats for resources included in this package
+                package_resources_statistics = resource_download_statistics.get(date_str, {}).get(package_id, {})
                 downloads = sum(stats.get('nb_hits', 0)
                                 for resource_stats_list in package_resources_statistics.values()
                                 for stats in resource_stats_list)
@@ -71,12 +82,25 @@ def fetch(dryrun, since, until):
             except Exception as e:
                 print('Error updating dataset statistics for {}: {}'.format(package_name, e))
 
+    # Loop resources download stats (as a fallback if dataset had no stats)
     for date_str, date_statistics in resource_download_statistics.items():
         date = datetime.datetime.strptime(date_str, DATE_FORMAT)
         updated_package_ids = updated_package_ids_by_date.get(date_str, set())
 
         for package_id, stats_list in date_statistics.items():
             if package_id in updated_package_ids:
+                # Add download-stats for every resources
+                for resource_id, resource_stats in stats_list.items():
+                    try:
+                        downloads = sum(stats.get('nb_hits', 0) for stats in resource_stats)
+                        if dryrun:
+                            print('Would create or update: resource_id={}, date={}, downloads={}'.format(resource_id, date, visits))
+                        else:
+                            ResourceStats.update_downloads(resource_id, date, downloads)
+                    except Exception as e:
+                        print('Error updating resource statistics for {}: {}'.format(resource_id, e))
+
+                # If dataset is already handled, don't parse again package stats
                 continue
 
             try:
@@ -149,3 +173,42 @@ def init_db():
     from ckanext.matomo.model import init_tables
     import ckan.model as model
     init_tables(model.meta.engine)
+
+
+def migrate():
+    """ Adds any missing columns to the database table for ResourceStats by
+        checking the schema and adding those that are missing.
+
+        If you wish to add a column, add the column name and sql
+        statement to MIGRATIONS_ADD which will check that the column is
+        not present before running the query.
+
+        If you wish to modify or delete a column, add the column name and
+        query to the MIGRATIONS_MODIFY which only runs if the column
+        does exist.
+        """
+    from ckan import model
+
+    MIGRATIONS_ADD = OrderedDict({
+        "downloads": "ALTER TABLE resource_stats ADD COLUMN downloads INT",
+    })
+
+    MIGRATIONS_MODIFY = OrderedDict({
+    })
+
+    q = "SELECT column_name from INFORMATION_SCHEMA.COLUMNS where table_name = 'resource_stats';"
+    current_cols = list([m[0] for m in model.Session.execute(q)])
+    for k, v in MIGRATIONS_ADD.items():
+        if k not in current_cols:
+            log.info(u"Adding column '{0}'".format(k))
+            log.info(u"Executing '{0}'".format(v))
+            model.Session.execute(v)
+            model.Session.commit()
+
+    for k, v in MIGRATIONS_MODIFY.items():
+        if k in current_cols:
+            log.info(u"Removing column '{0}'".format(k))
+            log.info(u"Executing '{0}'".format(v))
+            model.Session.execute(v)
+            model.Session.commit()
+    log.info("Migrations complete")

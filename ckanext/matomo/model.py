@@ -401,6 +401,7 @@ class ResourceStats(Base):
     resource_id = Column(types.UnicodeText, nullable=False, index=True, primary_key=True)
     visit_date = Column(types.DateTime, default=datetime.now, primary_key=True)
     visits = Column(types.Integer, default=0)
+    downloads = Column(types.Integer, default=0)
 
     @classmethod
     def get(cls, id):
@@ -426,6 +427,29 @@ class ResourceStats(Base):
 
         model.Session.commit()
         log.debug("Number of visits updated for resource id: %s", item_id)
+        model.Session.flush()
+        return True
+
+    @classmethod
+    def update_downloads(cls, item_id, visit_date, downloads):
+        '''
+        Updates the number of downloads for a certain resource_id
+
+        :param item_id: resource_id
+        :param visit_date: last visit date
+        :param downloads: number of downloads until visit_date
+        :return: True for a successful update, otherwise False
+        '''
+        resource = model.Session.query(cls).filter(cls.resource_id == item_id).filter(cls.visit_date == visit_date).first()
+        if resource is None:
+            resource = ResourceStats(resource_id=item_id, visit_date=visit_date, downloads=downloads)
+            model.Session.add(resource)
+        else:
+            resource.downloads = downloads
+            resource.visit_date = visit_date
+
+        model.Session.commit()
+        log.debug("Number of downloads updated for resource id: %s", item_id)
         model.Session.flush()
         return True
 
@@ -461,9 +485,10 @@ class ResourceStats(Base):
             cls.visit_date >= start_date).all()
         # Returns the total number of visits since the beggining of all times
         total_visits = model.Session.query(func.sum(cls.visits)).filter(cls.resource_id == resource_id).scalar()
+        total_downloads = model.Session.query(func.sum(cls.downloads)).filter(cls.resource_id == resource_id).scalar()
         visits = {}
-        if total_visits is not None:
-            visits = ResourceStats.convert_to_dict(resource_visits, total_visits)
+        if total_visits is not None or total_downloads is not None:
+            visits = ResourceStats.convert_to_dict(resource_visits, total_visits, total_downloads)
         return visits
 
     @classmethod
@@ -499,11 +524,12 @@ class ResourceStats(Base):
         result['package_name'] = res_info[1]
         result['package_id'] = res_info[2]
         result['visits'] = res.visits
+        result['downloads'] = res.downloads
         result['visit_date'] = res.visit_date.strftime("%d-%m-%Y")
         return result
 
     @classmethod
-    def convert_to_dict(cls, resource_stats, tot_visits):
+    def convert_to_dict(cls, resource_stats, tot_visits, total_downloads):
         visits = []
         for resource in resource_stats:
             visits.append(ResourceStats.as_dict(resource))
@@ -513,6 +539,9 @@ class ResourceStats(Base):
         }
         if tot_visits is not None:
             results['tot_visits'] = tot_visits
+
+        if total_downloads is not None:
+            results['total_downloads'] = total_downloads
 
         return results
 
@@ -559,7 +588,7 @@ class ResourceStats(Base):
 
         visits = cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
 
-        return sum(visit.__dict__.get('visits') for visit in visits)
+        return sum(visit.__dict__.get('downloads') for visit in visits)
 
     @classmethod
     def get_visits_by_dataset_id_between_two_dates(cls, package_id, start_date, end_date):
@@ -572,10 +601,9 @@ class ResourceStats(Base):
     @classmethod
     def get_all_visits(cls, id):
         visits_dict = ResourceStats.get_last_visits_by_id(id)
-        count = visits_dict.get('tot_visits', 0)
+        count = visits_dict.get('total_downloads', 0)
         visits = visits_dict.get('resources', [])
         visit_list = []
-
         now = datetime.now() - timedelta(days=1)
 
         # Creates a temporary date object for the last 30 days in the format (YEAR, MONTH, DAY, #visits this day)
@@ -593,7 +621,7 @@ class ResourceStats(Base):
                                    x['year'] == visit_date.year and x['month'] == visit_date.month and x[
                                        'day'] == visit_date.day), None)
                 if visit_item:
-                    visit_item['visits'] = t['visits']
+                    visit_item['visits'] = t['downloads']
 
         results = {
             "downloads": visit_list,
