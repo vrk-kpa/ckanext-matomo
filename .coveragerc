@@ -3,3 +3,6 @@ omit =
     */site-packages/*
     */python?.?/*
     ckan/*
+
+[run]
+relative_files = True
