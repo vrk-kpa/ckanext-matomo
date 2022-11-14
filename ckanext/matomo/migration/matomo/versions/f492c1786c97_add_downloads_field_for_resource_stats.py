@@ -1,7 +1,7 @@
 """Add downloads field for resource_stats
 
 Revision ID: f492c1786c97
-Revises: 
+Revises:
 Create Date: 2022-11-14 07:43:25.308276
 
 """
