@@ -221,7 +221,7 @@ class PackageStats(Base):
 
     @classmethod
     def get_last_visits_by_id(cls, package_id, num_days=365):
-        end_of_period = get_end_of_last_week(datetime.now())
+        end_of_period = datetime.now()
         beginning_of_period = get_beginning_of_next_week(end_of_period - timedelta(days=num_days))
 
         package_visits = model.Session.query(cls).filter(cls.package_id == package_id).filter(
@@ -288,28 +288,25 @@ class PackageStats(Base):
         count = visits_dict.get('tot_visits', 0)
 
         # Creates a weekly grouped list for last year
-        now = datetime.now()
-        now = now.replace(hour=23, minute=59, second=59, microsecond=999999)
-        end_of_current_week = get_end_of_last_week(datetime.now())
-        start_date = get_beginning_of_next_week(end_of_current_week.replace(hour=0, minute=0, second=0, microsecond=0)
+        current_end_of_week = get_end_of_last_week(datetime.now())
+        start_date = get_beginning_of_next_week(current_end_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
                                                 - timedelta(days=365))
 
-        while end_of_current_week > start_date:
-            start_of_current_week = end_of_current_week - timedelta(days=6)
-            start_of_current_week = start_of_current_week.replace(hour=0, minute=0, second=0, microsecond=0)
+        while current_end_of_week > start_date:
+            current_start_of_week = get_beginning_of_week(current_end_of_week)
             weekly_download_count = 0
             weekly_visit_count = 0
             for visit in visits:
                 visit_date = datetime.strptime(visit.get('visit_date'), '%d-%m-%Y')
                 # Do nothing if date of visit isn't in period of current week
-                if visit_date <= start_of_current_week or visit_date >= end_of_current_week:
+                if visit_date < current_start_of_week or visit_date > current_end_of_week:
                     continue
                 weekly_download_count += visit.get('downloads', 0)
                 weekly_visit_count += visit.get('visits', 0)
 
-            visit_list.append({'year': end_of_current_week.year, 'week': end_of_current_week.isocalendar()[1],
+            visit_list.append({'year': current_end_of_week.year, 'week': current_end_of_week.isocalendar()[1],
                                'visits': weekly_visit_count, 'downloads': weekly_download_count})
-            end_of_current_week = end_of_current_week - timedelta(weeks=1)
+            current_end_of_week = current_end_of_week - timedelta(weeks=1)
 
         # Revert visit list to make it end on previous week
         visit_list = visit_list[::-1]
@@ -614,24 +611,30 @@ class ResourceStats(Base):
         count = visits_dict.get('total_downloads', 0)
         visits = visits_dict.get('resources', [])
         visit_list = []
-        now = datetime.now() - timedelta(days=1)
 
-        # Creates a temporary date object for the last 30 days in the format (YEAR, MONTH, DAY, #visits this day)
-        # If there is no entry for a certain date should return 0 visits
-        for d in range(0, 30):
-            curr = now - timedelta(d)
-            visit_list.append({'year': curr.year, 'month': curr.month, 'day': curr.day, 'visits': 0})
+        # Creates a weekly grouped list for last year
+        current_end_of_week = get_end_of_last_week(datetime.now())
+        start_date = get_beginning_of_next_week(current_end_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
+                                                - timedelta(days=365))
 
-        for t in visits:
-            visit_date_str = t['visit_date']
-            if visit_date_str is not None:
-                visit_date = datetime.strptime(visit_date_str, "%d-%m-%Y")
-                # Build temporary match
-                visit_item = next((x for x in visit_list if
-                                   x['year'] == visit_date.year and x['month'] == visit_date.month and x[
-                                       'day'] == visit_date.day), None)
-                if visit_item:
-                    visit_item['visits'] = t['downloads']
+        while current_end_of_week > start_date:
+            current_start_of_week = get_beginning_of_week(current_end_of_week)
+            weekly_download_count = 0
+            weekly_visit_count = 0
+            for visit in visits:
+                visit_date = datetime.strptime(visit.get('visit_date'), '%d-%m-%Y')
+                # Do nothing if date of visit isn't in period of current week
+                if visit_date < current_start_of_week or visit_date > current_end_of_week:
+                    continue
+                weekly_download_count += visit.get('downloads', 0)
+                weekly_visit_count += visit.get('visits', 0)
+
+            visit_list.append({'year': current_end_of_week.year, 'week': current_end_of_week.isocalendar()[1],
+                               'visits': weekly_visit_count, 'downloads': weekly_download_count})
+            current_end_of_week = current_end_of_week - timedelta(weeks=1)
+
+        # Revert visit list to make it end on previous week
+        visit_list = visit_list[::-1]
 
         results = {
             "downloads": visit_list,
@@ -1006,13 +1009,25 @@ def init_tables(engine):
     log.info('Analytics database tables are set-up')
 
 
-def get_beginning_of_next_week(date):
+def get_beginning_of_week(date):
     date = date.replace(hour=0, minute=0, second=0, microsecond=0)
-    date = date + timedelta(days=7 - date.weekday())
+    date = date - timedelta(days=date.weekday())
+    return date
+
+
+def get_end_of_week(date):
+    date = date.replace(hour=23, minute=59, second=59, microsecond=999999)
+    date = date + timedelta(days=6 - date.weekday())
+    return date
+
+
+def get_beginning_of_next_week(date):
+    date = get_beginning_of_week(date)
+    date = date + timedelta(weeks=1)
     return date
 
 
 def get_end_of_last_week(date):
-    date = date.replace(hour=23, minute=59, second=59, microsecond=999999)
-    date = date - timedelta(days=date.weekday() + 1)
+    date = get_end_of_week(date)
+    date = date - timedelta(weeks=1)
     return date
