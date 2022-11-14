@@ -220,10 +220,12 @@ class PackageStats(Base):
         return package_visits
 
     @classmethod
-    def get_last_visits_by_id(cls, package_id, num_days=30):
-        start_date = datetime.now() - timedelta(num_days)
+    def get_last_visits_by_id(cls, package_id, num_days=365):
+        end_of_period = get_end_of_last_week(datetime.now())
+        beginning_of_period = get_beginning_of_next_week(end_of_period - timedelta(days=num_days))
+
         package_visits = model.Session.query(cls).filter(cls.package_id == package_id).filter(
-            cls.visit_date >= start_date).all()
+            cls.visit_date >= beginning_of_period).filter(cls.visit_date <= end_of_period).all()
         # Returns the total number of visits since the beginning of all times
         total_visits = model.Session.query(func.sum(cls.visits)).filter(cls.package_id == package_id).scalar()
         visits = {}
@@ -285,24 +287,32 @@ class PackageStats(Base):
         visits = visits_dict.get('packages', [])
         count = visits_dict.get('tot_visits', 0)
 
-        now = datetime.now() - timedelta(days=1)
+        # Creates a weekly grouped list for last year
+        now = datetime.now()
+        now = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+        end_of_current_week = get_end_of_last_week(datetime.now())
+        start_date = get_beginning_of_next_week(end_of_current_week.replace(hour=0, minute=0, second=0, microsecond=0)
+                                                - timedelta(days=365))
 
-        # Creates a date object for the last 30 days in the format (YEAR, MONTH, DAY)
-        for d in range(0, 30):
-            curr = now - timedelta(d)
-            visit_list.append({'year': curr.year, 'month': curr.month, 'day': curr.day, 'visits': 0, "downloads": 0})
+        while end_of_current_week > start_date:
+            start_of_current_week = end_of_current_week - timedelta(days=6)
+            start_of_current_week = start_of_current_week.replace(hour=0, minute=0, second=0, microsecond=0)
+            weekly_download_count = 0
+            weekly_visit_count = 0
+            for visit in visits:
+                visit_date = datetime.strptime(visit.get('visit_date'), '%d-%m-%Y')
+                # Do nothing if date of visit isn't in period of current week
+                if visit_date <= start_of_current_week or visit_date >= end_of_current_week:
+                    continue
+                weekly_download_count += visit.get('downloads', 0)
+                weekly_visit_count += visit.get('visits', 0)
 
-        for t in visits:
-            visit_date_str = t['visit_date']
-            if visit_date_str is not None:
-                visit_date = datetime.strptime(visit_date_str, "%d-%m-%Y")
-                # Build temporary match
-                visit_item = next((x for x in visit_list if
-                                   x['year'] == visit_date.year and x['month'] == visit_date.month and x[
-                                       'day'] == visit_date.day), None)
-                if visit_item:
-                    visit_item['visits'] = t['visits']
-                    visit_item['downloads'] = t['downloads']
+            visit_list.append({'year': end_of_current_week.year, 'week': end_of_current_week.isocalendar()[1],
+                               'visits': weekly_visit_count, 'downloads': weekly_download_count})
+            end_of_current_week = end_of_current_week - timedelta(weeks=1)
+
+        # Revert visit list to make it end on previous week
+        visit_list = visit_list[::-1]
 
         results = {
             "visits": visit_list,
@@ -994,3 +1004,15 @@ def maybe_negate(value, inputvalue, negate=False):
 def init_tables(engine):
     Base.metadata.create_all(engine)
     log.info('Analytics database tables are set-up')
+
+
+def get_beginning_of_next_week(date):
+    date = date.replace(hour=0, minute=0, second=0, microsecond=0)
+    date = date + timedelta(days=7 - date.weekday())
+    return date
+
+
+def get_end_of_last_week(date):
+    date = date.replace(hour=23, minute=59, second=59, microsecond=999999)
+    date = date - timedelta(days=date.weekday() + 1)
+    return date
