@@ -22,6 +22,12 @@ def post_analytics(action_name, download=False):
              'm': now.minute,
              's': now.second
              }
+
+    user_agent = toolkit.request.user_agent.string
+
+    if toolkit.config.get(u'ckanext.matomo.ignored_user_agents', '') == user_agent:
+        return
+
     user_id = next((v for k, v in toolkit.request.cookies.items() if k.startswith('_pk_id')), None)
     if user_id:
         event['_id'] = user_id.split('.', 1)[0]
