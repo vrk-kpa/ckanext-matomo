@@ -588,7 +588,7 @@ class ResourceStats(Base):
 
         visits = cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
 
-        return sum(visit.__dict__.get('downloads') for visit in visits)
+        return sum(filter(None, [visit.__dict__.get('downloads', 0) for visit in visits]))
 
     @classmethod
     def get_visits_by_dataset_id_between_two_dates(cls, package_id, start_date, end_date):

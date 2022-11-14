@@ -31,11 +31,3 @@ def fetch(dryrun, since, until):
 )
 def init_db():
     commands.init_db()
-
-
-@matomo.command(
-    u'migrate',
-    help='Simple migration command to add new fields into a matomo tables'
-)
-def migrate():
-    commands.migrate()
