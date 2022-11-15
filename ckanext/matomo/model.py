@@ -693,6 +693,58 @@ class ResourceStats(Base):
         else:
             return result.visit_date
 
+    @classmethod
+    def get_visit_count_for_resource_during_last_12_months(cls, resource_id):
+        from dateutil.relativedelta import relativedelta
+
+        first_day = datetime.now() - relativedelta(months=12)
+        last_day = datetime.now()
+
+        visits = cls.get_visits_by_resource_id_between_two_dates(resource_id, first_day, last_day)
+
+        return sum(filter(None, [visit.__dict__.get('visits', 0) for visit in visits]))
+
+    @classmethod
+    def get_visit_count_for_resource_during_last_30_days(cls, resource_id):
+        from dateutil.relativedelta import relativedelta
+
+        first_day = datetime.now() - relativedelta(days=30)
+        last_day = datetime.now()
+
+        visits = cls.get_visits_by_resource_id_between_two_dates(resource_id, first_day, last_day)
+
+        return sum(filter(None, [visit.__dict__.get('visits', 0) for visit in visits]))
+
+    @classmethod
+    def get_download_count_for_resource_during_last_12_months(cls, resource_id):
+        from dateutil.relativedelta import relativedelta
+
+        first_day = datetime.now() - relativedelta(months=12)
+        last_day = datetime.now()
+
+        visits = cls.get_visits_by_resource_id_between_two_dates(resource_id, first_day, last_day)
+
+        return sum(filter(None, [visit.__dict__.get('downloads', 0) for visit in visits]))
+
+    @classmethod
+    def get_download_count_for_resource_during_last_30_days(cls, resource_id):
+        from dateutil.relativedelta import relativedelta
+
+        first_day = datetime.now() - relativedelta(days=30)
+        last_day = datetime.now()
+
+        visits = cls.get_visits_by_resource_id_between_two_dates(resource_id, first_day, last_day)
+
+        return sum(filter(None, [visit.__dict__.get('downloads', 0) for visit in visits]))
+
+    @classmethod
+    def get_visits_by_resource_id_between_two_dates(cls, resource_id, start_date, end_date):
+        # Returns a list of visits between the dates
+        visits = model.Session.query(cls).filter(cls.resource_id == resource_id).filter(cls.visit_date >= start_date).filter(
+            cls.visit_date <= end_date).all()
+        return visits
+
+
 
 class AudienceLocation(Base):
     """

@@ -69,3 +69,27 @@ def get_visit_count_for_dataset_during_last_30_days(id):
     from ckanext.matomo.model import PackageStats
 
     return PackageStats.get_visit_count_for_dataset_during_last_30_days(id)
+
+
+def get_visit_count_for_resource_during_last_12_months(id):
+    from ckanext.matomo.model import ResourceStats
+
+    return ResourceStats.get_visit_count_for_resource_during_last_12_months(id)
+
+
+def get_visit_count_for_resource_during_last_30_days(id):
+    from ckanext.matomo.model import ResourceStats
+
+    return ResourceStats.get_visit_count_for_resource_during_last_30_days(id)
+
+
+def get_download_count_for_resource_during_last_12_months(id):
+    from ckanext.matomo.model import ResourceStats
+
+    return ResourceStats.get_download_count_for_resource_during_last_12_months(id)
+
+
+def get_download_count_for_resource_during_last_30_days(id):
+    from ckanext.matomo.model import ResourceStats
+
+    return ResourceStats.get_download_count_for_resource_during_last_30_days(id)
