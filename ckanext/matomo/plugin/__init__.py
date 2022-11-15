@@ -71,6 +71,9 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin, DefaultTranslation):
             'get_download_count_for_dataset_during_last_year': helpers.get_download_count_for_dataset_during_last_year,
             'get_download_count_for_dataset_during_last_12_months':
                 helpers.get_download_count_for_dataset_during_last_12_months,
+            'get_download_count_for_dataset_during_last_30_days': helpers.get_download_count_for_dataset_during_last_30_days,
+            'get_visit_count_for_dataset_during_last_12_months': helpers.get_visit_count_for_dataset_during_last_12_months,
+            'get_visit_count_for_dataset_during_last_30_days': helpers.get_visit_count_for_dataset_during_last_30_days,
         }
 
     # IReport

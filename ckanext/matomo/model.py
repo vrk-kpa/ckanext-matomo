@@ -239,6 +239,37 @@ class PackageStats(Base):
         return visits
 
     @classmethod
+    def get_visit_count_for_dataset_during_last_12_months(cls, package_id):
+        from dateutil.relativedelta import relativedelta
+
+        # Returns a list of visits during the last 12 months.
+        first_day = datetime.now() - relativedelta(months=12)
+        last_day = datetime.now()
+
+        visits = cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
+
+        return sum(filter(None, [visit.__dict__.get('visits', 0) for visit in visits]))
+
+    @classmethod
+    def get_visit_count_for_dataset_during_last_30_days(cls, package_id):
+        from dateutil.relativedelta import relativedelta
+
+        # Returns a list of visits during the last 30 days.
+        first_day = datetime.now() - relativedelta(days=30)
+        last_day = datetime.now()
+
+        visits = cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
+
+        return sum(filter(None, [visit.__dict__.get('visits', 0) for visit in visits]))
+
+    @classmethod
+    def get_visits_by_dataset_id_between_two_dates(cls, package_id, start_date, end_date):
+        # Returns a list of visits between the dates
+        visits = model.Session.query(cls).filter(cls.package_id == package_id).filter(cls.visit_date >= start_date).filter(
+            cls.visit_date <= end_date).all()
+        return visits
+
+    @classmethod
     def get_top(cls, limit=20, start_date=None, end_date=None, dataset_type='dataset'):
         package_stats = []
         # TODO: Reimplement in more efficient manner if needed (using RANK OVER and PARTITION in raw sql)
@@ -591,6 +622,18 @@ class ResourceStats(Base):
 
         # Returns a list of visits during the last 12 months.
         first_day = datetime.now() - relativedelta(months=12)
+        last_day = datetime.now()
+
+        visits = cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
+
+        return sum(filter(None, [visit.__dict__.get('downloads', 0) for visit in visits]))
+
+    @classmethod
+    def get_download_count_for_dataset_during_last_30_days(cls, package_id):
+        from dateutil.relativedelta import relativedelta
+
+        # Returns a list of visits during the last 30 days.
+        first_day = datetime.now() - relativedelta(days=30)
         last_day = datetime.now()
 
         visits = cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
