@@ -3,8 +3,6 @@ import ckan.plugins.toolkit as toolkit
 
 from ckanext.matomo.matomo_api import MatomoAPI
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
-import logging
-log = logging.getLogger(__name__)
 
 DATE_FORMAT = '%Y-%m-%d'
 
