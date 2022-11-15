@@ -1,6 +1,5 @@
 import datetime
 import ckan.plugins.toolkit as toolkit
-
 from ckanext.matomo.matomo_api import MatomoAPI
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
 
