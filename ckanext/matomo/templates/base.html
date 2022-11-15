@@ -4,3 +4,12 @@
   {{ super() }}
   {{ h.matomo_snippet() }}
 {% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  {% block matomo_event_tracking %}
+    {% set type = 'asset' if h.ckan_version().split('.')[1] | int >= 9 else 'resource' %}
+      {% include 'matomo/snippets/event_tracking_' ~ type ~ '.html' %}
+      <div class="js-hide" data-module="matomo"></div>
+  {% endblock %}
+{% endblock %}
