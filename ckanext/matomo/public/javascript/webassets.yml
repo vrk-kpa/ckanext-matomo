@@ -15,3 +15,12 @@ chart-doughnut_js:
       - base/main
   contents:
     - chart-doughnut.js
+
+event_tracking:
+  filter: rjsmin
+  output: ckanext-matomo/%(version)s_event_tracking.js
+  extra:
+    preload:
+      - base/main
+  contents:
+    - matomo_event_tracking.js
