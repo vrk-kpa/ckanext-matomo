@@ -745,7 +745,6 @@ class ResourceStats(Base):
         return visits
 
 
-
 class AudienceLocation(Base):
     """
     Contains stats for different visitors locations
