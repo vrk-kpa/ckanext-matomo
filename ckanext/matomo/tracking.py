@@ -10,13 +10,15 @@ log = logging.getLogger(__name__)
 
 
 def tracked_action(logic_function, ver=3):
-    post_analytics('API / Action / {}'.format(logic_function))
+    post_analytics('API', 'Action', '{}'.format(logic_function))
     return ckan_action(logic_function, ver)
 
 
-def post_analytics(action_name, download=False):
+def post_analytics(category, action, name, download=False):
     now = datetime.datetime.now()
-    event = {'action_name': action_name,
+    event = {'e_c': category,
+             'e_a': action,
+             'e_n': name,
              'url': toolkit.request.url,
              'h': now.hour,
              'm': now.minute,

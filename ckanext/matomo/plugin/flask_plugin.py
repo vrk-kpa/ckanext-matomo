@@ -24,5 +24,5 @@ class MixinPlugin(plugins.SingletonPlugin):
 
 
 def tracked_download(package_id, resource_id, filename=None):
-    post_analytics('Resource / Download', download=True)
+    post_analytics('Resource', 'Download', 'Resource download', download=True)
     return resource_download(None, package_id, resource_id, filename)
