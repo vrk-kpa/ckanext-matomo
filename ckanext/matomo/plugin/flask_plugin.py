@@ -4,7 +4,7 @@ from flask import Blueprint
 from ckan.views.resource import download as resource_download
 
 
-class MixinPlugin:
+class MixinPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IBlueprint)
 
     # IBlueprint
@@ -14,8 +14,8 @@ class MixinPlugin:
         rules = [
             ('/api/action/<logic_function>', 'tracked_action', tracked_action),
             ('/api/<ver>/action/<logic_function>', 'tracked_action', tracked_action),
-            ('/dataset/<package_id>/resource/<resource_id>/download', tracked_download),
-            ('/dataset/<package_id>/resource/<resource_id>/download/<filename>', tracked_download),
+            ('/dataset/<package_id>/resource/<resource_id>/download', 'tracked_download', tracked_download),
+            ('/dataset/<package_id>/resource/<resource_id>/download/<filename>', 'tracked_download', tracked_download)
         ]
         for rule in rules:
             blueprint.add_url_rule(*rule)
@@ -24,5 +24,5 @@ class MixinPlugin:
 
 
 def tracked_download(package_id, resource_id, filename=None):
-    post_analytics('Resource / Download', download=True)
+    post_analytics('Resource', 'Download', 'Resource download', download=True)
     return resource_download(None, package_id, resource_id, filename)
