@@ -1,6 +1,6 @@
 import pytest
 import ckan.tests.factories as factories
-from datetime import date, datetime, timedelta
+from datetime import datetime
 from ckanext.matomo.model import ResourceStats
 from ckanext.matomo.commands import init_db
 import logging
@@ -38,8 +38,8 @@ def test_resource_get_download_count_for_dataset_during_last_12_months(app):
     init_db()
     package_id = '06364c67-251c-45dc-98d9-9e91105d1928'
     resource_id = '16364c67-251c-45dc-98d9-9e91105d1928'
-    dataset = factories.Dataset(id=package_id)
-    resource = factories.Resource(id=resource_id, package_id=package_id)
+    factories.Dataset(id=package_id)
+    factories.Resource(id=resource_id, package_id=package_id)
     stat_date = datetime.strptime('2022-11-10', '%Y-%m-%d')
     ResourceStats.update_downloads(resource_id, stat_date, 3)
     stat_date = datetime.strptime('2022-11-09', '%Y-%m-%d')

@@ -1,6 +1,5 @@
 import pytest
-import ckan.tests.factories as factories
-from datetime import date, datetime, timedelta
+from datetime import datetime
 from ckanext.matomo.model import PackageStats
 from ckanext.matomo.commands import init_db
 import logging
