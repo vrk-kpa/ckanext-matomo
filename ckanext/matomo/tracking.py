@@ -16,19 +16,23 @@ def tracked_action(logic_function, ver=3):
 
 def post_analytics(category, action, name, download=False):
     now = datetime.datetime.now()
+
+    user_agent = toolkit.request.user_agent.string
+    if toolkit.config.get(u'ckanext.matomo.ignored_user_agents', '') == user_agent:
+        return
+
+    referrer = toolkit.request.referrer or ''
+
     event = {'e_c': category,
              'e_a': action,
              'e_n': name,
              'url': toolkit.request.url,
              'h': now.hour,
              'm': now.minute,
-             's': now.second
+             's': now.second,
+             'ua': user_agent,
+             'urlref': referrer
              }
-
-    user_agent = toolkit.request.user_agent.string
-
-    if toolkit.config.get(u'ckanext.matomo.ignored_user_agents', '') == user_agent:
-        return
 
     user_id = next((v for k, v in toolkit.request.cookies.items() if k.startswith('_pk_id')), None)
     if user_id:
