@@ -34,6 +34,11 @@ def post_analytics(category, action, name, download=False):
              'urlref': referrer
              }
 
+    # Overriding ip address requires write access to matomo
+    if toolkit.config.get('ckanext.matomo.token_auth', '') != '':
+        visitor_ip = toolkit.request.remote_addr
+        event.update({'cip': visitor_ip})
+
     user_id = next((v for k, v in toolkit.request.cookies.items() if k.startswith('_pk_id')), None)
     if user_id:
         event['_id'] = user_id.split('.', 1)[0]
@@ -55,5 +60,5 @@ def matomo_track(matomo_url, matomo_site_id, event, test_mode):
         log.warn("Would send API event to Matomo: %s", event)
     else:
         log.warn("Sending API event to Matomo: %s", event)
-        api = MatomoAPI(matomo_url, matomo_site_id, token_auth=None)
+        api = MatomoAPI(matomo_url, matomo_site_id, token_auth=toolkit.config.get('ckanext.matomo.token_auth'))
         api.tracking(event)
