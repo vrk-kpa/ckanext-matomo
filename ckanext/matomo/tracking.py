@@ -10,18 +10,35 @@ log = logging.getLogger(__name__)
 
 
 def tracked_action(logic_function, ver=3):
-    post_analytics('API / Action / {}'.format(logic_function))
+    post_analytics('API', 'Action', '{}'.format(logic_function))
     return ckan_action(logic_function, ver)
 
 
-def post_analytics(action_name, download=False):
+def post_analytics(category, action, name, download=False):
     now = datetime.datetime.now()
-    event = {'action_name': action_name,
+
+    user_agent = toolkit.request.user_agent.string
+    if toolkit.config.get(u'ckanext.matomo.ignored_user_agents', '') == user_agent:
+        return
+
+    referrer = toolkit.request.referrer or ''
+
+    event = {'e_c': category,
+             'e_a': action,
+             'e_n': name,
              'url': toolkit.request.url,
              'h': now.hour,
              'm': now.minute,
-             's': now.second
+             's': now.second,
+             'ua': user_agent,
+             'urlref': referrer
              }
+
+    # Overriding ip address requires write access to matomo
+    if toolkit.config.get('ckanext.matomo.token_auth', '') != '':
+        visitor_ip = toolkit.request.remote_addr
+        event.update({'cip': visitor_ip})
+
     user_id = next((v for k, v in toolkit.request.cookies.items() if k.startswith('_pk_id')), None)
     if user_id:
         event['_id'] = user_id.split('.', 1)[0]
@@ -43,5 +60,5 @@ def matomo_track(matomo_url, matomo_site_id, event, test_mode):
         log.warn("Would send API event to Matomo: %s", event)
     else:
         log.warn("Sending API event to Matomo: %s", event)
-        api = MatomoAPI(matomo_url, matomo_site_id, token_auth=None)
+        api = MatomoAPI(matomo_url, matomo_site_id, token_auth=toolkit.config.get('ckanext.matomo.token_auth'))
         api.tracking(event)

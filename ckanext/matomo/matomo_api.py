@@ -129,6 +129,9 @@ class MatomoAPI(object):
         params.update(extra_params)
         params['rand'] = uuid.uuid1()
 
+        if self.token_auth is not None:
+            params['token_auth'] = self.token_auth
+
         return requests.get(self.tracking_url, params=params)
 
 
