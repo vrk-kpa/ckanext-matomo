@@ -112,7 +112,7 @@ class PackageStats(Base):
         if package is None:
             cls.update_visits(item_id=package_id, visit_date=visit_date, visits=0, entrances=0, downloads=downloads)
         else:
-            package.downloads += downloads
+            package.downloads = downloads
 
         log.debug("Downloads updated for date: %s and packag: %s", visit_date, package_id)
         model.Session.flush()
