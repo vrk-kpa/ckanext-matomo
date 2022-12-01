@@ -239,6 +239,37 @@ class PackageStats(Base):
         return visits
 
     @classmethod
+    def get_visit_count_for_dataset_during_last_12_months(cls, package_id):
+        from dateutil.relativedelta import relativedelta
+
+        # Returns a list of visits during the last 12 months.
+        first_day = datetime.now() - relativedelta(months=12)
+        last_day = datetime.now()
+
+        visits = cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
+
+        return sum(filter(None, [visit.__dict__.get('visits', 0) for visit in visits]))
+
+    @classmethod
+    def get_visit_count_for_dataset_during_last_30_days(cls, package_id):
+        from dateutil.relativedelta import relativedelta
+
+        # Returns a list of visits during the last 30 days.
+        first_day = datetime.now() - relativedelta(days=30)
+        last_day = datetime.now()
+
+        visits = cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
+
+        return sum(filter(None, [visit.__dict__.get('visits', 0) for visit in visits]))
+
+    @classmethod
+    def get_visits_by_dataset_id_between_two_dates(cls, package_id, start_date, end_date):
+        # Returns a list of visits between the dates
+        visits = model.Session.query(cls).filter(cls.package_id == package_id).filter(cls.visit_date >= start_date).filter(
+            cls.visit_date <= end_date).all()
+        return visits
+
+    @classmethod
     def get_top(cls, limit=20, start_date=None, end_date=None, dataset_type='dataset'):
         package_stats = []
         # TODO: Reimplement in more efficient manner if needed (using RANK OVER and PARTITION in raw sql)
@@ -598,6 +629,18 @@ class ResourceStats(Base):
         return sum(filter(None, [visit.__dict__.get('downloads', 0) for visit in visits]))
 
     @classmethod
+    def get_download_count_for_dataset_during_last_30_days(cls, package_id):
+        from dateutil.relativedelta import relativedelta
+
+        # Returns a list of visits during the last 30 days.
+        first_day = datetime.now() - relativedelta(days=30)
+        last_day = datetime.now()
+
+        visits = cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
+
+        return sum(filter(None, [visit.__dict__.get('downloads', 0) for visit in visits]))
+
+    @classmethod
     def get_visits_by_dataset_id_between_two_dates(cls, package_id, start_date, end_date):
         # Returns a list of visits between the dates
         subquery = model.Session.query(model.Resource.id).filter(model.Resource.package_id == package_id).subquery()
@@ -608,7 +651,8 @@ class ResourceStats(Base):
     @classmethod
     def get_all_visits(cls, id):
         visits_dict = ResourceStats.get_last_visits_by_id(id)
-        count = visits_dict.get('total_downloads', 0)
+        downloads_count = visits_dict.get('total_downloads', 0)
+        visits_count = visits_dict.get('tot_visits', 0)
         visits = visits_dict.get('resources', [])
         visit_list = []
 
@@ -638,7 +682,8 @@ class ResourceStats(Base):
 
         results = {
             "downloads": visit_list,
-            "count": count
+            "downloads_count": downloads_count,
+            "visits_count": visits_count,
         }
         return results
 
@@ -649,6 +694,57 @@ class ResourceStats(Base):
             return None
         else:
             return result.visit_date
+
+    @classmethod
+    def get_visit_count_for_resource_during_last_12_months(cls, resource_id):
+        from dateutil.relativedelta import relativedelta
+
+        first_day = datetime.now() - relativedelta(months=12)
+        last_day = datetime.now()
+
+        visits = cls.get_visits_by_resource_id_between_two_dates(resource_id, first_day, last_day)
+
+        return sum(filter(None, [visit.__dict__.get('visits', 0) for visit in visits]))
+
+    @classmethod
+    def get_visit_count_for_resource_during_last_30_days(cls, resource_id):
+        from dateutil.relativedelta import relativedelta
+
+        first_day = datetime.now() - relativedelta(days=30)
+        last_day = datetime.now()
+
+        visits = cls.get_visits_by_resource_id_between_two_dates(resource_id, first_day, last_day)
+
+        return sum(filter(None, [visit.__dict__.get('visits', 0) for visit in visits]))
+
+    @classmethod
+    def get_download_count_for_resource_during_last_12_months(cls, resource_id):
+        from dateutil.relativedelta import relativedelta
+
+        first_day = datetime.now() - relativedelta(months=12)
+        last_day = datetime.now()
+
+        visits = cls.get_visits_by_resource_id_between_two_dates(resource_id, first_day, last_day)
+
+        return sum(filter(None, [visit.__dict__.get('downloads', 0) for visit in visits]))
+
+    @classmethod
+    def get_download_count_for_resource_during_last_30_days(cls, resource_id):
+        from dateutil.relativedelta import relativedelta
+
+        first_day = datetime.now() - relativedelta(days=30)
+        last_day = datetime.now()
+
+        visits = cls.get_visits_by_resource_id_between_two_dates(resource_id, first_day, last_day)
+
+        return sum(filter(None, [visit.__dict__.get('downloads', 0) for visit in visits]))
+
+    @classmethod
+    def get_visits_by_resource_id_between_two_dates(cls, resource_id, start_date, end_date):
+        # Returns a list of visits between the dates
+        visits = model.Session.query(cls).filter(cls.resource_id == resource_id).filter(cls.visit_date >= start_date).filter(
+            cls.visit_date <= end_date).all()
+        return visits
 
 
 class AudienceLocation(Base):
