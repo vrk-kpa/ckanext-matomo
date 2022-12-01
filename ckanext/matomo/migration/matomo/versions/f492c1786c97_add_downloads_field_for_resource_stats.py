@@ -17,10 +17,18 @@ depends_on = None
 
 
 def upgrade():
-    op.add_column('resource_stats', sa.Column('downloads', sa.Integer))
+    if not column_exists('resource_stats', 'downloads'):
+        op.add_column('resource_stats', sa.Column('downloads', sa.Integer, default=0))
     pass
 
 
 def downgrade():
     op.drop_column('resource_stats', 'downloads')
     pass
+
+
+def column_exists(table_name, column_name):
+    bind = op.get_context().bind
+    insp = sa.inspect(bind)
+    columns = insp.get_columns(table_name)
+    return any(c["name"] == column_name for c in columns)
