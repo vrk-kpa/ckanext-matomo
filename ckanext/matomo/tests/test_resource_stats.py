@@ -73,7 +73,6 @@ def test_resource_get_top(app):
             ResourceStats.update_downloads(resource_id, stat_date, base_count_downloads - i_resource)
             ResourceStats.update_visits(resource_id, stat_date, base_count_visits - i_resource)
             stat_date = stat_date - timedelta(weeks=1)
-        
 
     top_resources = ResourceStats.get_top()
     resources = top_resources.get('resources')
