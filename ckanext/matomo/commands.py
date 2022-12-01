@@ -1,7 +1,10 @@
 import datetime
 import ckan.plugins.toolkit as toolkit
+
 from ckanext.matomo.matomo_api import MatomoAPI
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
+import logging
+log = logging.getLogger(__name__)
 
 DATE_FORMAT = '%Y-%m-%d'
 
@@ -36,6 +39,7 @@ def fetch(dryrun, since, until):
     resource_download_statistics = api.resource_download_statistics(**params)
     updated_package_ids_by_date = {}
 
+    # Parse visits for datasets
     for date_str, date_statistics in dataset_page_statistics.items():
         date = datetime.datetime.strptime(date_str, DATE_FORMAT)
         updated_package_ids = set()
@@ -55,8 +59,9 @@ def fetch(dryrun, since, until):
                 package_id = package['id']
                 visits = sum(stats.get('nb_hits', 0) for stats in stats_list)
                 entrances = sum(int(stats.get('entry_nb_visits', 0)) for stats in stats_list)
-                package_resources_statistics = resource_download_statistics.get(date_str, {}).get(package_id, {})
 
+                # Check if there's download stats for resources included in this package
+                package_resources_statistics = resource_download_statistics.get(date_str, {}).get(package_id, {})
                 downloads = sum(stats.get('nb_hits', 0)
                                 for resource_stats_list in package_resources_statistics.values()
                                 for stats in resource_stats_list)
@@ -71,12 +76,26 @@ def fetch(dryrun, since, until):
             except Exception as e:
                 print('Error updating dataset statistics for {}: {}'.format(package_name, e))
 
+    # Loop resources download stats (as a fallback if dataset had no stats)
     for date_str, date_statistics in resource_download_statistics.items():
         date = datetime.datetime.strptime(date_str, DATE_FORMAT)
         updated_package_ids = updated_package_ids_by_date.get(date_str, set())
 
         for package_id, stats_list in date_statistics.items():
             if package_id in updated_package_ids:
+                # Add download-stats for every resources
+                for resource_id, resource_stats in stats_list.items():
+                    try:
+                        downloads = sum(stats.get('nb_hits', 0) for stats in resource_stats)
+                        if dryrun:
+                            print('Would create or update: resource_id={}, date={}, downloads={}'
+                                  .format(resource_id, date, visits))
+                        else:
+                            ResourceStats.update_downloads(resource_id, date, downloads)
+                    except Exception as e:
+                        print('Error updating resource statistics for {}: {}'.format(resource_id, e))
+
+                # If dataset is already handled, don't parse again package stats
                 continue
 
             try:
