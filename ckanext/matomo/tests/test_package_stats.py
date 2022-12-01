@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 
 
 @pytest.mark.usefixtures("clean_db")
-def test_resource_update_downloads(app):
+def test_package_update_downloads(app):
     init_db()
     package_id = '16364c67-251c-45dc-98d9-9e91105d1928'
     stat_date = datetime.strptime('2022-11-10', '%Y-%m-%d')
@@ -20,7 +20,7 @@ def test_resource_update_downloads(app):
 
 
 @pytest.mark.usefixtures("clean_db")
-def test_resource_update_visits(app):
+def test_package_update_visits(app):
     init_db()
     package_id = '16364c67-251c-45dc-98d9-9e91105d1928'
     stat_date = datetime.strptime('2022-11-10', '%Y-%m-%d')
