@@ -1,5 +1,9 @@
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
 from datetime import datetime, timedelta
+import ckan.model as model
+# import ckan.plugins as plugins
+import logging
+# tk = plugins.toolkit
 
 try:
     from ckan.common import OrderedDict
@@ -39,21 +43,37 @@ def last_calendar_period(period):
         raise ValueError("The period parameter should be either 'week', 'month' or 'year'")
 
 
-def matomo_dataset_report(time):
+def matomo_dataset_report(organization, time):
     '''
     Generates report based on matomo data. number of views per package
     '''
 
+    # Return index page if an organization is not given
+    if organization is None:
+        return matomo_dataset_report_index()
+
     start_date, end_date = last_calendar_period(time)
 
     # get package objects corresponding to popular GA content
-    top_packages = PackageStats.get_total_visits(start_date=start_date, end_date=end_date, limit=None)
+    top_packages = PackageStats.get_total_visits_for_organization(organization, start_date=start_date, end_date=end_date, limit=None)
     top_20 = top_packages[:20]
 
     return {
         'table': top_packages,
         'top': top_20
     }
+
+# Returns the list of organizations that have report data
+def matomo_dataset_report_index():
+    organizations = model.Session.query(model.Group)\
+        .filter(model.Group.type == 'organization')\
+        .filter(model.Group.state == 'active').all()
+    simple_organizations = []
+    # return organizations that have at least 1 dataset
+    for organization in organizations:
+        if organization.packages(limit=1):
+            simple_organizations.append({'title': organization.title, 'name': organization.name})
+    return {'organizations': simple_organizations, 'table': simple_organizations}
 
 
 def matomo_dataset_option_combinations():
@@ -67,7 +87,8 @@ def matomo_dataset_report_info():
         'name': 'matomo-dataset',
         'title': 'Most popular datasets',
         'description': 'Matomo showing top datasets with most views',
-        'option_defaults': OrderedDict((('time', 'month'),)),
+        'option_defaults': OrderedDict((('organization', None),
+                                        ('time', 'month'),)),
         'option_combinations': matomo_dataset_option_combinations,
         'generate': matomo_dataset_report,
         'template': 'report/dataset_analytics.html',

@@ -79,6 +79,7 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin, DefaultTranslation):
             'get_download_count_for_resource_during_last_12_months':
                 helpers.get_download_count_for_resource_during_last_12_months,
             'get_download_count_for_resource_during_last_30_days': helpers.get_download_count_for_resource_during_last_30_days,
+            'get_organization_url': helpers.get_organization_url,
         }
 
     # IReport

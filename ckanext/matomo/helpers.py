@@ -1,5 +1,6 @@
 from ckan.plugins.toolkit import render_snippet, config
 import datetime
+from ckan.plugins import toolkit as tk
 
 
 def matomo_snippet():
@@ -10,6 +11,13 @@ def matomo_snippet():
     }
 
     return render_snippet("matomo/snippets/matomo.html", data)
+
+# Get the organization specific report url
+def get_organization_url(organization):
+    from flask import request
+    if not organization:
+        return request.path
+    return tk.url_for(f"{request.path}/{organization}")
 
 
 def get_visits_for_resource(id):
