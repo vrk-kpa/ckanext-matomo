@@ -18,7 +18,8 @@ def get_organization_url(organization):
     from flask import request
     if not organization:
         return request.path
-    return tk.url_for(f"{request.path}/{organization}")
+    organization_path = f"{request.path}/{organization}"
+    return tk.url_for(organization_path)
 
 
 def get_visits_for_resource(id):
