@@ -54,9 +54,9 @@ def matomo_dataset_report(organization, time):
 
     # get package objects corresponding to popular GA content
     top_packages = PackageStats.get_total_visits_for_organization(organization, 
-                                                                start_date=start_date, 
-                                                                end_date=end_date, 
-                                                                limit=None)
+        start_date=start_date,
+        end_date=end_date,
+        limit=None)
     top_20 = top_packages[:20]
 
     return {
