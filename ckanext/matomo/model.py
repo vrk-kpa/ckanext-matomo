@@ -208,7 +208,8 @@ class PackageStats(Base):
         end_date=datetime.today(),
         limit=50,
         descending=True,
-        package_id=None):
+        package_id=None
+    ):
 
         '''
         Returns datasets and their visitors amount summed during time span, grouped by dataset.

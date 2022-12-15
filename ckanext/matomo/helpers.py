@@ -12,6 +12,7 @@ def matomo_snippet():
 
     return render_snippet("matomo/snippets/matomo.html", data)
 
+
 # Get the organization specific report url
 def get_organization_url(organization):
     from flask import request

@@ -1,9 +1,7 @@
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
 from datetime import datetime, timedelta
 import ckan.model as model
-# import ckan.plugins as plugins
-import logging
-# tk = plugins.toolkit
+
 
 try:
     from ckan.common import OrderedDict
@@ -55,13 +53,17 @@ def matomo_dataset_report(organization, time):
     start_date, end_date = last_calendar_period(time)
 
     # get package objects corresponding to popular GA content
-    top_packages = PackageStats.get_total_visits_for_organization(organization, start_date=start_date, end_date=end_date, limit=None)
+    top_packages = PackageStats.get_total_visits_for_organization(organization, 
+                                                                start_date=start_date, 
+                                                                end_date=end_date, 
+                                                                limit=None)
     top_20 = top_packages[:20]
 
     return {
         'table': top_packages,
         'top': top_20
     }
+
 
 # Returns the list of organizations that have report data
 def matomo_dataset_report_index():
