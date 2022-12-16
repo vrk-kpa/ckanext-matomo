@@ -44,7 +44,7 @@ def test_resource_get_download_count_for_dataset_during_last_12_months(app):
     ResourceStats.update_downloads(resource_id, stat_date, 3)
     stat_date = datetime.strptime('2022-11-09', '%Y-%m-%d')
     ResourceStats.update_downloads(resource_id, stat_date, 2)
-    stat_date = datetime.strptime('2021-12-16', '%Y-%m-%d')
+    stat_date = datetime.strptime('2021-12-24', '%Y-%m-%d')
     ResourceStats.update_downloads(resource_id, stat_date, 21)
     stat_date = datetime.strptime('2021-10-16', '%Y-%m-%d')
     ResourceStats.update_downloads(resource_id, stat_date, 21)

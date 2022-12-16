@@ -199,6 +199,64 @@ class PackageStats(Base):
 
         return datasets
 
+    # Same as above, but uses organization to filter datasets belonging to only that organization
+    @classmethod
+    def get_total_visits_for_organization(
+        cls,
+        organization,
+        start_date=date(2000, 1, 1),
+        end_date=datetime.today(),
+        limit=50,
+        descending=True,
+        package_id=None
+    ):
+
+        '''
+        Returns datasets and their visitors amount summed during time span, grouped by dataset.
+
+        :param start_date: Date
+        :param end_date: Date
+        :return: [{ visits, entrances, package_id, package_name }, ...]
+        '''
+        def sorting_direction(value, descending):
+            if descending:
+                return desc(value)
+            else:
+                return value
+
+        query = model.Session.query(
+            cls.package_id,
+            func.sum(cls.visits).label('total_visits'),
+            func.sum(cls.downloads).label('total_downloads'),
+            func.sum(cls.entrances).label('total_entrances')
+        )
+
+        if package_id:
+            query = query.filter(cls.package_id == package_id)
+
+        visits_by_dataset = (query.join(model.Package, cls.package_id == model.Package.id)
+                             .filter(model.Package.state == 'active')
+                             .filter(model.Package.private == False)  # noqa: E712
+                             .filter(model.Package.owner_org == organization)
+                             .filter(cls.visit_date >= start_date)
+                             .filter(cls.visit_date <= end_date)
+                             .group_by(cls.package_id)
+                             .order_by(sorting_direction(func.sum(cls.visits), descending))
+                             .limit(limit)
+                             .all())
+
+        datasets = []
+        for dataset in visits_by_dataset:
+            datasets.append({
+                "package_name": PackageStats.get_package_name_by_id(dataset.package_id),
+                "package_id": dataset.package_id,
+                "visits": dataset.total_visits,
+                "entrances": dataset.total_entrances,
+                "downloads": dataset.total_downloads,
+            })
+
+        return datasets
+
     @classmethod
     def get_visits_during_year(cls, resource_id, year):
         '''
