@@ -7,6 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 import ckan.model as model
 from ckan.plugins.toolkit import config, aslist, get_action, ObjectNotFound
+import logging
 
 
 log = __import__('logging').getLogger(__name__)
@@ -608,7 +609,7 @@ class ResourceStats(Base):
 
                 rs = ResourceStats(resource_id=resource_id, visit_date=last_date[0], visits=visits)
                 resource_stats.append(rs)
-        dictat = ResourceStats.convert_to_dict(resource_stats, None)
+        dictat = ResourceStats.convert_to_dict(resource_stats, None, None)
         return dictat
 
     @classmethod
