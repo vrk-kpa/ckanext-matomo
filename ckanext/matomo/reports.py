@@ -142,13 +142,13 @@ def matomo_resource_report(organization, last):
     if organization is None:
         return matomo_resource_report_index()
 
-    # get resource objects corresponding to popular GA content
-    top_resources = ResourceStats.get_top(limit=last)
+    # Get the most downloaded resources for the organization
+    top_resources = ResourceStats.get_top_downloaded_resources_for_organization(organization, last)
 
-    logging.warning(top_resources)
+    logging.warning(last)
 
     return {
-        'table': top_resources.get("resources")
+        'table': top_resources.get("resources"),
     }
 
 def matomo_resource_report_index():

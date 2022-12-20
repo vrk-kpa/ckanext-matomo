@@ -594,6 +594,9 @@ class ResourceStats(Base):
         # TODO: Reimplement in more efficient manner if needed (using RANK OVER and PARTITION in raw sql)
         unique_resources = model.Session.query(cls.resource_id, func.count(cls.visits)).group_by(cls.resource_id).order_by(
             func.count(cls.visits).desc()).join(model.Resource, model.Resource.id == cls.resource_id).limit(limit).all()
+
+        # logging.warning(unique_resources)
+
         # Adding last date associated to this package stat and filtering out private and deleted packages
         if unique_resources is not None:
             for resource in unique_resources:
@@ -611,6 +614,39 @@ class ResourceStats(Base):
                 resource_stats.append(rs)
         dictat = ResourceStats.convert_to_dict(resource_stats, None, None)
         return dictat
+
+    @classmethod
+    def get_top_downloaded_resources_for_organization(cls, organization, limit=20):
+        # Query for organization specific visitor counts
+        unique_resources = model.Session.query(
+            cls.resource_id, cls.visits, cls.downloads
+        ).filter(model.Resource.id == cls.resource_id, 
+            model.Package.id == model.Resource.package_id, 
+            model.Package.state == 'active', 
+            model.Group.id == model.Package.owner_org,
+            model.Group.type == 'organization',
+            model.Group.name == organization,
+            model.Group.approval_status == 'approved').order_by(cls.downloads.desc()).limit(limit).all()
+
+        resource_stats = []
+        # Add last date associated to the resource stat
+        if unique_resources:
+            for resource in unique_resources:
+                resource_id = resource[0]
+                visits = resource[1]
+                downloads = resource[2]
+                # TODO: Check if associated resource is private
+                resource = model.Session.query(model.Resource).filter(model.Resource.id == resource_id).filter_by(
+                    state='active').first()
+                if resource is None:
+                    continue
+                last_date = model.Session.query(func.max(cls.visit_date)).filter(cls.resource_id == resource_id).first()
+
+                rs = ResourceStats(resource_id=resource_id, visit_date=last_date[0], visits=visits, downloads=downloads)
+                resource_stats.append(rs)
+        dictat = ResourceStats.convert_to_dict(resource_stats, None, None)
+        return dictat
+
 
     @classmethod
     def as_dict(cls, res):
