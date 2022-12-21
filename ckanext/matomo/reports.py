@@ -137,7 +137,6 @@ def matomo_resource_report(organization, last):
     '''
     Generates report based on matomo data. number of views per package
     '''
-    
     # Return organization list if none chosen
     if organization is None:
         return matomo_resource_report_index()
@@ -150,6 +149,7 @@ def matomo_resource_report(organization, last):
         'value': last,
         'last': last
     }
+
 
 def matomo_resource_report_index():
     organizations = model.Session.query(model.Group)\

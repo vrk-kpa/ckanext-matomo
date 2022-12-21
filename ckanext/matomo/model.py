@@ -618,12 +618,12 @@ class ResourceStats(Base):
         unique_resources = model.Session.query(
             cls.resource_id, cls.visits, cls.downloads
         ).filter(model.Resource.id == cls.resource_id,
-            model.Package.id == model.Resource.package_id,
-            model.Package.state == 'active',
-            model.Group.id == model.Package.owner_org,
-            model.Group.type == 'organization',
-            model.Group.name == organization,
-            model.Group.approval_status == 'approved').order_by(cls.downloads.desc()).limit(limit).all()
+                model.Package.id == model.Resource.package_id,
+                model.Package.state == 'active',
+                model.Group.id == model.Package.owner_org,
+                model.Group.type == 'organization',
+                model.Group.name == organization,
+                model.Group.approval_status == 'approved').order_by(cls.downloads.desc()).limit(limit).all()
 
         resource_stats = []
         # Add last date associated to the resource stat
@@ -643,7 +643,6 @@ class ResourceStats(Base):
                 resource_stats.append(rs)
         dictat = ResourceStats.convert_to_dict(resource_stats, None, None)
         return dictat
-
 
     @classmethod
     def as_dict(cls, res):
