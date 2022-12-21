@@ -7,7 +7,6 @@ from sqlalchemy.ext.declarative import declarative_base
 
 import ckan.model as model
 from ckan.plugins.toolkit import config, aslist, get_action, ObjectNotFound
-import logging
 
 
 log = __import__('logging').getLogger(__name__)
@@ -595,8 +594,6 @@ class ResourceStats(Base):
         unique_resources = model.Session.query(cls.resource_id, func.count(cls.visits)).group_by(cls.resource_id).order_by(
             func.count(cls.visits).desc()).join(model.Resource, model.Resource.id == cls.resource_id).limit(limit).all()
 
-        # logging.warning(unique_resources)
-
         # Adding last date associated to this package stat and filtering out private and deleted packages
         if unique_resources is not None:
             for resource in unique_resources:
@@ -620,9 +617,9 @@ class ResourceStats(Base):
         # Query for organization specific visitor counts
         unique_resources = model.Session.query(
             cls.resource_id, cls.visits, cls.downloads
-        ).filter(model.Resource.id == cls.resource_id, 
-            model.Package.id == model.Resource.package_id, 
-            model.Package.state == 'active', 
+        ).filter(model.Resource.id == cls.resource_id,
+            model.Package.id == model.Resource.package_id,
+            model.Package.state == 'active',
             model.Group.id == model.Package.owner_org,
             model.Group.type == 'organization',
             model.Group.name == organization,

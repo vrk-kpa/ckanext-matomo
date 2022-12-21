@@ -1,7 +1,6 @@
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
 from datetime import datetime, timedelta
 import ckan.model as model
-import logging
 
 
 try:
@@ -138,6 +137,7 @@ def matomo_resource_report(organization, last):
     '''
     Generates report based on matomo data. number of views per package
     '''
+    
     # Return organization list if none chosen
     if organization is None:
         return matomo_resource_report_index()
@@ -145,10 +145,10 @@ def matomo_resource_report(organization, last):
     # Get the most downloaded resources for the organization
     top_resources = ResourceStats.get_top_downloaded_resources_for_organization(organization, last)
 
-    logging.warning(last)
-
     return {
         'table': top_resources.get("resources"),
+        'value': last,
+        'last': last
     }
 
 def matomo_resource_report_index():
