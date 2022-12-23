@@ -591,14 +591,15 @@ class ResourceStats(Base):
     def get_top(cls, limit=20):
         resource_stats = []
         # TODO: Reimplement in more efficient manner if needed (using RANK OVER and PARTITION in raw sql)
-        unique_resources = model.Session.query(cls.resource_id, func.count(cls.visits)).group_by(cls.resource_id).order_by(
-            func.count(cls.visits).desc()).join(model.Resource, model.Resource.id == cls.resource_id).limit(limit).all()
-
+        unique_resources = model.Session.query(cls.resource_id, func.count(cls.visits), func.sum(cls.downloads)).group_by(
+            cls.resource_id).order_by(func.sum(cls.downloads).desc()).having(func.sum(cls.downloads) > 0).join(
+                model.Resource, model.Resource.id == cls.resource_id).limit(limit).all()
         # Adding last date associated to this package stat and filtering out private and deleted packages
         if unique_resources is not None:
             for resource in unique_resources:
                 resource_id = resource[0]
                 visits = resource[1]
+                downloads = resource[2]
                 # TODO: Check if associated resource is private
                 resource = model.Session.query(model.Resource).filter(model.Resource.id == resource_id).filter_by(
                     state='active').first()
@@ -607,7 +608,7 @@ class ResourceStats(Base):
 
                 last_date = model.Session.query(func.max(cls.visit_date)).filter(cls.resource_id == resource_id).first()
 
-                rs = ResourceStats(resource_id=resource_id, visit_date=last_date[0], visits=visits)
+                rs = ResourceStats(resource_id=resource_id, visit_date=last_date[0], visits=visits, downloads=downloads)
                 resource_stats.append(rs)
         dictat = ResourceStats.convert_to_dict(resource_stats, None, None)
         return dictat
@@ -762,8 +763,11 @@ class ResourceStats(Base):
                 # Do nothing if date of visit isn't in period of current week
                 if visit_date < current_start_of_week or visit_date > current_end_of_week:
                     continue
-                weekly_download_count += visit.get('downloads', 0)
-                weekly_visit_count += visit.get('visits', 0)
+
+                if visit.get('downloads', 0) is not None:
+                    weekly_download_count += visit.get('downloads', 0)
+                if visit.get('visits', 0) is not None:
+                    weekly_visit_count += visit.get('visits', 0)
 
             visit_list.append({'year': current_end_of_week.year, 'week': current_end_of_week.isocalendar()[1],
                                'visits': weekly_visit_count, 'downloads': weekly_download_count})
@@ -1167,7 +1171,7 @@ class SearchStats(Base):
 
     @classmethod
     def get_most_popular_search_terms(cls, start_date, end_date, limit=20):
-        results = model.Session.query(cls).filter(cls.date >= start_date).filter(cls.date <= end_date).limit(limit).all()
+        results = model.Session.query(cls).filter(cls.date >= start_date).filter(cls.date <= end_date).all()
         search_term_counts = {}
         for result in results:
             if result.search_term in search_term_counts:
