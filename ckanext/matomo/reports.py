@@ -133,16 +133,34 @@ def matomo_dataset_least_popular_report_info():
     }
 
 
-def matomo_resource_report(last):
+def matomo_resource_report(organization, last):
     '''
     Generates report based on matomo data. number of views per package
     '''
-    # get resource objects corresponding to popular GA content
-    top_resources = ResourceStats.get_top(limit=last)
+    # Return organization list if none chosen
+    if organization is None:
+        return matomo_resource_report_index()
+
+    # Get the most downloaded resources for the organization
+    top_resources = ResourceStats.get_top_downloaded_resources_for_organization(organization, last)
 
     return {
-        'table': top_resources.get("resources")
+        'table': top_resources.get("resources"),
+        'value': last,
+        'last': last
     }
+
+
+def matomo_resource_report_index():
+    organizations = model.Session.query(model.Group)\
+        .filter(model.Group.type == 'organization')\
+        .filter(model.Group.state == 'active').all()
+    simple_organizations = []
+    # return organizations that have at least 1 dataset
+    for organization in organizations:
+        if organization.packages(limit=1):
+            simple_organizations.append({'title': organization.title, 'name': organization.name})
+    return {'organizations': simple_organizations, 'table': simple_organizations}
 
 
 def matomo_resource_option_combinations():
@@ -156,7 +174,8 @@ def matomo_resource_report_info():
         'name': 'matomo-resource',
         'title': 'Most popular resources',
         'description': 'Matomo showing most downloaded resources',
-        'option_defaults': OrderedDict((('last', 20),)),
+        'option_defaults': OrderedDict((('organization', None),
+                                        ('last', 20),)),
         'option_combinations': matomo_resource_option_combinations,
         'generate': matomo_resource_report,
         'template': 'report/resource_analytics.html'
