@@ -1,6 +1,5 @@
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
 from datetime import datetime, timedelta
-import ckan.model as model
 from ckanext.report import lib as report
 
 
@@ -210,7 +209,8 @@ def matomo_location_report_info():
 
 def matomo_organizations_with_most_popular_datasets(time, descending=True):
     start_date, end_date = last_calendar_period(time)
-    most_popular_organizations = PackageStats.get_organizations_with_most_popular_datasets(start_date, end_date, descending=descending)
+    most_popular_organizations = PackageStats.get_organizations_with_most_popular_datasets(start_date,
+                                                                                           end_date, descending=descending)
 
     return {
         'table': most_popular_organizations

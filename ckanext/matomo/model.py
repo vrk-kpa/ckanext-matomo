@@ -637,9 +637,9 @@ class ResourceStats(Base):
             model.Group.type == 'organization',
             model.Group.name == organization,
             model.Group.approval_status == 'approved')
-        .order_by(cls.downloads.desc())
-        .limit(limit)
-        .all())
+            .order_by(cls.downloads.desc())
+            .limit(limit)
+            .all())
 
         resource_stats = []
         # Add last date associated to the resource stat
