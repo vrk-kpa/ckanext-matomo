@@ -5,6 +5,7 @@ from ckanext.matomo.model import ResourceStats
 from ckanext.matomo.commands import init_db
 import uuid
 
+
 @pytest.mark.freeze_time('2022-11-11')
 @pytest.mark.usefixtures("clean_db")
 def test_resource_update_downloads(app):
@@ -18,6 +19,7 @@ def test_resource_update_downloads(app):
     resource_stats = ResourceStats.get(resource_id)
     assert resource_stats.__dict__.get('downloads') == 2
 
+
 @pytest.mark.freeze_time('2022-11-11')
 @pytest.mark.usefixtures("clean_db")
 def test_resource_update_visits(app):
@@ -30,6 +32,7 @@ def test_resource_update_visits(app):
     ResourceStats.update_visits(resource_id, stat_date, 2)
     resource_stats = ResourceStats.get(resource_id)
     assert resource_stats.__dict__.get('visits') == 2
+
 
 @pytest.mark.freeze_time('2022-11-11')
 @pytest.mark.usefixtures("clean_db")
@@ -50,6 +53,7 @@ def test_resource_get_download_count_for_dataset_during_last_12_months(app):
     downloads_during_last_12_months = ResourceStats.get_download_count_for_dataset_during_last_12_months(package_id)
 
     assert downloads_during_last_12_months == 26
+
 
 @pytest.mark.freeze_time('2022-11-11')
 @pytest.mark.usefixtures("clean_db")
