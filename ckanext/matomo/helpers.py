@@ -19,6 +19,10 @@ def get_organization_url(organization):
     if not organization:
         return request.path
     organization_path = "%s/%s" % (request.path, organization)
+    params = dict(list(request.args.items()))
+    time = params.get('time')
+    if time:
+        organization_path = "%s?time=%s" % (organization_path, time)
     return tk.url_for(organization_path)
 
 

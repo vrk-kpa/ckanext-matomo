@@ -183,7 +183,7 @@ class PackageStats(Base):
                              .filter(cls.visit_date >= start_date)
                              .filter(cls.visit_date <= end_date)
                              .group_by(cls.package_id)
-                             .order_by(sorting_direction(func.sum(cls.visits), descending))
+                             .order_by(sorting_direction('total_visits', descending))
                              .limit(limit)
                              .all())
 
@@ -206,7 +206,7 @@ class PackageStats(Base):
         organization,
         start_date=date(2000, 1, 1),
         end_date=datetime.today(),
-        limit=50,
+        limit=20,
         descending=True,
         package_id=None
     ):
@@ -234,14 +234,18 @@ class PackageStats(Base):
         if package_id:
             query = query.filter(cls.package_id == package_id)
 
+        # Ensure we find results in case organization's name and id do not match
+        # i.e. make sure we use org id for the below db query instead of the org name that's in the url
+        organization_id = get_action('organization_show')({}, {'id': organization}).get('id')
+
         visits_by_dataset = (query.join(model.Package, cls.package_id == model.Package.id)
                              .filter(model.Package.state == 'active')
                              .filter(model.Package.private == False)  # noqa: E712
-                             .filter(model.Package.owner_org == organization)
+                             .filter(model.Package.owner_org == organization_id)
                              .filter(cls.visit_date >= start_date)
                              .filter(cls.visit_date <= end_date)
                              .group_by(cls.package_id)
-                             .order_by(sorting_direction(func.sum(cls.visits), descending))
+                             .order_by(sorting_direction('total_visits', descending))
                              .limit(limit)
                              .all())
 
@@ -249,6 +253,7 @@ class PackageStats(Base):
         for dataset in visits_by_dataset:
             datasets.append({
                 "package_name": PackageStats.get_package_name_by_id(dataset.package_id),
+                "package_title_translated": get_action('package_show')({}, {'id': dataset.package_id}).get('title_translated'),
                 "package_id": dataset.package_id,
                 "visits": dataset.total_visits,
                 "entrances": dataset.total_entrances,
@@ -445,15 +450,16 @@ class PackageStats(Base):
         try:
             package = get_action('package_show')({}, {'id': dataset_name})
             if package.get('organization'):
-                return package.get('organization').get('name')
+                # Fetch the whole organization bundle to get access to translated fields
+                return get_action('organization_show')({}, {'id': package.get('organization').get('id')})
             else:
                 return None
         except ObjectNotFound:
             return None
 
     @classmethod
-    def get_organizations_with_most_popular_datasets(cls, start_date, end_date, limit=20):
-        all_packages_result = cls.get_total_visits(start_date, end_date, limit=None)
+    def get_organizations_with_most_popular_datasets(cls, start_date, end_date, descending=True, limit=20):
+        all_packages_result = cls.get_total_visits(start_date, end_date, descending=descending, limit=20)
         organization_stats = {}
         for package in all_packages_result:
             package_id = package["package_id"]
@@ -461,7 +467,9 @@ class PackageStats(Base):
             downloads = package["downloads"]
             entrances = package["entrances"]
 
-            organization_name = cls.get_organization(package_id)
+            organization = cls.get_organization(package_id)
+            organization_name = organization.get('name')
+            organization_title_translated = organization.get('title_translated')
             if organization_name:
                 if (organization_name in organization_stats):
                     organization_stats[organization_name]["visits"] += visits
@@ -469,6 +477,8 @@ class PackageStats(Base):
                     organization_stats[organization_name]["entrances"] += entrances
                 else:
                     organization_stats[organization_name] = {
+                        "organization_name": organization_name,
+                        "organization_title_translated": organization_title_translated,
                         "visits": visits,
                         "downloads": downloads,
                         "entrances": entrances
@@ -476,15 +486,16 @@ class PackageStats(Base):
 
         organization_list = []
         for organization_name, stats in organization_stats.items():
-            organization_list.append(
-                {"organization_name": organization_name,
+            organization_list.append({
+                 "organization_name": stats["organization_name"],
+                 "organization_title_translated": stats["organization_title_translated"],
                  "total_visits": stats["visits"],
                  "total_downloads": stats["downloads"],
                  "total_entrances": stats["entrances"]
                  }
             )
 
-        return sorted(organization_list, key=lambda organization: organization["total_visits"], reverse=True)[:limit]
+        return sorted(organization_list, key=lambda organization: organization["total_visits"], reverse=descending)[:limit]
 
 
 class ResourceStats(Base):
@@ -614,9 +625,9 @@ class ResourceStats(Base):
         return dictat
 
     @classmethod
-    def get_top_downloaded_resources_for_organization(cls, organization, limit=20):
-        # Query for organization specific visitor counts
-        unique_resources = model.Session.query(
+    def get_top_downloaded_resources_for_organization(cls, organization, time, limit=20):
+        # Query for organization specific resource download counts
+        unique_resources = (model.Session.query(
             cls.resource_id, cls.visits, cls.downloads
         ).filter(
             model.Resource.id == cls.resource_id,
@@ -625,7 +636,10 @@ class ResourceStats(Base):
             model.Group.id == model.Package.owner_org,
             model.Group.type == 'organization',
             model.Group.name == organization,
-            model.Group.approval_status == 'approved').order_by(cls.downloads.desc()).limit(limit).all()
+            model.Group.approval_status == 'approved')
+            .order_by(cls.downloads.desc())
+            .limit(limit)
+            .all())
 
         resource_stats = []
         # Add last date associated to the resource stat

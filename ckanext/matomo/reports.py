@@ -1,6 +1,6 @@
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
 from datetime import datetime, timedelta
-import ckan.model as model
+from ckanext.report import lib as report
 
 
 try:
@@ -46,127 +46,106 @@ def matomo_dataset_report(organization, time):
     Generates report based on matomo data. number of views per package
     '''
 
-    # Return index page if an organization is not given
+    # Return matomo_organizations_with_most_popular_datasets list if an organization is not given
     if organization is None:
-        return matomo_dataset_report_index()
+        return matomo_organizations_with_most_popular_datasets(time)
 
     start_date, end_date = last_calendar_period(time)
 
     # get package objects corresponding to popular GA content
-    top_packages = PackageStats.get_total_visits_for_organization(
+    most_visited_packages = PackageStats.get_total_visits_for_organization(
         organization,
         start_date=start_date,
         end_date=end_date,
-        limit=None)
-    top_20 = top_packages[:20]
+        limit=20)
 
     return {
-        'table': top_packages,
-        'top': top_20
+        'report_name': 'matomo-dataset',
+        'table': most_visited_packages
     }
 
 
-# Returns the list of organizations that have report data
-def matomo_dataset_report_index():
-    organizations = model.Session.query(model.Group)\
-        .filter(model.Group.type == 'organization')\
-        .filter(model.Group.state == 'active').all()
-    simple_organizations = []
-    # return organizations that have at least 1 dataset
-    for organization in organizations:
-        if organization.packages(limit=1):
-            simple_organizations.append({'title': organization.title, 'name': organization.name})
-    return {'organizations': simple_organizations, 'table': simple_organizations}
+def matomo_time_option_combinations():
+    time_options = ['week', 'month', 'year']
+    for time in time_options:
+        yield {'time': time}
 
 
-def matomo_dataset_option_combinations():
-    options = ['week', 'month', 'year']
-    for option in options:
-        yield {'time': option}
+def matomo_org_and_time_option_combinations():
+    time_options = ['week', 'month', 'year']
+    org_options = report.all_organizations(include_none=True)
+    for org in org_options:
+        for time in time_options:
+            yield {'organization': org, 'time': time}
 
 
 def matomo_dataset_report_info():
     return {
         'name': 'matomo-dataset',
         'title': 'Most popular datasets',
-        'description': 'Matomo showing top datasets with most views',
+        'description': 'Matomo showing top datasets with most views by organization',
         'option_defaults': OrderedDict((('organization', None),
                                         ('time', 'month'),)),
-        'option_combinations': matomo_dataset_option_combinations,
+        'option_combinations': matomo_org_and_time_option_combinations,
         'generate': matomo_dataset_report,
         'template': 'report/dataset_analytics.html',
     }
 
 
-def matomo_dataset_least_popular_report(time):
+def matomo_dataset_least_popular_report(organization, time):
     '''
     Generates report based on matomo data. number of views per package
     '''
 
+    # Return matomo_organizations_with_most_popular_datasets in reverse order list if an organization is not given
+    if organization is None:
+        return matomo_organizations_with_most_popular_datasets(time, descending=False)
+
     start_date, end_date = last_calendar_period(time)
 
     # get package objects corresponding to popular GA content
-    top_packages = PackageStats.get_total_visits(start_date=start_date, end_date=end_date, limit=None, descending=False)
-    top_20 = top_packages[:20]
+    least_visited_packages = PackageStats.get_total_visits_for_organization(
+        organization=organization,
+        start_date=start_date,
+        end_date=end_date,
+        limit=20,
+        descending=False)
 
     return {
-        'table': top_packages,
-        'top': top_20
+        'report_name': 'matomo-dataset-least-popular',
+        'table': least_visited_packages
     }
-
-
-def matomo_dataset_least_popular_option_combinations():
-    options = ['week', 'month', 'year']
-    for option in options:
-        yield {'time': option}
 
 
 def matomo_dataset_least_popular_report_info():
     return {
         'name': 'matomo-dataset-least-popular',
         'title': 'Least popular datasets',
-        'description': 'Matomo showing top datasets with least views',
-        'option_defaults': OrderedDict((('time', 'month'),)),
-        'option_combinations': matomo_dataset_least_popular_option_combinations,
+        'description': 'Matomo showing top datasets with least views by organization',
+        'option_defaults': OrderedDict((('organization', None),
+                                        ('time', 'month'),)),
+        'option_combinations': matomo_org_and_time_option_combinations,
         'generate': matomo_dataset_least_popular_report,
         'template': 'report/dataset_analytics.html',
     }
 
 
-def matomo_resource_report(organization, last):
+def matomo_resource_report(organization, time):
     '''
-    Generates report based on matomo data. number of views per package
+    Generates report based on matomo data. Number of downloads per package (sum of package's resource downloads)
     '''
-    # Return organization list if none chosen
+
+    # Return matomo_organizations_with_most_popular_datasets list if an organization is not given
     if organization is None:
-        return matomo_resource_report_index()
+        return matomo_organizations_with_most_popular_datasets(time)
 
     # Get the most downloaded resources for the organization
-    top_resources = ResourceStats.get_top_downloaded_resources_for_organization(organization, last)
+    most_downloaded_resources = ResourceStats.get_top_downloaded_resources_for_organization(organization, time)
 
     return {
-        'table': top_resources.get("resources"),
-        'value': last,
-        'last': last
+        'report_name': 'matomo-resource',
+        'table': most_downloaded_resources.get("resources")
     }
-
-
-def matomo_resource_report_index():
-    organizations = model.Session.query(model.Group)\
-        .filter(model.Group.type == 'organization')\
-        .filter(model.Group.state == 'active').all()
-    simple_organizations = []
-    # return organizations that have at least 1 dataset
-    for organization in organizations:
-        if organization.packages(limit=1):
-            simple_organizations.append({'title': organization.title, 'name': organization.name})
-    return {'organizations': simple_organizations, 'table': simple_organizations}
-
-
-def matomo_resource_option_combinations():
-    options = [20, 25, 30, 35, 40, 45, 50]
-    for option in options:
-        yield {'last': option}
 
 
 def matomo_resource_report_info():
@@ -175,8 +154,8 @@ def matomo_resource_report_info():
         'title': 'Most popular resources',
         'description': 'Matomo showing most downloaded resources',
         'option_defaults': OrderedDict((('organization', None),
-                                        ('last', 20),)),
-        'option_combinations': matomo_resource_option_combinations,
+                                        ('time', 'month'),)),
+        'option_combinations': matomo_org_and_time_option_combinations,
         'generate': matomo_resource_report,
         'template': 'report/resource_analytics.html'
     }
@@ -228,23 +207,13 @@ def matomo_location_report_info():
     }
 
 
-def matomo_organizations_with_most_popular_datasets(time):
+def matomo_organizations_with_most_popular_datasets(time, descending=True):
     start_date, end_date = last_calendar_period(time)
-    most_popular_organizations = PackageStats.get_organizations_with_most_popular_datasets(start_date, end_date)
+    most_popular_organizations = PackageStats.get_organizations_with_most_popular_datasets(start_date,
+                                                                                           end_date, descending=descending)
+
     return {
         'table': most_popular_organizations
-    }
-
-
-def matomo_organizations_with_most_popular_datasets_info():
-    return {
-        'name': 'matomo-most-popular-organizations',
-        'title': 'Most popular organizations',
-        'description': 'Matomo showing most popular organizations by visited datasets',
-        'option_defaults': OrderedDict((('time', 'month'),)),
-        'option_combinations': matomo_dataset_option_combinations,
-        'generate': matomo_organizations_with_most_popular_datasets,
-        'template': 'report/organization_analytics.html'
     }
 
 
@@ -262,7 +231,7 @@ def matomo_most_popular_search_terms_info():
         'title': 'Most popular search terms',
         'description': 'Matomo showing most popular search terms',
         'option_defaults': OrderedDict((('time', 'month'),)),
-        'option_combinations': matomo_dataset_option_combinations,
+        'option_combinations': matomo_time_option_combinations,
         'generate': matomo_most_popular_search_terms,
         'template': 'report/search_term_analytics.html'
     }
