@@ -29,7 +29,7 @@
     <tr>
       <th>{% trans %}Resource{% endtrans %}</th>
       <th>{% trans %}Last accessed date{% endtrans %}</th>
-      <th>{% trans %}Downloads (since recording started){% endtrans %}</th>
+      <th>{% trans %}Downloads{% endtrans %}&nbsp({{ _(options['time']) }})</th>
     </tr>
         {% for topresource in table %}
       <tr>
