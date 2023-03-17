@@ -593,13 +593,16 @@ class ResourceStats(Base):
         return visits
 
     @classmethod
-    def get_stat_counts_by_id_and_date_range(cls, resource_id, start_date=datetime.today() - relativedelta(months=1), end_date=datetime.today()):
-        resource_visits = model.Session.query(cls).filter(cls.resource_id == resource_id,
-                                                          cls.visit_date >= start_date,
-                                                          cls.visit_date <= end_date).all()
-        total_visits = model.Session.query(func.sum(cls.visits)).filter(cls.resource_id == resource_id).scalar()
-        total_downloads = model.Session.query(func.sum(cls.downloads)).filter(cls.resource_id == resource_id).scalar()
-        return { 'visits': total_visits, 'downloads': total_downloads }
+    def get_stat_counts_by_id_and_date_range(cls, resource_id,
+                                             start_date=datetime.today() - relativedelta(months=1),
+                                             end_date=datetime.today()):
+        total_visits = model.Session.query(func.sum(cls.visits)).filter(cls.resource_id == resource_id,
+                                                                        cls.visit_date >= start_date,
+                                                                        cls.visit_date <= end_date).scalar()
+        total_downloads = model.Session.query(func.sum(cls.downloads)).filter(cls.resource_id == resource_id,
+                                                                              cls.visit_date >= start_date,
+                                                                              cls.visit_date <= end_date).scalar()
+        return {'visits': total_visits, 'downloads': total_downloads}
 
     @classmethod
     def get_top(cls, limit=20):
@@ -653,10 +656,11 @@ class ResourceStats(Base):
                 resource_id = resource[0]
                 stats = ResourceStats.get_stat_counts_by_id_and_date_range(resource_id, start_date, end_date)
                 last_date = model.Session.query(func.max(cls.visit_date)).filter(cls.resource_id == resource_id,
-                                                         cls.visit_date >= start_date,
-                                                         cls.visit_date <= end_date).first()
+                                                                                 cls.visit_date >= start_date,
+                                                                                 cls.visit_date <= end_date).first()
 
-                rs = ResourceStats(resource_id=resource_id, visit_date=last_date[0], visits=stats['visits'], downloads=stats['downloads'])
+                rs = ResourceStats(resource_id=resource_id, visit_date=last_date[0],
+                                   visits=stats['visits'], downloads=stats['downloads'])
                 resource_stats.append(rs)
         dictat = ResourceStats.convert_to_dict(resource_stats, None, None)
         return dictat

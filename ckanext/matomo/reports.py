@@ -10,6 +10,7 @@ try:
 except ImportError:
     from collections import OrderedDict
 
+
 # We don't need to mind the end_date time of day as stats update with delay anyways, right?
 def last_week():
     today = datetime.today()
