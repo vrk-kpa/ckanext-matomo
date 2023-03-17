@@ -583,6 +583,16 @@ class ResourceStats(Base):
         return [res_name, res_package_name, res_package_id]
 
     @classmethod
+    def get_all_visits_by_id(cls, resource_id):
+        resource_visits = model.Session.query(cls).filter(cls.resource_id == resource_id).all()
+        total_visits = model.Session.query(func.sum(cls.visits)).filter(cls.resource_id == resource_id).scalar()
+        total_downloads = model.Session.query(func.sum(cls.downloads)).filter(cls.resource_id == resource_id).scalar()
+        visits = {}
+        if total_visits is not None or total_downloads is not None:
+            visits = ResourceStats.convert_to_dict(resource_visits, total_visits, total_downloads)
+        return visits
+
+    @classmethod
     def get_stat_counts_by_id_and_date_range(cls, resource_id, start_date=datetime.today() - relativedelta(months=1), end_date=datetime.today()):
         resource_visits = model.Session.query(cls).filter(cls.resource_id == resource_id,
                                                           cls.visit_date >= start_date,
@@ -744,7 +754,7 @@ class ResourceStats(Base):
 
     @classmethod
     def get_all_visits(cls, id):
-        visits_dict = ResourceStats.get_last_visits_by_id(id)
+        visits_dict = ResourceStats.get_all_visits_by_id(id)
         downloads_count = visits_dict.get('total_downloads', 0)
         visits_count = visits_dict.get('tot_visits', 0)
         visits = visits_dict.get('resources', [])
