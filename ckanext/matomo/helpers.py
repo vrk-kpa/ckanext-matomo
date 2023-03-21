@@ -1,4 +1,4 @@
-from ckan.plugins.toolkit import render_snippet, config, get_action
+from ckan.plugins.toolkit import render_snippet, config
 import datetime
 from ckan.plugins import toolkit as tk
 from ckanext.matomo.reports import last_calendar_period
