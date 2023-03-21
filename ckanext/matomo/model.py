@@ -663,6 +663,8 @@ class ResourceStats(Base):
                                    visits=stats['visits'], downloads=stats['downloads'])
                 resource_stats.append(rs)
         dictat = ResourceStats.convert_to_dict(resource_stats, None, None)
+        dictat['resources'] = sorted(dictat['resources'], key=lambda resource: resource["downloads"], reverse=True)
+
         return dictat
 
     @classmethod
