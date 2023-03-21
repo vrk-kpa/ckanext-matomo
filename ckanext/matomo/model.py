@@ -1189,14 +1189,18 @@ class SearchStats(Base):
         for result in results:
             if result.search_term in search_term_counts:
                 search_term_counts[result.search_term]['count'] += result.count
+                if result.date > search_term_counts[result.search_term]['date']:
+                    search_term_counts[result.search_term]['date'] = result.date
             else:
                 search_term_counts[result.search_term] = {'count': result.count}
+                search_term_counts[result.search_term]['date'] = result.date
 
         search_term_list = []
         for search_term, search_term_info in search_term_counts.items():
             search_term_list.append(
                 {"search_term": search_term,
-                 "count": search_term_info['count']
+                 "count": search_term_info['count'],
+                 "latest_search_date": search_term_info['date'].strftime('%Y-%m-%d')
                  }
             )
 

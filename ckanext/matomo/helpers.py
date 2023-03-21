@@ -107,3 +107,8 @@ def get_download_count_for_resource_during_last_30_days(id):
     from ckanext.matomo.model import ResourceStats
 
     return ResourceStats.get_download_count_for_resource_during_last_30_days(id)
+
+
+def format_date(datestr):
+    date = datetime.date.fromisoformat(datestr)
+    return date.strftime('%d-%m-%Y')
