@@ -1,6 +1,8 @@
-from ckan.plugins.toolkit import render_snippet, config
+from ckan.plugins.toolkit import render_snippet, config, get_action
 import datetime
 from ckan.plugins import toolkit as tk
+from ckanext.matomo.reports import last_calendar_period
+from flask import request
 
 
 def matomo_snippet():
@@ -15,7 +17,6 @@ def matomo_snippet():
 
 # Get the organization specific report url
 def get_organization_url(organization):
-    from flask import request
     if not organization:
         return request.path
     organization_path = "%s/%s" % (request.path, organization)
@@ -107,3 +108,9 @@ def get_download_count_for_resource_during_last_30_days(id):
     from ckanext.matomo.model import ResourceStats
 
     return ResourceStats.get_download_count_for_resource_during_last_30_days(id)
+
+
+def get_date_range():
+    params = dict(list(request.args.items()))
+    time = params.get('time') if params.get('time') else 'month'
+    return last_calendar_period(time)
