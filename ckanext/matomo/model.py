@@ -1173,7 +1173,11 @@ class SearchStats(Base):
         :param count: Number of times the search term was searched
         :return: True for a successful update, otherwise False
         '''
-        model.Session.add(SearchStats(search_term=search_term, date=date, count=count))
+        row = model.Session.query(cls).filter(cls.search_term == search_term, cls.date == date).first()
+        if row is None:
+            model.Session.add(SearchStats(search_term=search_term, date=date, count=count))
+        else:
+            row.count = count
         model.Session.commit()
         model.Session.flush()
         return True
