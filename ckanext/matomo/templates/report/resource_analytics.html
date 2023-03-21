@@ -26,7 +26,9 @@
         {% endfor %}
       </table>
   {% else %}
-    <h2>{% trans %}Most downloaded resources{% endtrans %}</h2>
+    <h2>{% trans %}Most downloaded resources{% endtrans %}
+      <span class="h4">({{start_date.strftime('%d.%m.%Y')}} - {{end_date.strftime('%d.%m.%Y')}})</span>
+    </h2>
     {% if data['table'] %}
         <table class="table table-condensed table-bordered table-striped">
     <tr>
