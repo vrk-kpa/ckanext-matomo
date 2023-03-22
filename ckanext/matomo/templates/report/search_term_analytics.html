@@ -1,5 +1,8 @@
 <div class="module-content">
-  <h2>{% trans %}Most popular search terms{% endtrans %}</h2>
+  {% set start_date, end_date = h.get_date_range() %}
+  <h2>{% trans %}Most popular search terms{% endtrans %}
+    <span class="h4">({{start_date.strftime('%d.%m.%Y')}} - {{end_date.strftime('%d.%m.%Y')}})</span>
+  </h2>
     {% if data['table'] %}
       <table class="table table-condensed table-bordered table-striped">
       <tr>

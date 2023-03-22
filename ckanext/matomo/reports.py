@@ -1,5 +1,6 @@
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from ckanext.report import lib as report
 
 log = __import__('logging').getLogger(__name__)
@@ -11,25 +12,30 @@ except ImportError:
     from collections import OrderedDict
 
 
-# We don't need to mind the end_date time of day as stats update with delay anyways, right?
+# Set end_date explicitly to be the second before midnight on previous day
+# and start_date to be at 00:00:00 week, month or year from that
+# Example on 2023-03-21 14:11:42
+# week = 2023-03-14 00:00:00 - 2023-03-20 23:59:59
+# month = 2023-02-20 00:00:00 - 2023-03-20 23:59:59
+# year = 2022-03-20 00:00:00 - 2023-03-20 23:59:59
 def last_week():
     today = datetime.today()
-    end_date = today - timedelta(days=1)
-    start_date = end_date - timedelta(days=7)
+    end_date = today - relativedelta(days=1, hour=23, minute=59, second=59)
+    start_date = today - relativedelta(weeks=1, hour=0, minute=0, second=0)
     return start_date, end_date
 
 
 def last_month():
     today = datetime.today()
-    end_date = today - timedelta(days=1)
-    start_date = end_date - timedelta(days=30)
+    end_date = today - relativedelta(days=1, hour=23, minute=59, second=59)
+    start_date = end_date - relativedelta(months=1, hour=0, minute=0, second=0)
     return start_date, end_date
 
 
 def last_year():
     today = datetime.today()
-    end_date = today - timedelta(days=1)
-    start_date = end_date - timedelta(days=365)
+    end_date = today - relativedelta(days=1, hour=23, minute=59, second=59)
+    start_date = end_date - relativedelta(years=1, hour=0, minute=0, second=0)
     return start_date, end_date
 
 

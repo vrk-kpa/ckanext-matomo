@@ -1,7 +1,10 @@
 <div>
+    {% set start_date, end_date = h.get_date_range() %}
     <!-- Display organization list if none chosen -->
     {% if options['organization'] == None %}
-    <h2>{% trans %}Organizations that have published data{% endtrans %}</h2>
+    <h2>{% trans %}Organizations that have published data{% endtrans %}
+      <span class="h4">({{start_date.strftime('%d.%m.%Y')}} - {{end_date.strftime('%d.%m.%Y')}})</span>
+    </h2>
     <table class="table table-condensed table-bordered table-striped">
       <tr>
         <th>{% trans %}Organization{% endtrans %}</th>
@@ -24,7 +27,9 @@
       </table>
     {% else %}
     <!-- Display organization's 20 most popular datasets -->
-      <h2>{% trans %}Most viewed datasets{% endtrans %}</h2>
+      <h2>{% trans %}Most viewed datasets{% endtrans %}
+        <span class="h4">({{start_date.strftime('%d.%m.%Y')}} - {{end_date.strftime('%d.%m.%Y')}})</span>
+      </h2>
       {% if data['table'] %}
       <table class="table table-condensed table-bordered table-striped">
         <tr>
