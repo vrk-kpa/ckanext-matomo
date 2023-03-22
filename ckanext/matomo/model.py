@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+from dateutil.relativedelta import relativedelta
 import json
 
 from sqlalchemy import types, func, Column, ForeignKey, not_, desc
@@ -303,8 +304,6 @@ class PackageStats(Base):
 
     @classmethod
     def get_visit_count_for_dataset_during_last_12_months(cls, package_id):
-        from dateutil.relativedelta import relativedelta
-
         # Returns a list of visits during the last 12 months.
         first_day = datetime.now() - relativedelta(months=12)
         last_day = datetime.now()
@@ -315,8 +314,6 @@ class PackageStats(Base):
 
     @classmethod
     def get_visit_count_for_dataset_during_last_30_days(cls, package_id):
-        from dateutil.relativedelta import relativedelta
-
         # Returns a list of visits during the last 30 days.
         first_day = datetime.now() - relativedelta(days=30)
         last_day = datetime.now()
@@ -586,17 +583,26 @@ class ResourceStats(Base):
         return [res_name, res_package_name, res_package_id]
 
     @classmethod
-    def get_last_visits_by_id(cls, resource_id, num_days=30):
-        start_date = datetime.now() - timedelta(num_days)
-        resource_visits = model.Session.query(cls).filter(cls.resource_id == resource_id).filter(
-            cls.visit_date >= start_date).all()
-        # Returns the total number of visits since the beggining of all times
+    def get_all_visits_by_id(cls, resource_id):
+        resource_visits = model.Session.query(cls).filter(cls.resource_id == resource_id).all()
         total_visits = model.Session.query(func.sum(cls.visits)).filter(cls.resource_id == resource_id).scalar()
         total_downloads = model.Session.query(func.sum(cls.downloads)).filter(cls.resource_id == resource_id).scalar()
         visits = {}
         if total_visits is not None or total_downloads is not None:
             visits = ResourceStats.convert_to_dict(resource_visits, total_visits, total_downloads)
         return visits
+
+    @classmethod
+    def get_stat_counts_by_id_and_date_range(cls, resource_id,
+                                             start_date=datetime.today() - relativedelta(months=1),
+                                             end_date=datetime.today()):
+        total_visits = model.Session.query(func.sum(cls.visits)).filter(cls.resource_id == resource_id,
+                                                                        cls.visit_date >= start_date,
+                                                                        cls.visit_date <= end_date).scalar()
+        total_downloads = model.Session.query(func.sum(cls.downloads)).filter(cls.resource_id == resource_id,
+                                                                              cls.visit_date >= start_date,
+                                                                              cls.visit_date <= end_date).scalar()
+        return {'visits': total_visits, 'downloads': total_downloads}
 
     @classmethod
     def get_top(cls, limit=20):
@@ -625,39 +631,40 @@ class ResourceStats(Base):
         return dictat
 
     @classmethod
-    def get_top_downloaded_resources_for_organization(cls, organization, time, limit=20):
-        # Query for organization specific resource download counts
+    def get_top_downloaded_resources_for_organization(cls, organization, start_date, end_date):
+        # Query for organization specific resource ids
         unique_resources = (model.Session.query(
-            cls.resource_id, cls.visits, cls.downloads
+            cls.resource_id
         ).filter(
             model.Resource.id == cls.resource_id,
             model.Package.id == model.Resource.package_id,
             model.Package.state == 'active',
+            model.Resource.state == 'active',
             model.Group.id == model.Package.owner_org,
             model.Group.type == 'organization',
             model.Group.name == organization,
-            model.Group.approval_status == 'approved')
-            .order_by(cls.downloads.desc())
-            .limit(limit)
+            model.Group.approval_status == 'approved',
+            cls.visit_date >= start_date,
+            cls.visit_date <= end_date)
+            .distinct()
+            .order_by(cls.resource_id)
             .all())
-
         resource_stats = []
         # Add last date associated to the resource stat
         if unique_resources:
             for resource in unique_resources:
                 resource_id = resource[0]
-                visits = resource[1]
-                downloads = resource[2]
-                # TODO: Check if associated resource is private
-                resource = model.Session.query(model.Resource).filter(model.Resource.id == resource_id).filter_by(
-                    state='active').first()
-                if resource is None:
-                    continue
-                last_date = model.Session.query(func.max(cls.visit_date)).filter(cls.resource_id == resource_id).first()
+                stats = ResourceStats.get_stat_counts_by_id_and_date_range(resource_id, start_date, end_date)
+                last_date = model.Session.query(func.max(cls.visit_date)).filter(cls.resource_id == resource_id,
+                                                                                 cls.visit_date >= start_date,
+                                                                                 cls.visit_date <= end_date).first()
 
-                rs = ResourceStats(resource_id=resource_id, visit_date=last_date[0], visits=visits, downloads=downloads)
+                rs = ResourceStats(resource_id=resource_id, visit_date=last_date[0],
+                                   visits=stats['visits'], downloads=stats['downloads'])
                 resource_stats.append(rs)
         dictat = ResourceStats.convert_to_dict(resource_stats, None, None)
+        dictat['resources'] = sorted(dictat['resources'], key=lambda resource: resource["downloads"], reverse=True)
+
         return dictat
 
     @classmethod
@@ -725,8 +732,6 @@ class ResourceStats(Base):
 
     @classmethod
     def get_download_count_for_dataset_during_last_12_months(cls, package_id):
-        from dateutil.relativedelta import relativedelta
-
         # Returns a list of visits during the last 12 months.
         first_day = datetime.now() - relativedelta(months=12)
         last_day = datetime.now()
@@ -737,8 +742,6 @@ class ResourceStats(Base):
 
     @classmethod
     def get_download_count_for_dataset_during_last_30_days(cls, package_id):
-        from dateutil.relativedelta import relativedelta
-
         # Returns a list of visits during the last 30 days.
         first_day = datetime.now() - relativedelta(days=30)
         last_day = datetime.now()
@@ -757,7 +760,7 @@ class ResourceStats(Base):
 
     @classmethod
     def get_all_visits(cls, id):
-        visits_dict = ResourceStats.get_last_visits_by_id(id)
+        visits_dict = ResourceStats.get_all_visits_by_id(id)
         downloads_count = visits_dict.get('total_downloads', 0)
         visits_count = visits_dict.get('tot_visits', 0)
         visits = visits_dict.get('resources', [])
@@ -807,8 +810,6 @@ class ResourceStats(Base):
 
     @classmethod
     def get_visit_count_for_resource_during_last_12_months(cls, resource_id):
-        from dateutil.relativedelta import relativedelta
-
         first_day = datetime.now() - relativedelta(months=12)
         last_day = datetime.now()
 
@@ -818,8 +819,6 @@ class ResourceStats(Base):
 
     @classmethod
     def get_visit_count_for_resource_during_last_30_days(cls, resource_id):
-        from dateutil.relativedelta import relativedelta
-
         first_day = datetime.now() - relativedelta(days=30)
         last_day = datetime.now()
 
@@ -829,8 +828,6 @@ class ResourceStats(Base):
 
     @classmethod
     def get_download_count_for_resource_during_last_12_months(cls, resource_id):
-        from dateutil.relativedelta import relativedelta
-
         first_day = datetime.now() - relativedelta(months=12)
         last_day = datetime.now()
 
@@ -840,8 +837,6 @@ class ResourceStats(Base):
 
     @classmethod
     def get_download_count_for_resource_during_last_30_days(cls, resource_id):
-        from dateutil.relativedelta import relativedelta
-
         first_day = datetime.now() - relativedelta(days=30)
         last_day = datetime.now()
 

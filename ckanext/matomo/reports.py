@@ -2,6 +2,8 @@ from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDa
 from datetime import datetime, timedelta
 from ckanext.report import lib as report
 
+log = __import__('logging').getLogger(__name__)
+
 
 try:
     from ckan.common import OrderedDict
@@ -9,6 +11,7 @@ except ImportError:
     from collections import OrderedDict
 
 
+# We don't need to mind the end_date time of day as stats update with delay anyways, right?
 def last_week():
     today = datetime.today()
     end_date = today - timedelta(days=1)
@@ -139,8 +142,10 @@ def matomo_resource_report(organization, time):
     if organization is None:
         return matomo_organizations_with_most_popular_datasets(time)
 
+    start_date, end_date = last_calendar_period(time)
+
     # Get the most downloaded resources for the organization
-    most_downloaded_resources = ResourceStats.get_top_downloaded_resources_for_organization(organization, time)
+    most_downloaded_resources = ResourceStats.get_top_downloaded_resources_for_organization(organization, start_date, end_date)
 
     return {
         'report_name': 'matomo-resource',

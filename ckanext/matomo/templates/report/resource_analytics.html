@@ -5,9 +5,6 @@
     <table class="table table-condensed table-bordered table-striped">
       <tr>
         <th>{% trans %}Organization{% endtrans %}</th>
-        <th>{% trans %}Total views{% endtrans %}</th>
-        <th>{% trans %}Initial entrance{% endtrans %}</th>
-        <th>{% trans %}Entrances of total views{% endtrans %}</th>
         <th>{% trans %}Downloads{% endtrans %}</th>
       </tr>
         {% for row in data['table'] %}
@@ -15,9 +12,6 @@
           {% set org_title = h.get_translated(row, 'organization_title') or org_name %}
           <tr>
             <td>{{ h.link_to(org_title, h.get_organization_url(org_name)) }}</td>
-            <td>{{ row.get('total_visits') }}</td>
-            <td>{{ row.get('total_entrances') }}</td>
-            {% snippet "report/snippets/entrances_percentage_td.html", total_visits=row.get('total_visits'), total_entrances=row.get('total_entrances') %}
             <td>{{ row.get('total_downloads') }}</td>
           </tr>
         {% endfor %}
@@ -28,16 +22,16 @@
         <table class="table table-condensed table-bordered table-striped">
     <tr>
       <th>{% trans %}Resource{% endtrans %}</th>
+      <th>{% trans %}Downloads{% endtrans %}&nbsp({{ _(options['time']) }})</th>
       <th>{% trans %}Last accessed date{% endtrans %}</th>
-      <th>{% trans %}Downloads (since recording started){% endtrans %}</th>
     </tr>
         {% for topresource in table %}
       <tr>
         <td>{{ h.link_to(h.truncate(topresource.resource_name, length=50,whole_word=True), h.url_for('dataset_resource.read',id=topresource.package_id,resource_id=topresource.resource_id)) }}<br />
           <em>in {{ h.link_to(topresource.package_name, h.url_for('dataset.read', id=topresource.package_id)) }}</em>
         </td>
-        <td>{{ topresource.visit_date }}</td>
         <td>{{ topresource.downloads }}</td>
+        <td>{{ topresource.visit_date }}</td>
       </tr>
       {% endfor %}
       </table>
