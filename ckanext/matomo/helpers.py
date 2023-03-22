@@ -110,6 +110,11 @@ def get_download_count_for_resource_during_last_30_days(id):
     return ResourceStats.get_download_count_for_resource_during_last_30_days(id)
 
 
+def format_date(datestr):
+    date = datetime.date.fromisoformat(datestr)
+    return date.strftime('%d-%m-%Y')
+
+
 def get_date_range():
     params = dict(list(request.args.items()))
     time = params.get('time') if params.get('time') else 'month'

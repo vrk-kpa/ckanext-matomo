@@ -8,11 +8,13 @@
       <tr>
         <th>{% trans %}Search term{% endtrans %}</th>
         <th>{% trans %}Total searches{% endtrans %}</th>
+        <th>{% trans %}Last searched date{% endtrans %}</th>
       </tr>
-        {% for toppackage in table %}
+        {% for search_term in table %}
           <tr>
-            <td>{{ toppackage.search_term }}</td>
-            <td>{{ toppackage.count }}</td>
+            <td>{{ search_term.search_term }}</td>
+            <td>{{ search_term.count }}</td>
+            <td>{{ h.format_date(search_term.latest_search_date) }}</td>
           </tr>
         {% endfor %}
       </table>
