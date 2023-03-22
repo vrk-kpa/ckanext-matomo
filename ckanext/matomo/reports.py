@@ -1,5 +1,5 @@
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 from ckanext.report import lib as report
 
@@ -10,6 +10,12 @@ try:
     from ckan.common import OrderedDict
 except ImportError:
     from collections import OrderedDict
+
+
+def get_report_years():
+    start_year = 2014
+    current_year = date.today().year
+    return sorted(list(range(start_year, current_year+1)), reverse=True)
 
 
 # Set end_date explicitly to be the second before midnight on previous day
@@ -39,13 +45,22 @@ def last_year():
     return start_date, end_date
 
 
+def selected_year(year):
+    start_date = datetime(year, 1, 1, 0, 0, 0, 0)
+    end_date = datetime(year, 12, 31, 23, 59, 59, 0)
+    return start_date, end_date
+
+
 def last_calendar_period(period):
+    report_years = get_report_years()
     if period == 'week':
         return last_week()
     elif period == 'month':
         return last_month()
     elif period == 'year':
         return last_year()
+    elif (isinstance(period, int) or (isinstance(period, str) and period.isdigit())) and int(period) in report_years:
+        return selected_year(int(period))
     else:
         raise ValueError("The period parameter should be either 'week', 'month' or 'year'")
 
@@ -76,12 +91,14 @@ def matomo_dataset_report(organization, time):
 
 def matomo_time_option_combinations():
     time_options = ['week', 'month', 'year']
+    time_options.extend(get_report_years())
     for time in time_options:
         yield {'time': time}
 
 
 def matomo_org_and_time_option_combinations():
     time_options = ['week', 'month', 'year']
+    time_options.extend(get_report_years())
     org_options = report.all_organizations(include_none=True)
     for org in org_options:
         for time in time_options:

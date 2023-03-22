@@ -1,7 +1,7 @@
 from ckan.plugins.toolkit import render_snippet, config
 import datetime
 from ckan.plugins import toolkit as tk
-from ckanext.matomo.reports import last_calendar_period
+from ckanext.matomo.reports import last_calendar_period, get_report_years
 from flask import request
 
 
@@ -119,3 +119,7 @@ def get_date_range():
     params = dict(list(request.args.items()))
     time = params.get('time') if params.get('time') else 'month'
     return last_calendar_period(time)
+
+
+def get_years():
+    return [str(year) for year in get_report_years()]
