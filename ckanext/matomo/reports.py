@@ -15,7 +15,7 @@ except ImportError:
 # Set end_date explicitly to be the second before midnight on previous day
 # and start_date to be at 00:00:00 week, month or year from that
 # Example on 2023-03-21 14:11:42
-# week = 2023-03-13 00:00:00 - 2023-03-20 23:59:59
+# week = 2023-03-14 00:00:00 - 2023-03-20 23:59:59
 # month = 2023-02-20 00:00:00 - 2023-03-20 23:59:59
 # year = 2022-03-20 00:00:00 - 2023-03-20 23:59:59
 def last_week():
