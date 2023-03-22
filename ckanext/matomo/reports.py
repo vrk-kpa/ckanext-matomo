@@ -21,7 +21,7 @@ except ImportError:
 def last_week():
     today = datetime.today()
     end_date = today - relativedelta(days=1, hour=23, minute=59, second=59)
-    start_date = end_date - relativedelta(weeks=1, hour=0, minute=0, second=0)
+    start_date = today - relativedelta(weeks=1, hour=0, minute=0, second=0)
     return start_date, end_date
 
 
