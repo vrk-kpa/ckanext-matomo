@@ -149,7 +149,7 @@ def fetch(dryrun, since, until):
         date = datetime.datetime.strptime(date_str, DATE_FORMAT)
         for search_term_stats in date_statistics:
             search_term = search_term_stats.get('label', '(not set)')
-            count = search_term_stats.get('nb_hits', 0)
+            count = search_term_stats.get('nb_visits', 0)
 
             try:
                 if dryrun:

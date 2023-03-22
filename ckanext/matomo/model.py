@@ -1173,7 +1173,11 @@ class SearchStats(Base):
         :param count: Number of times the search term was searched
         :return: True for a successful update, otherwise False
         '''
-        model.Session.add(SearchStats(search_term=search_term, date=date, count=count))
+        row = model.Session.query(cls).filter(cls.search_term == search_term, cls.date == date).first()
+        if row is None:
+            model.Session.add(SearchStats(search_term=search_term, date=date, count=count))
+        else:
+            row.count = count
         model.Session.commit()
         model.Session.flush()
         return True
@@ -1185,14 +1189,18 @@ class SearchStats(Base):
         for result in results:
             if result.search_term in search_term_counts:
                 search_term_counts[result.search_term]['count'] += result.count
+                if result.date > search_term_counts[result.search_term]['date']:
+                    search_term_counts[result.search_term]['date'] = result.date
             else:
                 search_term_counts[result.search_term] = {'count': result.count}
+                search_term_counts[result.search_term]['date'] = result.date
 
         search_term_list = []
         for search_term, search_term_info in search_term_counts.items():
             search_term_list.append(
                 {"search_term": search_term,
-                 "count": search_term_info['count']
+                 "count": search_term_info['count'],
+                 "latest_search_date": search_term_info['date'].strftime('%Y-%m-%d')
                  }
             )
 
