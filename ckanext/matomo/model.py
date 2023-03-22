@@ -1181,7 +1181,7 @@ class SearchStats(Base):
         return True
 
     @classmethod
-    def get_most_popular_search_terms(cls, start_date, end_date, limit=20):
+    def get_most_popular_search_terms(cls, start_date, end_date, limit=50):
         results = model.Session.query(cls).filter(cls.date >= start_date).filter(cls.date <= end_date).all()
         search_term_counts = {}
         for result in results:
