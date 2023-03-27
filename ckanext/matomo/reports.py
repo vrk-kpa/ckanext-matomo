@@ -80,8 +80,7 @@ def matomo_dataset_report(organization, time):
     most_visited_packages = PackageStats.get_total_visits_for_organization(
         organization,
         start_date=start_date,
-        end_date=end_date,
-        limit=20)
+        end_date=end_date)
 
     return {
         'report_name': 'matomo-dataset',
@@ -134,7 +133,6 @@ def matomo_dataset_least_popular_report(organization, time):
         organization=organization,
         start_date=start_date,
         end_date=end_date,
-        limit=20,
         descending=False)
 
     return {

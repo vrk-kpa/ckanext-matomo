@@ -30,13 +30,13 @@
       <th>{% trans %}Downloads{% endtrans %}&nbsp;({{ _(options['time']) }})</th>
       <th>{% trans %}Last accessed date{% endtrans %}</th>
     </tr>
-        {% for topresource in table %}
+        {% for resource in table %}
       <tr>
-        <td>{{ h.link_to(h.truncate(topresource.resource_name, length=50,whole_word=True), h.url_for('dataset_resource.read',id=topresource.package_id,resource_id=topresource.resource_id)) }}<br />
-          <em>in {{ h.link_to(topresource.package_name, h.url_for('dataset.read', id=topresource.package_id)) }}</em>
+        <td>{{ h.link_to(h.truncate(resource.resource_name, length=50,whole_word=True), h.url_for('dataset_resource.read',id=resource.package_id,resource_id=resource.resource_id)) }}<br />
+          <em>in {{ h.link_to(resource.package_name, h.url_for('dataset.read', id=resource.package_id)) }}</em>
         </td>
-        <td>{{ topresource.downloads }}</td>
-        <td>{{ topresource.visit_date }}</td>
+        <td>{{ resource.downloads }}</td>
+        <td>{{ resource.visit_date }}</td>
       </tr>
       {% endfor %}
       </table>

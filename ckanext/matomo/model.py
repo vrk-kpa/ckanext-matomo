@@ -207,7 +207,6 @@ class PackageStats(Base):
         organization,
         start_date=date(2000, 1, 1),
         end_date=datetime.today(),
-        limit=20,
         descending=True,
         package_id=None
     ):
@@ -247,7 +246,6 @@ class PackageStats(Base):
                              .filter(cls.visit_date <= end_date)
                              .group_by(cls.package_id)
                              .order_by(sorting_direction('total_visits', descending))
-                             .limit(limit)
                              .all())
 
         datasets = []
@@ -455,8 +453,8 @@ class PackageStats(Base):
             return None
 
     @classmethod
-    def get_organizations_with_most_popular_datasets(cls, start_date, end_date, descending=True, limit=20):
-        all_packages_result = cls.get_total_visits(start_date, end_date, descending=descending, limit=20)
+    def get_organizations_with_most_popular_datasets(cls, start_date, end_date, descending=True):
+        all_packages_result = cls.get_total_visits(start_date, end_date, descending=descending)
         organization_stats = {}
         for package in all_packages_result:
             package_id = package["package_id"]
@@ -492,7 +490,7 @@ class PackageStats(Base):
                  }
             )
 
-        return sorted(organization_list, key=lambda organization: organization["total_visits"], reverse=descending)[:limit]
+        return sorted(organization_list, key=lambda organization: organization["total_visits"], reverse=descending)
 
 
 class ResourceStats(Base):
@@ -1183,7 +1181,7 @@ class SearchStats(Base):
         return True
 
     @classmethod
-    def get_most_popular_search_terms(cls, start_date, end_date, limit=20):
+    def get_most_popular_search_terms(cls, start_date, end_date, limit=50):
         results = model.Session.query(cls).filter(cls.date >= start_date).filter(cls.date <= end_date).all()
         search_term_counts = {}
         for result in results:
