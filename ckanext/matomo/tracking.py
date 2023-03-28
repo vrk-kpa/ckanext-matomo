@@ -36,7 +36,13 @@ def post_analytics(category, action, name, download=False):
 
     # Overriding ip address requires write access to matomo
     if toolkit.config.get('ckanext.matomo.token_auth', '') != '':
-        visitor_ip = toolkit.request.remote_addr
+        visitor_ip = toolkit.request.headers.get('X-Forwarded-For')
+
+        #TODO: Remove logging once this is tested in AWS
+        log.info(visitor_ip)
+        log.info(toolkit.request.headers.get('X-Real-IP'))
+        log.info(toolkit.request.remote_addr)
+
         event.update({'cip': visitor_ip})
 
     user_id = next((v for k, v in toolkit.request.cookies.items() if k.startswith('_pk_id')), None)
