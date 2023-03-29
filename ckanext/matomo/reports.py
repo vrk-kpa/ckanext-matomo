@@ -161,7 +161,9 @@ def matomo_resource_report(organization, time):
 
     # Return matomo_organizations_with_most_popular_datasets list if an organization is not given
     if organization is None:
-        return matomo_organizations_with_most_popular_datasets(time)
+        most_viewed_datasets = matomo_organizations_with_most_popular_datasets(time)
+
+        return {'table': sorted(most_viewed_datasets['table'], key=lambda organization: organization["total_downloads"], reverse=True)}
 
     start_date, end_date = last_calendar_period(time)
 
