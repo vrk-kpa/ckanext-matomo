@@ -1,6 +1,5 @@
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
-import json
 from typing import Dict
 
 from sqlalchemy import types, func, Column, ForeignKey, not_, desc
@@ -8,7 +7,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 import ckan.model as model
-from ckan.plugins.toolkit import config, aslist, get_action, ObjectNotFound
+from ckan.plugins.toolkit import get_action, ObjectNotFound
 from ckanext.report.helpers import organization_list as get_organizations_with_datasets
 
 
@@ -568,8 +567,10 @@ class ResourceStats(Base):
     def get_resource_info_by_id(cls, resource_id):
         resource = get_action('resource_show')({}, {'id': resource_id})
         package = get_action('package_show')({}, {'id': resource.get('package_id')})
-        result = {'resource_id': resource.get('id'), 'resource_name': resource.get('name'), 'resource_name_translated': resource.get('name_translated'),
-                  'package_id': package.get('id'), 'package_name': package.get('name'), 'package_title': package.get('title'), 'package_title_translated': package.get('title_translated')}
+        result = {'resource_id': resource.get('id'), 'resource_name': resource.get('name'),
+                  'resource_name_translated': resource.get('name_translated'), 'package_id': package.get('id'),
+                  'package_name': package.get('name'), 'package_title': package.get('title'),
+                  'package_title_translated': package.get('title_translated')}
 
 
         return result
