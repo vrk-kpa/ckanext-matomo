@@ -1,7 +1,7 @@
 name: Tests
 on: [push, pull_request, workflow_dispatch]
 jobs:
-  lint:
+  ruff:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -9,17 +9,15 @@ jobs:
         with:
           python-version: '3.8'
       - name: Install requirements
-        run: pip install flake8 pycodestyle
-      - name: Check syntax
-        run: flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics --exclude ckan
-      - name: Run flake8
-        run: flake8 . --count --max-line-length=127 --statistics --exclude ckan
+        run: pip install ruff
+      - name: Run ruff
+        run: ruff check --format=github .
 
   test:
-    needs: lint
+    needs: ruff
     strategy:
       matrix:
-        ckan-version: [2.9, 2.9-py2]
+        ckan-version: [2.9]
       fail-fast: false
 
     name: CKAN ${{ matrix.ckan-version }}
@@ -46,7 +44,7 @@ jobs:
       CKAN_REDIS_URL: redis://redis:6379/1
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install requirements
         run: |
           pip install -r requirements.txt

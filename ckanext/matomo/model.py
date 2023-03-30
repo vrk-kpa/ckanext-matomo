@@ -1,13 +1,14 @@
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
-import json
+from typing import Dict, Optional
 
 from sqlalchemy import types, func, Column, ForeignKey, not_, desc
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 import ckan.model as model
-from ckan.plugins.toolkit import config, aslist, get_action, ObjectNotFound
+from ckan.plugins.toolkit import get_action, ObjectNotFound
+from ckanext.report.helpers import organization_list as get_organizations_with_datasets
 
 
 log = __import__('logging').getLogger(__name__)
@@ -234,11 +235,12 @@ class PackageStats(Base):
         if package_id:
             query = query.filter(cls.package_id == package_id)
 
-        # Ensure we find results in case organization's name and id do not match
-        # i.e. make sure we use org id for the below db query instead of the org name that's in the url
-        organization_id = get_action('organization_show')({}, {'id': organization}).get('id')
+        # Get all organization's datasets via organization_show
+        organization = get_action('organization_show')({}, {'id': organization, 'include_datasets': True})
+        organization_id = organization.get('id')
+        datasets = organization.get('packages')
 
-        visits_by_dataset = (query.join(model.Package, cls.package_id == model.Package.id)
+        visits = (query.join(model.Package, cls.package_id == model.Package.id)
                              .filter(model.Package.state == 'active')
                              .filter(model.Package.private == False)  # noqa: E712
                              .filter(model.Package.owner_org == organization_id)
@@ -248,18 +250,24 @@ class PackageStats(Base):
                              .order_by(sorting_direction('total_visits', descending))
                              .all())
 
-        datasets = []
-        for dataset in visits_by_dataset:
-            datasets.append({
-                "package_name": PackageStats.get_package_name_by_id(dataset.package_id),
-                "package_title_translated": get_action('package_show')({}, {'id': dataset.package_id}).get('title_translated'),
-                "package_id": dataset.package_id,
-                "visits": dataset.total_visits,
-                "entrances": dataset.total_entrances,
-                "downloads": dataset.total_downloads,
+        visits_by_dataset = {dataset_id: {'visits': visits, 'entrances': entrances, 'downloads': downloads}
+                             for dataset_id, visits, entrances, downloads in visits}
+
+        # Map the visit data onto relevant datasets
+        result = []
+        for dataset in datasets:
+            id = dataset.get('id')
+            visit = visits_by_dataset.get(id, {})
+            result.append({
+                "package_name": dataset.get('name'),
+                "package_title_translated": dataset.get('title_translated'),
+                "package_id": id,
+                "visits": visit.get('visits', 0),
+                "entrances": visit.get('entrances', 0),
+                "downloads": visit.get('downloads', 0)
             })
 
-        return datasets
+        return sorted(result, key=lambda dataset: dataset["visits"], reverse=descending)
 
     @classmethod
     def get_visits_during_year(cls, resource_id, year):
@@ -445,8 +453,7 @@ class PackageStats(Base):
         try:
             package = get_action('package_show')({}, {'id': dataset_name})
             if package.get('organization'):
-                # Fetch the whole organization bundle to get access to translated fields
-                return get_action('organization_show')({}, {'id': package.get('organization').get('id')})
+                return {'name': package.get('organization').get('name')}
             else:
                 return None
         except ObjectNotFound:
@@ -455,6 +462,7 @@ class PackageStats(Base):
     @classmethod
     def get_organizations_with_most_popular_datasets(cls, start_date, end_date, descending=True):
         all_packages_result = cls.get_total_visits(start_date, end_date, descending=descending)
+        organizations_with_datasets = get_organizations_with_datasets(only_orgs_with_packages=True)
         organization_stats = {}
         for package in all_packages_result:
             package_id = package["package_id"]
@@ -464,7 +472,6 @@ class PackageStats(Base):
 
             organization = cls.get_organization(package_id)
             organization_name = organization.get('name')
-            organization_title_translated = organization.get('title_translated')
             if organization_name:
                 if (organization_name in organization_stats):
                     organization_stats[organization_name]["visits"] += visits
@@ -473,23 +480,24 @@ class PackageStats(Base):
                 else:
                     organization_stats[organization_name] = {
                         "organization_name": organization_name,
-                        "organization_title_translated": organization_title_translated,
                         "visits": visits,
                         "downloads": downloads,
                         "entrances": entrances
                     }
 
         organization_list = []
-        for organization_name, stats in organization_stats.items():
+        for organization in organizations_with_datasets:
+            org_name = organization.get('name')
+            stats = organization_stats.get(org_name, {})
+
             organization_list.append({
-                 "organization_name": stats["organization_name"],
-                 "organization_title_translated": stats["organization_title_translated"],
-                 "total_visits": stats["visits"],
-                 "total_downloads": stats["downloads"],
-                 "total_entrances": stats["entrances"]
+                 "organization_name": org_name,
+                 "organization_title_translated": organization.get('title_translated'),
+                 "total_visits": stats.get('visits', 0),
+                 "total_downloads": stats.get('downloads', 0),
+                 "total_entrances": stats.get('entrances', 0)
                  }
             )
-
         return sorted(organization_list, key=lambda organization: organization["total_visits"], reverse=descending)
 
 
@@ -557,28 +565,15 @@ class ResourceStats(Base):
 
     @classmethod
     def get_resource_info_by_id(cls, resource_id):
-        resource = model.Session.query(model.Resource).filter(model.Resource.id == resource_id).first()
-        res_name = None
-        res_package_name = None
-        res_package_id = None
+        resource = get_action('resource_show')({}, {'id': resource_id})
+        package = get_action('package_show')({}, {'id': resource.get('package_id')})
+        result = {'resource_id': resource.get('id'), 'resource_name': resource.get('name'),
+                  'resource_name_translated': resource.get('name_translated'), 'package_id': package.get('id'),
+                  'package_name': package.get('name'), 'package_title': package.get('title'),
+                  'package_title_translated': package.get('title_translated')}
 
-        if resource is not None:
-            res_package_name = resource.package.title or resource.package.name
-            res_package_id = resource.package.name
 
-            name_translated_json = resource.extras.get('name_translated')
-            if name_translated_json is not None:
-                try:
-                    name_translated = json.loads(name_translated_json)
-                    languages = aslist(config.get('ckan.locales_offered', []))
-                    res_name = next((name_translated[lang] for lang in languages
-                                     if name_translated.get(lang)), None)
-                except json.JSONDecodeError:
-                    pass
-
-            res_name = res_name or resource.description or resource.format
-
-        return [res_name, res_package_name, res_package_id]
+        return result
 
     @classmethod
     def get_all_visits_by_id(cls, resource_id):
@@ -591,16 +586,22 @@ class ResourceStats(Base):
         return visits
 
     @classmethod
-    def get_stat_counts_by_id_and_date_range(cls, resource_id,
-                                             start_date=datetime.today() - relativedelta(months=1),
-                                             end_date=datetime.today()):
-        total_visits = model.Session.query(func.sum(cls.visits)).filter(cls.resource_id == resource_id,
+    def get_stat_counts_by_id_and_date_range(cls, resource_id: str,
+                                             start_date: Optional[datetime] = None,
+                                             end_date: Optional[datetime] = None) -> Dict[str, int]:
+
+        if not start_date:
+            start_date = datetime.today() - relativedelta(months=1, hour=0, minute=0, second=0, microsecond=0)
+        if not end_date:
+            end_date = datetime.today().replace(hour=23, minute=59, second=59, microsecond=999999)
+
+        total_visits: int = model.Session.query(func.sum(cls.visits)).filter(cls.resource_id == resource_id,
                                                                         cls.visit_date >= start_date,
                                                                         cls.visit_date <= end_date).scalar()
-        total_downloads = model.Session.query(func.sum(cls.downloads)).filter(cls.resource_id == resource_id,
+        total_downloads: int = model.Session.query(func.sum(cls.downloads)).filter(cls.resource_id == resource_id,
                                                                               cls.visit_date >= start_date,
                                                                               cls.visit_date <= end_date).scalar()
-        return {'visits': total_visits, 'downloads': total_downloads}
+        return {'visits': total_visits or 0, 'downloads': total_downloads or 0}
 
     @classmethod
     def get_top(cls, limit=20):
@@ -630,36 +631,26 @@ class ResourceStats(Base):
 
     @classmethod
     def get_top_downloaded_resources_for_organization(cls, organization, start_date, end_date):
-        # Query for organization specific resource ids
-        unique_resources = (model.Session.query(
-            cls.resource_id
-        ).filter(
-            model.Resource.id == cls.resource_id,
-            model.Package.id == model.Resource.package_id,
-            model.Package.state == 'active',
-            model.Resource.state == 'active',
-            model.Group.id == model.Package.owner_org,
-            model.Group.type == 'organization',
-            model.Group.name == organization,
-            model.Group.approval_status == 'approved',
-            cls.visit_date >= start_date,
-            cls.visit_date <= end_date)
-            .distinct()
-            .order_by(cls.resource_id)
-            .all())
+        org_id = get_action('organization_show')({}, {'id': organization}).get('id')
+        fq = 'owner_org:%s' % org_id
+        packages = get_action('package_search')({}, {'fq': fq}).get('results', [])
+        resources = []
+        for pkg in packages:
+            resource_list = pkg.get('resources', [])
+            for resource in resource_list:
+                resources.append(resource.get('id'))
+
         resource_stats = []
         # Add last date associated to the resource stat
-        if unique_resources:
-            for resource in unique_resources:
-                resource_id = resource[0]
-                stats = ResourceStats.get_stat_counts_by_id_and_date_range(resource_id, start_date, end_date)
-                last_date = model.Session.query(func.max(cls.visit_date)).filter(cls.resource_id == resource_id,
-                                                                                 cls.visit_date >= start_date,
-                                                                                 cls.visit_date <= end_date).first()
+        for resource_id in resources:
+            stats = ResourceStats.get_stat_counts_by_id_and_date_range(resource_id, start_date, end_date)
+            last_date = model.Session.query(func.max(cls.visit_date)).filter(cls.resource_id == resource_id,
+                                                                             cls.visit_date >= start_date,
+                                                                             cls.visit_date <= end_date).first()[0]
 
-                rs = ResourceStats(resource_id=resource_id, visit_date=last_date[0],
-                                   visits=stats['visits'], downloads=stats['downloads'])
-                resource_stats.append(rs)
+            rs = ResourceStats(resource_id=resource_id, visit_date=last_date,
+                               visits=stats['visits'], downloads=stats['downloads'])
+            resource_stats.append(rs)
         dictat = ResourceStats.convert_to_dict(resource_stats, None, None)
         dictat['resources'] = sorted(dictat['resources'], key=lambda resource: resource["downloads"], reverse=True)
 
@@ -669,18 +660,23 @@ class ResourceStats(Base):
     def as_dict(cls, res):
         result = {}
         res_info = ResourceStats.get_resource_info_by_id(res.resource_id)
-        result['resource_name'] = res_info[0]
-        result['resource_id'] = res.resource_id
-        result['package_name'] = res_info[1]
-        result['package_id'] = res_info[2]
+        result['resource_id'] = res_info['resource_id']
+        result['resource_name'] = res_info['resource_name']
+        result['resource_name_translated'] = res_info['resource_name_translated']
+        result['package_id'] = res_info['package_id']
+        result['package_name'] = res_info['package_name']
+        result['package_title'] = res_info['package_title']
+        result['package_title_translated'] = res_info['package_title_translated']
         result['visits'] = res.visits
         result['downloads'] = res.downloads
-        result['visit_date'] = res.visit_date.strftime("%d-%m-%Y")
+        result['visit_date'] = res.visit_date.strftime("%d-%m-%Y") if res.visit_date else ''
+
         return result
 
     @classmethod
     def convert_to_dict(cls, resource_stats, tot_visits, total_downloads):
         visits = []
+
         for resource in resource_stats:
             visits.append(ResourceStats.as_dict(resource))
 
