@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from typing import Dict
+from typing import Dict, Optional
 
 from sqlalchemy import types, func, Column, ForeignKey, not_, desc
 from sqlalchemy.orm import relationship
@@ -587,8 +587,14 @@ class ResourceStats(Base):
 
     @classmethod
     def get_stat_counts_by_id_and_date_range(cls, resource_id: str,
-                                             start_date: datetime = datetime.today() - relativedelta(months=1),
-                                             end_date: datetime = datetime.today()) -> Dict[str, int]:
+                                             start_date: Optional[datetime] = None,
+                                             end_date: Optional[datetime] = None) -> Dict[str, int]:
+
+        if not start_date:
+            start_date = datetime.today() - relativedelta(months=1, hour=0, minute=0, second=0, microsecond=0)
+        if not end_date:
+            end_date = datetime.today().replace(hour=23, minute=59, second=59, microsecond=999999)
+
         total_visits: int = model.Session.query(func.sum(cls.visits)).filter(cls.resource_id == resource_id,
                                                                         cls.visit_date >= start_date,
                                                                         cls.visit_date <= end_date).scalar()
