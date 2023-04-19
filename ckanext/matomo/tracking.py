@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 def tracked_action(logic_function, ver=3):
-    post_analytics('API', 'Action', '{}'.format(logic_function))
+    post_analytics('API', '{}'.format(logic_function), toolkit.request.url)
     return ckan_action(logic_function, ver)
 
 
