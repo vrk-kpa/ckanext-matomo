@@ -174,16 +174,13 @@ class PackageStats(Base):
             func.sum(cls.visits).label('total_visits'),
             func.sum(cls.downloads).label('total_downloads'),
             func.sum(cls.entrances).label('total_entrances')
-        )
-
+        ).filter(cls.visit_date >= start_date).filter(cls.visit_date <= end_date)
         if package_id:
             query = query.filter(cls.package_id == package_id)
 
         visits_by_dataset = (query.join(model.Package, cls.package_id == model.Package.id)
                              .filter(model.Package.state == 'active')
                              .filter(model.Package.private == False)  # noqa: E712
-                             .filter(cls.visit_date >= start_date)
-                             .filter(cls.visit_date <= end_date)
                              .group_by(cls.package_id)
                              .order_by(sorting_direction('total_visits', descending))
                              .limit(limit)
@@ -230,22 +227,25 @@ class PackageStats(Base):
             func.sum(cls.visits).label('total_visits'),
             func.sum(cls.downloads).label('total_downloads'),
             func.sum(cls.entrances).label('total_entrances')
-        )
+        ).filter(cls.visit_date >= start_date).filter(cls.visit_date <= end_date)
 
         if package_id:
             query = query.filter(cls.package_id == package_id)
 
-        # Get all organization's datasets via organization_show
-        organization = get_action('organization_show')({}, {'id': organization, 'include_datasets': True})
+        # ~Get all organization's datasets via organization_show~
+        # D'OH... organization_show only shows truncated list of packages (10)
+        organization = get_action('organization_show')({}, {'id': organization})
         organization_id = organization.get('id')
-        datasets = organization.get('packages')
+        # Get organization's datasets via package_search instead,
+        # should we worry about organizations having more than 1000 datasets?
+        datasets = get_action('package_search')(
+            {}, {'fq': 'owner_org:%s' % organization_id, 'rows': 1000, 'fl': 'id,name,title,extras_title_translated'}).\
+            get('results', [])
 
         visits = (query.join(model.Package, cls.package_id == model.Package.id)
                              .filter(model.Package.state == 'active')
                              .filter(model.Package.private == False)  # noqa: E712
                              .filter(model.Package.owner_org == organization_id)
-                             .filter(cls.visit_date >= start_date)
-                             .filter(cls.visit_date <= end_date)
                              .group_by(cls.package_id)
                              .order_by(sorting_direction('total_visits', descending))
                              .all())
