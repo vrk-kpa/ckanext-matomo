@@ -10,6 +10,7 @@ import ckan.model as model
 from ckan.plugins.toolkit import get_action, ObjectNotFound
 from ckanext.report.helpers import organization_list as get_organizations_with_datasets
 
+from .utils import package_generator
 
 log = __import__('logging').getLogger(__name__)
 
@@ -232,15 +233,11 @@ class PackageStats(Base):
         if package_id:
             query = query.filter(cls.package_id == package_id)
 
-        # ~Get all organization's datasets via organization_show~
-        # D'OH... organization_show only shows truncated list of packages (10)
         organization = get_action('organization_show')({}, {'id': organization})
         organization_id = organization.get('id')
-        # Get organization's datasets via package_search instead,
-        # should we worry about organizations having more than 1000 datasets?
-        datasets = get_action('package_search')(
-            {}, {'fq': 'owner_org:%s' % organization_id, 'rows': 1000, 'fl': 'id,name,title,extras_title_translated'}).\
-            get('results', [])
+
+        datasets = package_generator('*:*', 1000, fq = '+owner_org:%s' % organization_id,
+                                     fl = 'id,name,title,extras_title_translated')
 
         visits = (query.join(model.Package, cls.package_id == model.Package.id)
                              .filter(model.Package.state == 'active')
