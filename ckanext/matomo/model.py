@@ -153,7 +153,6 @@ class PackageStats(Base):
         cls,
         start_date=date(2000, 1, 1),
         end_date=datetime.today(),
-        limit=50,
         descending=True,
         package_id=None
     ):
@@ -184,7 +183,6 @@ class PackageStats(Base):
                              .filter(model.Package.private == False)  # noqa: E712
                              .group_by(cls.package_id)
                              .order_by(sorting_direction('total_visits', descending))
-                             .limit(limit)
                              .all())
 
         datasets = []
