@@ -10,6 +10,7 @@ import ckan.model as model
 from ckan.plugins.toolkit import get_action, ObjectNotFound
 from ckanext.report.helpers import organization_list as get_organizations_with_datasets
 
+from .utils import package_generator
 
 log = __import__('logging').getLogger(__name__)
 
@@ -174,16 +175,13 @@ class PackageStats(Base):
             func.sum(cls.visits).label('total_visits'),
             func.sum(cls.downloads).label('total_downloads'),
             func.sum(cls.entrances).label('total_entrances')
-        )
-
+        ).filter(cls.visit_date >= start_date).filter(cls.visit_date <= end_date)
         if package_id:
             query = query.filter(cls.package_id == package_id)
 
         visits_by_dataset = (query.join(model.Package, cls.package_id == model.Package.id)
                              .filter(model.Package.state == 'active')
                              .filter(model.Package.private == False)  # noqa: E712
-                             .filter(cls.visit_date >= start_date)
-                             .filter(cls.visit_date <= end_date)
                              .group_by(cls.package_id)
                              .order_by(sorting_direction('total_visits', descending))
                              .limit(limit)
@@ -230,22 +228,21 @@ class PackageStats(Base):
             func.sum(cls.visits).label('total_visits'),
             func.sum(cls.downloads).label('total_downloads'),
             func.sum(cls.entrances).label('total_entrances')
-        )
+        ).filter(cls.visit_date >= start_date).filter(cls.visit_date <= end_date)
 
         if package_id:
             query = query.filter(cls.package_id == package_id)
 
-        # Get all organization's datasets via organization_show
-        organization = get_action('organization_show')({}, {'id': organization, 'include_datasets': True})
+        organization = get_action('organization_show')({}, {'id': organization})
         organization_id = organization.get('id')
-        datasets = organization.get('packages')
+
+        datasets = package_generator('*:*', 1000, fq = '+owner_org:%s' % organization_id,
+                                     fl = 'id,name,title,extras_title_translated')
 
         visits = (query.join(model.Package, cls.package_id == model.Package.id)
                              .filter(model.Package.state == 'active')
                              .filter(model.Package.private == False)  # noqa: E712
                              .filter(model.Package.owner_org == organization_id)
-                             .filter(cls.visit_date >= start_date)
-                             .filter(cls.visit_date <= end_date)
                              .group_by(cls.package_id)
                              .order_by(sorting_direction('total_visits', descending))
                              .all())
