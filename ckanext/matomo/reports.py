@@ -117,43 +117,6 @@ def matomo_dataset_report_info():
     }
 
 
-def matomo_dataset_least_popular_report(organization, time):
-    '''
-    Generates report based on matomo data. number of views per package
-    '''
-
-    # Return matomo_organizations_with_most_popular_datasets in reverse order list if an organization is not given
-    if organization is None:
-        return matomo_organizations_with_most_popular_datasets(time, descending=False)
-
-    start_date, end_date = last_calendar_period(time)
-
-    # get package objects corresponding to popular GA content
-    least_visited_packages = PackageStats.get_total_visits_for_organization(
-        organization=organization,
-        start_date=start_date,
-        end_date=end_date,
-        descending=False)
-
-    return {
-        'report_name': 'matomo-dataset-least-popular',
-        'table': least_visited_packages
-    }
-
-
-def matomo_dataset_least_popular_report_info():
-    return {
-        'name': 'matomo-dataset-least-popular',
-        'title': 'Least popular datasets',
-        'description': 'Matomo showing top datasets with least views by organization',
-        'option_defaults': OrderedDict((('organization', None),
-                                        ('time', 'month'),)),
-        'option_combinations': matomo_org_and_time_option_combinations,
-        'generate': matomo_dataset_least_popular_report,
-        'template': 'report/dataset_analytics.html',
-    }
-
-
 def matomo_resource_report(organization, time):
     '''
     Generates report based on matomo data. Number of downloads per package (sum of package's resource downloads)
