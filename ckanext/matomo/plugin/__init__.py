@@ -91,7 +91,6 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin, DefaultTranslation):
         return [reports.matomo_dataset_report_info(),
                 reports.matomo_resource_report_info(),
                 reports.matomo_location_report_info(),
-                reports.matomo_dataset_least_popular_report_info(),
                 reports.matomo_most_popular_search_terms_info()]
 
     # IClick
