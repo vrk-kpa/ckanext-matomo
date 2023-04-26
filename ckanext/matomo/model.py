@@ -625,27 +625,23 @@ class ResourceStats(Base):
         return dictat
 
     @classmethod
-    def get_top_downloaded_resources_for_organization(cls, organization, start_date, end_date):
-        org_id = get_action('organization_show')({}, {'id': organization}).get('id')
-        fq = 'owner_org:%s' % org_id
-        packages = get_action('package_search')({}, {'fq': fq}).get('results', [])
-        resources = []
-        for pkg in packages:
-            resource_list = pkg.get('resources', [])
-            for resource in resource_list:
-                resources.append(resource.get('id'))
+    def get_top_downloaded_resources_for_organization(cls, organization_name, start_date, end_date):
+        org_id = get_action('organization_show')({}, {'id': organization_name}).get('id')
+        packages = package_generator('*:*', 1000, fq = '+owner_org:%s' % org_id)
 
         resource_stats = []
         # Add last date associated to the resource stat
-        for resource_id in resources:
-            stats = ResourceStats.get_stat_counts_by_id_and_date_range(resource_id, start_date, end_date)
-            last_date = model.Session.query(func.max(cls.visit_date)).filter(cls.resource_id == resource_id,
-                                                                             cls.visit_date >= start_date,
-                                                                             cls.visit_date <= end_date).first()[0]
+        for package in packages:
+            for resource in package.get('resources', []):
+                resource_id = resource.get('id')
+                stats = ResourceStats.get_stat_counts_by_id_and_date_range(resource_id, start_date, end_date)
+                last_date = model.Session.query(func.max(cls.visit_date)).filter(cls.resource_id == resource_id,
+                                                                                cls.visit_date >= start_date,
+                                                                                cls.visit_date <= end_date).first()[0]
 
-            rs = ResourceStats(resource_id=resource_id, visit_date=last_date,
-                               visits=stats['visits'], downloads=stats['downloads'])
-            resource_stats.append(rs)
+                rs = ResourceStats(resource_id=resource_id, visit_date=last_date,
+                                visits=stats['visits'], downloads=stats['downloads'])
+                resource_stats.append(rs)
         dictat = ResourceStats.convert_to_dict(resource_stats, None, None)
         dictat['resources'] = sorted(dictat['resources'], key=lambda resource: resource["downloads"], reverse=True)
 

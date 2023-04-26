@@ -4,7 +4,7 @@ import itertools
 
 log = __import__('logging').getLogger(__name__)
 
-def package_generator(query, page_size, fq='', fl='', context={'ignore_auth': True}, dataset_type='dataset'):
+def package_generator(query, page_size, fq='', fl=None, context={'ignore_auth': True}, dataset_type='dataset'):
     package_search = get_action('package_search')
 
     # Loop through all items. Each page has {page_size} items.
