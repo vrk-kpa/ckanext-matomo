@@ -13,9 +13,9 @@ def most_visited_packages(context, data_dict) -> Visits:
 
     dataset_type = data_dict.get('type', 'dataset')
     if start_date:
-        start_date = datetime.strptime(start_date, "%d-%m-%Y")
+        start_date = datetime.strptime(start_date, "%Y-%m-%d")
     if end_date:
-        end_date = datetime.strptime(end_date, "%d-%m-%Y")
+        end_date = datetime.strptime(end_date, "%Y-%m-%d")
 
     result = PackageStats.get_top(start_date=start_date,
                             end_date=end_date,
