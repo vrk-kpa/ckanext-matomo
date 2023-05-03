@@ -1,43 +1,33 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from typing import Dict, Optional
+from typing import Dict, Optional, Generator, Any, Union, List, Literal
 
 from sqlalchemy import types, func, Column, ForeignKey, not_, desc
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 import ckan.model as model
-from ckan.plugins.toolkit import get_action, ObjectNotFound
-from ckanext.report.helpers import organization_list as get_organizations_with_datasets
+from ckan.plugins.toolkit import get_action
 
-from .utils import package_generator
+from ckanext.matomo.utils import package_generator, last_calendar_period
 
 log = __import__('logging').getLogger(__name__)
 
 Base = declarative_base()
 
+def sorting_direction(value, descending):
+    if descending:
+        return desc(value)
+    else:
+        return value
 
-# TODO: The package stats methods are a bit messed up, they could be organized better
-# For example:
-# visits, downloads, entrances on dataset (dates separated)
-# - by time frame
-# - in total
-#
-# Total visits, downloads, entrances by single dataset (dates combined)
-# - On time frame
-# - All time total
-#
-# And top / worst downloaded/visited/entered datasets
-# - by timespan
-# - in total
-#
-# and then the others: name by id, updating individual fields, get latest update
+
 class PackageStats(Base):
     """
     Contains stats for package (datasets)
     Stores number of visits per all dates for each package.
     """
-    __tablename__ = 'package_stats'
+    __tablename__: str = 'package_stats'
 
     package_id = Column(types.UnicodeText, nullable=False, index=True, primary_key=True)
     visit_date = Column(types.DateTime, default=datetime.now, primary_key=True)
@@ -130,44 +120,26 @@ class PackageStats(Base):
         return pack_name
 
     @classmethod
-    def get_visits(cls, start_date, end_date):
-        '''
-        Returns datasets and their visitors amount during time span, grouped by dates.
-
-        :param start_date: Date
-        :param end_date: Date
-        :return: [{ visits, package_id, package_name, visit_date }, ...]
-        '''
-        package_visits = (model.Session.query(cls)
-                          .join(model.Package, cls.package_id == model.Package.id)
-                          .filter(model.Package.state == 'active')
-                          .filter(model.Package.private == False)  # noqa: E712
-                          .filter(cls.visit_date >= start_date)
-                          .filter(cls.visit_date <= end_date)
-                          .all())
-
-        return cls.convert_to_dict(package_visits, None)
-
-    @classmethod
     def get_total_visits(
         cls,
-        start_date=date(2000, 1, 1),
-        end_date=datetime.today(),
-        descending=True,
-        package_id=None
-    ):
+        start_date: Union[datetime, None] = None,
+        end_date: Union[datetime, None] = None,
+        descending: bool = True,
+        package_id: Union[str, None] = None
+    ) -> List[Dict[str, Any]]:
         '''
         Returns datasets and their visitors amount summed during time span, grouped by dataset.
 
-        :param start_date: Date
-        :param end_date: Date
-        :return: [{ visits, entrances, package_id, package_name }, ...]
+        :param start_date: datetime
+        :param end_date: datetime
+        :param descending: bool
+        :param package_id: str
+        :return: [{ package_id: str, owner_org: str, visits: int, entrances: int, downloads: int }, ...]
         '''
-        def sorting_direction(value, descending):
-            if descending:
-                return desc(value)
-            else:
-                return value
+        if not start_date:
+            start_date = datetime(2000, 1, 1, 0, 0, 0, 0)
+        if not end_date:
+            end_date = datetime.today() - relativedelta(days=1, hour=23, minute=59, second=59)
 
         query = model.Session.query(
             cls.package_id,
@@ -185,41 +157,33 @@ class PackageStats(Base):
                              .order_by(sorting_direction('total_visits', descending))
                              .all())
 
-        datasets = []
-        for dataset in visits_by_dataset:
-            datasets.append({
-                "package_name": PackageStats.get_package_name_by_id(dataset.package_id),
+        return [{
                 "package_id": dataset.package_id,
+                "owner_org": cls.get_owner_org(dataset.package_id),
                 "visits": dataset.total_visits,
                 "entrances": dataset.total_entrances,
                 "downloads": dataset.total_downloads,
-            })
-
-        return datasets
+                } for dataset in visits_by_dataset]
 
     # Same as above, but uses organization to filter datasets belonging to only that organization
     @classmethod
     def get_total_visits_for_organization(
         cls,
-        organization,
-        start_date=date(2000, 1, 1),
-        end_date=datetime.today(),
-        descending=True,
-        package_id=None
-    ):
-
+        organization_name: str,
+        start_date: Union[datetime, None] = None,
+        end_date: Union[datetime, None] = None,
+        descending: bool = True,
+        package_id: Union[str, None] = None
+    ) -> List[Dict[str, Any]]:
         '''
-        Returns datasets and their visitors amount summed during time span, grouped by dataset.
+        Returns single organization's datasets and their visitors amount summed during time span, grouped by dataset.
 
-        :param start_date: Date
-        :param end_date: Date
-        :return: [{ visits, entrances, package_id, package_name }, ...]
+        :param start_date: datetime
+        :param end_date: datetime
+        :param descending: bool
+        :param package_id: str
+        :return: [{ package_id: str, owner_org: str, visits: int, entrances: int, downloads: int }, ...]
         '''
-        def sorting_direction(value, descending):
-            if descending:
-                return desc(value)
-            else:
-                return value
 
         query = model.Session.query(
             cls.package_id,
@@ -231,11 +195,12 @@ class PackageStats(Base):
         if package_id:
             query = query.filter(cls.package_id == package_id)
 
-        organization = get_action('organization_show')({}, {'id': organization})
-        organization_id = organization.get('id')
+        organization = get_action('organization_show')({}, {'id': organization_name})
+        organization_id: str = organization.get('id')
 
-        datasets = package_generator('*:*', 1000, fq = '+owner_org:%s' % organization_id,
-                                     fl = 'id,name,title,extras_title_translated')
+        datasets: Generator[Dict[str, Any], None, None] = package_generator('*:*', 1000,
+                                                                            fq = '+owner_org:%s' % organization_id,
+                                                                            fl = 'id,name,title,extras_title_translated')
 
         visits = (query.join(model.Package, cls.package_id == model.Package.id)
                              .filter(model.Package.state == 'active')
@@ -245,14 +210,16 @@ class PackageStats(Base):
                              .order_by(sorting_direction('total_visits', descending))
                              .all())
 
-        visits_by_dataset = {dataset_id: {'visits': visits, 'entrances': entrances, 'downloads': downloads}
-                             for dataset_id, visits, entrances, downloads in visits}
+        visits_by_dataset: Dict[str, Dict[Literal['visits', 'entrances', 'downloads'], int]] = {
+            dataset_id: {'visits': visits, 'entrances': entrances, 'downloads': downloads}
+                for dataset_id, visits, entrances, downloads in visits
+                        }
 
         # Map the visit data onto relevant datasets
         result = []
         for dataset in datasets:
-            id = dataset.get('id')
-            visit = visits_by_dataset.get(id, {})
+            id: str = dataset.get('id', '')
+            visit: Dict[Literal['visits', 'entrances', 'downloads'], int] = visits_by_dataset.get(id, {})
             result.append({
                 "package_name": dataset.get('name'),
                 "package_title_translated": dataset.get('title_translated'),
@@ -265,79 +232,40 @@ class PackageStats(Base):
         return sorted(result, key=lambda dataset: dataset["visits"], reverse=descending)
 
     @classmethod
-    def get_visits_during_year(cls, resource_id, year):
-        '''
-        Returns number of visitors during one calendar yearself.
-        For example, calling this with parameter year=2017 would returned
-        the number of visitors during the year 2017.
-
-        :param resource_id: ID of the resource
-        :param year: Year as an integer
-        :return: Number of visitors during the year
-        '''
-        start_date = datetime(year, 1, 1)
-        end_date = datetime(year, 12, 31)
-        package_visits = model.Session.query(cls).filter(cls.package_id == resource_id) \
-            .filter(cls.visit_date >= start_date) \
-            .filter(cls.visit_date <= end_date) \
-            .all()
-
-        return package_visits
-
-    @classmethod
-    def get_last_visits_by_id(cls, package_id, num_days=365):
-        end_of_period = datetime.now()
-        beginning_of_period = get_beginning_of_next_week(end_of_period - timedelta(days=num_days))
+    def get_last_visits_by_id(cls, package_id, time='year') -> Dict[str, Any]:
+        beginning_of_period, end_of_period = last_calendar_period(time)
 
         package_visits = model.Session.query(cls).filter(cls.package_id == package_id).filter(
             cls.visit_date >= beginning_of_period).filter(cls.visit_date <= end_of_period).all()
+
         # Returns the total number of visits since the beginning of all times
-        total_visits = model.Session.query(func.sum(cls.visits)).filter(cls.package_id == package_id).scalar()
-        visits = {}
+        total_visits: int = model.Session.query(func.sum(cls.visits)).filter(cls.package_id == package_id).scalar()
+        visits: Dict[str, Any] = {}
 
         if total_visits is not None:
             visits = PackageStats.convert_to_dict(package_visits, total_visits)
 
-        total_downloads = model.Session.query(func.sum(cls.downloads)).filter(cls.package_id == package_id).scalar()
+        total_downloads: int = model.Session.query(func.sum(cls.downloads)).filter(cls.package_id == package_id).scalar()
         visits['total_downloads'] = total_downloads if total_downloads else 0
-
+        log.info(visits)
         return visits
 
     @classmethod
-    def get_visit_count_for_dataset_during_last_12_months(cls, package_id):
-        # Returns a list of visits during the last 12 months.
-        first_day = datetime.now() - relativedelta(months=12)
-        last_day = datetime.now()
-
-        visits = cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
-
-        return sum(filter(None, [visit.__dict__.get('visits', 0) for visit in visits]))
-
-    @classmethod
-    def get_visit_count_for_dataset_during_last_30_days(cls, package_id):
-        # Returns a list of visits during the last 30 days.
-        first_day = datetime.now() - relativedelta(days=30)
-        last_day = datetime.now()
-
-        visits = cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
-
-        return sum(filter(None, [visit.__dict__.get('visits', 0) for visit in visits]))
-
-    @classmethod
-    def get_visits_by_dataset_id_between_two_dates(cls, package_id, start_date, end_date):
-        # Returns a list of visits between the dates
+    def get_visit_count_for_dataset(cls, package_id: str, start_date: datetime, end_date: datetime) -> int:
+        # Returns a list of visits within the given date range.
         visits = model.Session.query(cls).filter(cls.package_id == package_id).filter(cls.visit_date >= start_date).filter(
             cls.visit_date <= end_date).all()
-        return visits
+
+        return sum(filter(None, [visit.__dict__.get('visits', 0) for visit in visits]))
 
     @classmethod
     def get_top(cls, limit=20, start_date=None, end_date=None, dataset_type='dataset'):
         package_stats = []
         # TODO: Reimplement in more efficient manner if needed (using RANK OVER and PARTITION in raw sql)
         unique_packages = (model.Session.query(cls.package_id,
-                                               func.count(cls.visits),
-                                               func.count(cls.entrances),
-                                               func.count(cls.downloads))
+                                               func.sum(cls.visits),
+                                               func.sum(cls.entrances),
+                                               func.sum(cls.downloads))
                            .filter(cls.package_id == model.Package.id)
                            .filter(model.Package.state == 'active')
                            .filter(model.Package.private == False)  # noqa: E712
@@ -355,7 +283,6 @@ class PackageStats(Base):
         if unique_packages is not None:
             for package in unique_packages:
                 package_id = package[0]
-                visits = package[1]
 
                 tot_package = model.Session.query(model.Package).filter(model.Package.id == package_id).filter_by(
                     state='active').filter_by(private=False).first()
@@ -365,31 +292,32 @@ class PackageStats(Base):
                 last_date = model.Session.query(func.max(cls.visit_date)).filter(cls.package_id == package_id).first()
 
                 ps = PackageStats(package_id=package_id,
-                                  visit_date=last_date[0], visits=visits, entrances=package[2], downloads=package[3])
+                                  visit_date=last_date[0], visits=package[1], entrances=package[2], downloads=package[3])
                 package_stats.append(ps)
         dictat = PackageStats.convert_to_dict(package_stats, None)
         return dictat
 
     @classmethod
-    def get_all_visits(cls, dataset_id):
+    def get_all_visits(cls, dataset_id) -> Dict[str, Any]:
+        visits_dict: Dict[str, Any] = PackageStats.get_last_visits_by_id(dataset_id, time = 'year')
 
-        visits_dict = PackageStats.get_last_visits_by_id(dataset_id)
-
-        visit_list = []
-        visits = visits_dict.get('packages', [])
-        count = visits_dict.get('tot_visits', 0)
+        visit_list: List[Dict[str, Any]] = []
+        visits: List[Dict[str, Any]] = visits_dict.get('packages', [])
 
         # Creates a weekly grouped list for last year
-        current_end_of_week = get_end_of_last_week(datetime.now())
-        start_date = get_beginning_of_next_week(current_end_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
-                                                - timedelta(days=365))
+        current_end_of_week: datetime = get_end_of_last_week(datetime.now())
+        start_date: datetime = get_beginning_of_next_week(current_end_of_week.replace(hour=0,
+                                                                                      minute=0,
+                                                                                      second=0,
+                                                                                      microsecond=0)
+                                                          - timedelta(days=365))
 
         while current_end_of_week > start_date:
-            current_start_of_week = get_beginning_of_week(current_end_of_week)
+            current_start_of_week: datetime = get_beginning_of_week(current_end_of_week)
             weekly_download_count = 0
             weekly_visit_count = 0
             for visit in visits:
-                visit_date = datetime.strptime(visit.get('visit_date'), '%d-%m-%Y')
+                visit_date: datetime = datetime.strptime(visit.get('visit_date', ''), '%d-%m-%Y')
                 # Do nothing if date of visit isn't in period of current week
                 if visit_date < current_start_of_week or visit_date > current_end_of_week:
                     continue
@@ -403,10 +331,10 @@ class PackageStats(Base):
         # Revert visit list to make it end on previous week
         visit_list = visit_list[::-1]
 
-        results = {
+        results: Dict[str, Any] = {
             "visits": visit_list,
-            "count": count,
-            "download_count": visits_dict['total_downloads']
+            "total_visits": visits_dict.get('total_visits', 0),
+            "total_downloads": visits_dict.get('total_downloads', 0)
         }
         return results
 
@@ -423,7 +351,7 @@ class PackageStats(Base):
         return result
 
     @classmethod
-    def convert_to_dict(cls, package_stats, tot_visits):
+    def convert_to_dict(cls, package_stats, total_visits):
         visits = []
         for pkg in package_stats:
             visits.append(PackageStats.as_dict(pkg))
@@ -431,8 +359,8 @@ class PackageStats(Base):
         results = {
             "packages": visits,
         }
-        if tot_visits is not None:
-            results["tot_visits"] = tot_visits
+        if total_visits is not None:
+            results["total_visits"] = total_visits
         return results
 
     @classmethod
@@ -444,56 +372,12 @@ class PackageStats(Base):
             return result.visit_date
 
     @classmethod
-    def get_organization(cls, dataset_name):
-        try:
-            package = get_action('package_show')({}, {'id': dataset_name})
-            if package.get('organization'):
-                return {'name': package.get('organization').get('name')}
-            else:
-                return None
-        except ObjectNotFound:
+    def get_owner_org(cls, package_id) -> Union[str, None]:
+        result = model.Session.query(model.Package.id, model.Package.owner_org).filter(model.Package.id == package_id).first()
+        if result.owner_org:
+            return result.owner_org
+        else:
             return None
-
-    @classmethod
-    def get_organizations_with_most_popular_datasets(cls, start_date, end_date, descending=True):
-        all_packages_result = cls.get_total_visits(start_date, end_date, descending=descending)
-        organizations_with_datasets = get_organizations_with_datasets(only_orgs_with_packages=True)
-        organization_stats = {}
-        for package in all_packages_result:
-            package_id = package["package_id"]
-            visits = package["visits"]
-            downloads = package["downloads"]
-            entrances = package["entrances"]
-
-            organization = cls.get_organization(package_id)
-            organization_name = organization.get('name')
-            if organization_name:
-                if (organization_name in organization_stats):
-                    organization_stats[organization_name]["visits"] += visits
-                    organization_stats[organization_name]["downloads"] += downloads
-                    organization_stats[organization_name]["entrances"] += entrances
-                else:
-                    organization_stats[organization_name] = {
-                        "organization_name": organization_name,
-                        "visits": visits,
-                        "downloads": downloads,
-                        "entrances": entrances
-                    }
-
-        organization_list = []
-        for organization in organizations_with_datasets:
-            org_name = organization.get('name')
-            stats = organization_stats.get(org_name, {})
-
-            organization_list.append({
-                 "organization_name": org_name,
-                 "organization_title_translated": organization.get('title_translated'),
-                 "total_visits": stats.get('visits', 0),
-                 "total_downloads": stats.get('downloads', 0),
-                 "total_entrances": stats.get('entrances', 0)
-                 }
-            )
-        return sorted(organization_list, key=lambda organization: organization["total_visits"], reverse=descending)
 
 
 class ResourceStats(Base):
@@ -501,7 +385,7 @@ class ResourceStats(Base):
     Contains stats for resources associated to a certain dataset/package
     Stores number of visits i.e. downloads per all dates for each package.
     """
-    __tablename__ = 'resource_stats'
+    __tablename__: str = 'resource_stats'
 
     resource_id = Column(types.UnicodeText, nullable=False, index=True, primary_key=True)
     visit_date = Column(types.DateTime, default=datetime.now, primary_key=True)
@@ -584,6 +468,14 @@ class ResourceStats(Base):
     def get_stat_counts_by_id_and_date_range(cls, resource_id: str,
                                              start_date: Optional[datetime] = None,
                                              end_date: Optional[datetime] = None) -> Dict[str, int]:
+        '''
+        Gets summed up visits and downloads for given resource
+
+        :param resource_id: ID or the target resource
+        :param start_date: datetime: Beginning of the date range
+        :param end_date: datetime: End of the date range
+        :return: {visits: int, downloads: int}
+        '''
 
         if not start_date:
             start_date = datetime.today() - relativedelta(months=1, hour=0, minute=0, second=0, microsecond=0)
@@ -625,11 +517,14 @@ class ResourceStats(Base):
         return dictat
 
     @classmethod
-    def get_top_downloaded_resources_for_organization(cls, organization_name, start_date, end_date):
-        org_id = get_action('organization_show')({}, {'id': organization_name}).get('id')
+    def get_resource_stats_for_organization(cls,
+                                            organization_name: str,
+                                            start_date: Union[datetime, None],
+                                            end_date: Union[datetime, None]):
+        org_id: str = get_action('organization_show')({}, {'id': organization_name}).get('id')
         packages = package_generator('*:*', 1000, fq = '+owner_org:%s' % org_id)
 
-        resource_stats = []
+        resource_stats: List[ResourceStats] = []
         # Add last date associated to the resource stat
         for package in packages:
             for resource in package.get('resources', []):
@@ -639,8 +534,7 @@ class ResourceStats(Base):
                                                                                 cls.visit_date >= start_date,
                                                                                 cls.visit_date <= end_date).first()[0]
 
-                rs = ResourceStats(resource_id=resource_id, visit_date=last_date,
-                                visits=stats['visits'], downloads=stats['downloads'])
+                rs = ResourceStats(resource_id=resource_id, visit_date=last_date, **stats)
                 resource_stats.append(rs)
         dictat = ResourceStats.convert_to_dict(resource_stats, None, None)
         dictat['resources'] = sorted(dictat['resources'], key=lambda resource: resource["downloads"], reverse=True)
@@ -665,7 +559,7 @@ class ResourceStats(Base):
         return result
 
     @classmethod
-    def convert_to_dict(cls, resource_stats, tot_visits, total_downloads):
+    def convert_to_dict(cls, resource_stats, total_visits = None, total_downloads = None):
         visits = []
 
         for resource in resource_stats:
@@ -674,25 +568,13 @@ class ResourceStats(Base):
         results = {
             "resources": visits
         }
-        if tot_visits is not None:
-            results['tot_visits'] = tot_visits
+        if total_visits is not None:
+            results['total_visits'] = total_visits
 
         if total_downloads is not None:
             results['total_downloads'] = total_downloads
 
         return results
-
-    @classmethod
-    def get_last_visits_by_url(cls, url, num_days=30):
-        resource = model.Session.query(model.Resource).filter(model.Resource.url == url).first()
-        start_date = datetime.now() - timedelta(num_days)
-        # Returns the total number of visits since the beggining of all times for the associated resource to the given url
-        total_visits = model.Session.query(func.sum(cls.visits)).filter(cls.resource_id == resource.id).first().scalar()
-        resource_stats = model.Session.query(cls).filter(cls.resource_id == resource.id).filter(
-            cls.visit_date >= start_date).all()
-        visits = ResourceStats.convert_to_dict(resource_stats, total_visits)
-
-        return visits
 
     @classmethod
     def get_last_visits_by_dataset_id(cls, package_id, num_days=30):
@@ -708,46 +590,19 @@ class ResourceStats(Base):
         return visits
 
     @classmethod
-    def get_visits_during_last_calendar_year_by_dataset_id(cls, package_id):
-        # Returns a list of visits during the last calendar year.
-        last_year = datetime.now().year - 1
-        first_day = datetime(year=last_year, day=1, month=1)
-        last_day = datetime(year=last_year, day=31, month=12)
-        return cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
-
-    @classmethod
-    def get_download_count_for_dataset_during_last_12_months(cls, package_id):
-        # Returns a list of visits during the last 12 months.
-        first_day = datetime.now() - relativedelta(months=12)
-        last_day = datetime.now()
-
-        visits = cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
-
-        return sum(filter(None, [visit.__dict__.get('downloads', 0) for visit in visits]))
-
-    @classmethod
-    def get_download_count_for_dataset_during_last_30_days(cls, package_id):
-        # Returns a list of visits during the last 30 days.
-        first_day = datetime.now() - relativedelta(days=30)
-        last_day = datetime.now()
-
-        visits = cls.get_visits_by_dataset_id_between_two_dates(package_id, first_day, last_day)
-
-        return sum(filter(None, [visit.__dict__.get('downloads', 0) for visit in visits]))
-
-    @classmethod
-    def get_visits_by_dataset_id_between_two_dates(cls, package_id, start_date, end_date):
+    def get_download_count_for_dataset(cls, package_id: str, start_date: datetime, end_date: datetime) -> int:
         # Returns a list of visits between the dates
         subquery = model.Session.query(model.Resource.id).filter(model.Resource.package_id == package_id).subquery()
         visits = model.Session.query(cls).filter(cls.resource_id.in_(subquery)).filter(cls.visit_date >= start_date).filter(
             cls.visit_date <= end_date).all()
-        return visits
+
+        return sum(filter(None, [visit.__dict__.get('downloads', 0) for visit in visits]))
 
     @classmethod
     def get_all_visits(cls, id):
         visits_dict = ResourceStats.get_all_visits_by_id(id)
-        downloads_count = visits_dict.get('total_downloads', 0)
-        visits_count = visits_dict.get('tot_visits', 0)
+        total_downloads = visits_dict.get('total_downloads', 0)
+        total_visits = visits_dict.get('total_visits', 0)
         visits = visits_dict.get('resources', [])
         visit_list = []
 
@@ -779,9 +634,9 @@ class ResourceStats(Base):
         visit_list = visit_list[::-1]
 
         results = {
-            "downloads": visit_list,
-            "downloads_count": downloads_count,
-            "visits_count": visits_count,
+            "visits": visit_list,
+            "total_downloads": total_downloads,
+            "total_visits": total_visits,
         }
         return results
 
@@ -792,42 +647,6 @@ class ResourceStats(Base):
             return None
         else:
             return result.visit_date
-
-    @classmethod
-    def get_visit_count_for_resource_during_last_12_months(cls, resource_id):
-        first_day = datetime.now() - relativedelta(months=12)
-        last_day = datetime.now()
-
-        visits = cls.get_visits_by_resource_id_between_two_dates(resource_id, first_day, last_day)
-
-        return sum(filter(None, [visit.__dict__.get('visits', 0) for visit in visits]))
-
-    @classmethod
-    def get_visit_count_for_resource_during_last_30_days(cls, resource_id):
-        first_day = datetime.now() - relativedelta(days=30)
-        last_day = datetime.now()
-
-        visits = cls.get_visits_by_resource_id_between_two_dates(resource_id, first_day, last_day)
-
-        return sum(filter(None, [visit.__dict__.get('visits', 0) for visit in visits]))
-
-    @classmethod
-    def get_download_count_for_resource_during_last_12_months(cls, resource_id):
-        first_day = datetime.now() - relativedelta(months=12)
-        last_day = datetime.now()
-
-        visits = cls.get_visits_by_resource_id_between_two_dates(resource_id, first_day, last_day)
-
-        return sum(filter(None, [visit.__dict__.get('downloads', 0) for visit in visits]))
-
-    @classmethod
-    def get_download_count_for_resource_during_last_30_days(cls, resource_id):
-        first_day = datetime.now() - relativedelta(days=30)
-        last_day = datetime.now()
-
-        visits = cls.get_visits_by_resource_id_between_two_dates(resource_id, first_day, last_day)
-
-        return sum(filter(None, [visit.__dict__.get('downloads', 0) for visit in visits]))
 
     @classmethod
     def get_visits_by_resource_id_between_two_dates(cls, resource_id, start_date, end_date):
@@ -1203,25 +1022,25 @@ def init_tables(engine):
     log.info('Analytics database tables are set-up')
 
 
-def get_beginning_of_week(date):
+def get_beginning_of_week(date: datetime) -> datetime:
     date = date.replace(hour=0, minute=0, second=0, microsecond=0)
     date = date - timedelta(days=date.weekday())
     return date
 
 
-def get_end_of_week(date):
+def get_end_of_week(date: datetime) -> datetime:
     date = date.replace(hour=23, minute=59, second=59, microsecond=999999)
     date = date + timedelta(days=6 - date.weekday())
     return date
 
 
-def get_beginning_of_next_week(date):
+def get_beginning_of_next_week(date: datetime) -> datetime:
     date = get_beginning_of_week(date)
     date = date + timedelta(weeks=1)
     return date
 
 
-def get_end_of_last_week(date):
+def get_end_of_last_week(date: datetime) -> datetime:
     date = get_end_of_week(date)
     date = date - timedelta(weeks=1)
     return date

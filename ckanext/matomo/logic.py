@@ -2,6 +2,8 @@ from datetime import datetime
 import ckan.plugins.toolkit as toolkit
 from ckanext.matomo.model import PackageStats
 
+from operator import itemgetter
+
 
 @toolkit.side_effect_free
 def most_visited_packages(context, data_dict):
@@ -24,7 +26,5 @@ def most_visited_packages(context, data_dict):
         package_with_extras['visits'] = package['visits']
         package_with_extras['visit_date'] = package['visit_date']
         packages.append(package_with_extras)
-
-    from operator import itemgetter
     result['packages'] = sorted(packages, key=itemgetter('visits'), reverse=True)
     return result

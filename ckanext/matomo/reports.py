@@ -1,7 +1,9 @@
-from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
-from datetime import datetime, date, timedelta
-from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta
+from typing import List, Generator, Dict, Union, Any
 from ckanext.report import lib as report
+from ckanext.report.helpers import organization_list as report__organization_list
+from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
+from ckanext.matomo.utils import get_report_years, last_calendar_period
 
 log = __import__('logging').getLogger(__name__)
 
@@ -12,96 +14,83 @@ except ImportError:
     from collections import OrderedDict
 
 
-def get_report_years():
-    start_year = 2014
-    current_year = date.today().year
-    return sorted(list(range(start_year, current_year+1)), reverse=True)
-
-
-# Set end_date explicitly to be the second before midnight on previous day
-# and start_date to be at 00:00:00 week, month or year from that
-# Example on 2023-03-21 14:11:42
-# week = 2023-03-14 00:00:00 - 2023-03-20 23:59:59
-# month = 2023-02-20 00:00:00 - 2023-03-20 23:59:59
-# year = 2022-03-20 00:00:00 - 2023-03-20 23:59:59
-def last_week():
-    today = datetime.today()
-    end_date = today - relativedelta(days=1, hour=23, minute=59, second=59)
-    start_date = today - relativedelta(weeks=1, hour=0, minute=0, second=0)
-    return start_date, end_date
-
-
-def last_month():
-    today = datetime.today()
-    end_date = today - relativedelta(days=1, hour=23, minute=59, second=59)
-    start_date = end_date - relativedelta(months=1, hour=0, minute=0, second=0)
-    return start_date, end_date
-
-
-def last_year():
-    today = datetime.today()
-    end_date = today - relativedelta(days=1, hour=23, minute=59, second=59)
-    start_date = end_date - relativedelta(years=1, hour=0, minute=0, second=0)
-    return start_date, end_date
-
-
-def selected_year(year):
-    start_date = datetime(year, 1, 1, 0, 0, 0, 0)
-    end_date = datetime(year, 12, 31, 23, 59, 59, 0)
-    return start_date, end_date
-
-
-def last_calendar_period(period):
-    report_years = get_report_years()
-    if period == 'week':
-        return last_week()
-    elif period == 'month':
-        return last_month()
-    elif period == 'year':
-        return last_year()
-    elif (isinstance(period, int) or (isinstance(period, str) and period.isdigit())) and int(period) in report_years:
-        return selected_year(int(period))
-    else:
-        raise ValueError("The period parameter should be either 'week', 'month' or 'year'")
-
-
-def matomo_dataset_report(organization, time):
-    '''
-    Generates report based on matomo data. number of views per package
-    '''
-
-    # Return matomo_organizations_with_most_popular_datasets list if an organization is not given
-    if organization is None:
-        return matomo_organizations_with_most_popular_datasets(time)
-
-    start_date, end_date = last_calendar_period(time)
-
-    # get package objects corresponding to popular GA content
-    most_visited_packages = PackageStats.get_total_visits_for_organization(
-        organization,
-        start_date=start_date,
-        end_date=end_date)
-
-    return {
-        'report_name': 'matomo-dataset',
-        'table': most_visited_packages
-    }
-
-
-def matomo_time_option_combinations():
-    time_options = ['week', 'month', 'year']
+def time_option_combinations() -> Generator[Dict[str, str], None, None]:
+    time_options: list[str] = ['week', 'month', 'year']
     time_options.extend(get_report_years())
     for time in time_options:
         yield {'time': time}
 
 
-def matomo_org_and_time_option_combinations():
-    time_options = ['week', 'month', 'year']
+def org_and_time_option_combinations() -> Generator[Dict[str, Union[str, None]], None, None]:
+    time_options: list[str] = ['week', 'month', 'year']
     time_options.extend(get_report_years())
-    org_options = report.all_organizations(include_none=True)
+    org_options: Generator[Union[Any, None], None, None] = report.all_organizations(include_none=True)
     for org in org_options:
         for time in time_options:
             yield {'organization': org, 'time': time}
+
+
+def matomo_organization_list(start_date, end_date, descending=True, sort_by="total_visits") -> List[Any]:
+    # Fetch all organizations which have at least 1 dataset
+    organizations_with_datasets = report__organization_list(only_orgs_with_packages=True)
+    # Fetch total visits per package within given date range
+    package_stats: List[Dict[str, Any]] = PackageStats.get_total_visits(start_date, end_date, descending)
+
+    # Count org specific sums
+    totals_by_organization: Dict[str, Any] = {}
+    for stat in package_stats:
+        org: Union[Dict[str, Any], None] = totals_by_organization.get(stat['owner_org'])
+        if org:
+            org['visits'] += stat['visits']
+            org['entrances'] += stat['entrances']
+            org['downloads'] += stat['downloads']
+        else:
+            totals_by_organization[stat['owner_org']] = {'visits': stat['visits'],
+                                                         'entrances': stat['entrances'],
+                                                         'downloads': stat['downloads']}
+
+    # Format into list of org dicts with stats totals
+    organizations: List[Dict[str, Any]] = []
+    for organization in organizations_with_datasets:
+        org_id: str = organization.get('id', '')
+        stats: Dict[str, Any] = totals_by_organization.get(org_id, {})
+        organizations.append({
+            "organization_name": organization.get('name'),
+            "organization_title": organization.get('title'),
+            "organization_title_translated": organization.get('title_translated'),
+            "total_visits": stats.get('visits', 0),
+            "total_downloads": stats.get('downloads', 0),
+            "total_entrances": stats.get('entrances', 0)
+            })
+
+    return sorted(organizations, key=lambda organization: organization[sort_by], reverse=descending)
+
+
+def matomo_dataset_report(organization: str, time: str) -> Dict[str, Any]:
+    '''
+    Generates report based on matomo data.
+    Total sum of package visits per organization or number of views per package for selected organization
+    '''
+    organization_name: str = organization
+    start_date, end_date = last_calendar_period(time)
+
+    # Return list of all organizations with packages if an organization is not given
+    if organization_name is None:
+        return {
+            'report_name': 'matomo-dataset',
+            'table': matomo_organization_list(start_date, end_date, descending=True, sort_by='total_visits')
+        }
+    else:
+        # get given organizations datasets with the popularity statistics
+        packages = PackageStats.get_total_visits_for_organization(
+            organization_name,
+            start_date=start_date,
+            end_date=end_date)
+
+        return {
+            'report_name': 'matomo-dataset',
+            'table': packages
+        }
 
 
 def matomo_dataset_report_info():
@@ -111,33 +100,34 @@ def matomo_dataset_report_info():
         'description': 'Matomo showing top datasets with most views by organization',
         'option_defaults': OrderedDict((('organization', None),
                                         ('time', 'month'),)),
-        'option_combinations': matomo_org_and_time_option_combinations,
+        'option_combinations': org_and_time_option_combinations,
         'generate': matomo_dataset_report,
         'template': 'report/dataset_analytics.html',
     }
 
 
-def matomo_resource_report(organization, time):
+def matomo_resource_report(organization: str, time: str):
     '''
-    Generates report based on matomo data. Number of downloads per package (sum of package's resource downloads)
+    Generates report based on matomo data.
+    Total sum of resource dowloands per organization (all resources of all organization's packages)
+    or number of downloads per resource for selected organization
     '''
-
-    # Return matomo_organizations_with_most_popular_datasets list if an organization is not given
-    if organization is None:
-        most_viewed_datasets = matomo_organizations_with_most_popular_datasets(time)
-
-        return {'table': sorted(most_viewed_datasets['table'],
-                                key=lambda organization: organization["total_downloads"],
-                                reverse=True)}
-
+    organization_name: str = organization
     start_date, end_date = last_calendar_period(time)
 
-    # Get the most downloaded resources for the organization
-    most_downloaded_resources = ResourceStats.get_top_downloaded_resources_for_organization(organization, start_date, end_date)
+    # Return list of all organizations with packages if an organization is not given
+    if organization_name is None:
+        return {
+            'report_name': 'matomo-resource',
+            'table': matomo_organization_list(start_date, end_date, descending=True, sort_by='total_downloads')
+            }
+
+    # Get the resources for the organization
+    resources = ResourceStats.get_resource_stats_for_organization(organization_name, start_date, end_date)
 
     return {
         'report_name': 'matomo-resource',
-        'table': most_downloaded_resources.get("resources")
+        'table': resources
     }
 
 
@@ -148,7 +138,7 @@ def matomo_resource_report_info():
         'description': 'Matomo showing most downloaded resources',
         'option_defaults': OrderedDict((('organization', None),
                                         ('time', 'month'),)),
-        'option_combinations': matomo_org_and_time_option_combinations,
+        'option_combinations': org_and_time_option_combinations,
         'generate': matomo_resource_report,
         'template': 'report/resource_analytics.html'
     }
@@ -200,16 +190,6 @@ def matomo_location_report_info():
     }
 
 
-def matomo_organizations_with_most_popular_datasets(time, descending=True):
-    start_date, end_date = last_calendar_period(time)
-    most_popular_organizations = PackageStats.get_organizations_with_most_popular_datasets(start_date,
-                                                                                           end_date, descending=descending)
-
-    return {
-        'table': most_popular_organizations
-    }
-
-
 def matomo_most_popular_search_terms(time):
     start_date, end_date = last_calendar_period(time)
     most_popular_search_terms = SearchStats.get_most_popular_search_terms(start_date, end_date)
@@ -224,7 +204,7 @@ def matomo_most_popular_search_terms_info():
         'title': 'Most popular search terms',
         'description': 'Matomo showing most popular search terms',
         'option_defaults': OrderedDict((('time', 'month'),)),
-        'option_combinations': matomo_time_option_combinations,
+        'option_combinations': time_option_combinations,
         'generate': matomo_most_popular_search_terms,
         'template': 'report/search_term_analytics.html'
     }

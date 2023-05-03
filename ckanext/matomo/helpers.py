@@ -1,8 +1,10 @@
+from datetime import date, datetime
+from flask import request
+from typing import Dict, Any, Union, List, Tuple
 from ckan.plugins.toolkit import render_snippet, config
-import datetime
 from ckan.plugins import toolkit as tk
 from ckanext.matomo.reports import last_calendar_period, get_report_years
-from flask import request
+from ckanext.matomo.model import PackageStats, ResourceStats
 
 
 def matomo_snippet():
@@ -16,110 +18,46 @@ def matomo_snippet():
 
 
 # Get the organization specific report url
-def get_organization_url(organization):
+def get_organization_url(organization: str) -> str:
     if not organization:
         return request.path
-    organization_path = "%s/%s" % (request.path, organization)
+    organization_path: str = "%s/%s" % (request.path, organization)
     params = dict(list(request.args.items()))
-    time = params.get('time')
+    time: Union[str, None] = params.get('time')
     if time:
         organization_path = "%s?time=%s" % (organization_path, time)
     return tk.url_for(organization_path)
 
 
-def get_visits_for_resource(id):
-    from ckanext.matomo.model import ResourceStats
-
+def get_visits_for_resource(id: str) -> Dict[str, Any]:
     return ResourceStats.get_all_visits(id)
 
 
-def get_visits_for_dataset(id):
-
-    from ckanext.matomo.model import PackageStats
-
+def get_visits_for_dataset(id: str) -> Dict[str, Any]:
     return PackageStats.get_all_visits(id)
 
 
-def get_visits_count_for_dataset_during_last_year(id):
-
-    from ckanext.matomo.model import PackageStats
-
-    return len(PackageStats.get_visits_during_year(id, datetime.datetime.now().year - 1))
+def get_download_count_for_dataset(id: str, time: str) -> int:
+    start_date, end_date = get_date_range(time)
+    return ResourceStats.get_download_count_for_dataset(id, start_date, end_date)
 
 
-def get_download_count_for_dataset_during_last_year(id):
-    # Downloads are visits for the Resource object.
-    # This is why a 'get_visits' method is called.
-    from ckanext.matomo.model import ResourceStats
-    return len(ResourceStats.get_visits_during_last_calendar_year_by_dataset_id(id))
+def get_visit_count_for_dataset(id: str, time: str) -> int:
+    start_date, end_date = get_date_range(time)
+    return PackageStats.get_visit_count_for_dataset(id, start_date, end_date)
 
 
-def get_download_count_for_dataset_during_last_12_months(id):
-    # Downloads are visits for the Resource object.
-    # This is why a 'get_visits' method is called.
-    from ckanext.matomo.model import ResourceStats
-
-    return ResourceStats.get_download_count_for_dataset_during_last_12_months(id)
+def format_date(datestr) -> str:
+    dateobj: date = date.fromisoformat(datestr)
+    return dateobj.strftime('%d-%m-%Y')
 
 
-def get_download_count_for_dataset_during_last_30_days(id):
-    # Downloads are visits for the Resource object.
-    # This is why a 'get_visits' method is called.
-    from ckanext.matomo.model import ResourceStats
-
-    return ResourceStats.get_download_count_for_dataset_during_last_30_days(id)
-
-
-def get_visit_count_for_dataset_during_last_12_months(id):
-    # Downloads are visits for the Resource object.
-    # This is why a 'get_visits' method is called.
-    from ckanext.matomo.model import PackageStats
-
-    return PackageStats.get_visit_count_for_dataset_during_last_12_months(id)
-
-
-def get_visit_count_for_dataset_during_last_30_days(id):
-    # Downloads are visits for the Resource object.
-    # This is why a 'get_visits' method is called.
-    from ckanext.matomo.model import PackageStats
-
-    return PackageStats.get_visit_count_for_dataset_during_last_30_days(id)
-
-
-def get_visit_count_for_resource_during_last_12_months(id):
-    from ckanext.matomo.model import ResourceStats
-
-    return ResourceStats.get_visit_count_for_resource_during_last_12_months(id)
-
-
-def get_visit_count_for_resource_during_last_30_days(id):
-    from ckanext.matomo.model import ResourceStats
-
-    return ResourceStats.get_visit_count_for_resource_during_last_30_days(id)
-
-
-def get_download_count_for_resource_during_last_12_months(id):
-    from ckanext.matomo.model import ResourceStats
-
-    return ResourceStats.get_download_count_for_resource_during_last_12_months(id)
-
-
-def get_download_count_for_resource_during_last_30_days(id):
-    from ckanext.matomo.model import ResourceStats
-
-    return ResourceStats.get_download_count_for_resource_during_last_30_days(id)
-
-
-def format_date(datestr):
-    date = datetime.date.fromisoformat(datestr)
-    return date.strftime('%d-%m-%Y')
-
-
-def get_date_range():
-    params = dict(list(request.args.items()))
-    time = params.get('time') if params.get('time') else 'month'
+def get_date_range(time: Union[str, None] = None) -> Tuple[datetime, datetime]:
+    if not time:
+        params = dict(list(request.args.items()))
+        time = params.get('time', 'month')
     return last_calendar_period(time)
 
 
-def get_years():
-    return [str(year) for year in get_report_years()]
+def get_years() -> List[str]:
+    return get_report_years()
