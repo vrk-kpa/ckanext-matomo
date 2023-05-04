@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
-from typing import List, Generator, Dict, Union, Any
+from typing import List, Generator, Dict, Any, Optional
+from ckan.plugins.toolkit import get_action
 from ckanext.report import lib as report
-from ckanext.report.helpers import organization_list as report__organization_list
+from ckanext.report.types import Organization
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
-from ckanext.matomo.utils import get_report_years, last_calendar_period
+from ckanext.matomo.utils import package_generator, get_report_years, last_calendar_period
+from ckanext.matomo.types import VisitsByOrganization, VisitsByPackage, GroupedVisits, Time, OrganizationAndTime
 
 log = __import__('logging').getLogger(__name__)
 
@@ -14,56 +16,105 @@ except ImportError:
     from collections import OrderedDict
 
 
-def time_option_combinations() -> Generator[Dict[str, str], None, None]:
+def time_option_combinations() -> Generator[Time, None, None]:
     time_options: list[str] = ['week', 'month', 'year']
     time_options.extend(get_report_years())
     for time in time_options:
         yield {'time': time}
 
 
-def org_and_time_option_combinations() -> Generator[Dict[str, Union[str, None]], None, None]:
+def org_and_time_option_combinations() -> Generator[OrganizationAndTime, None, None]:
     time_options: list[str] = ['week', 'month', 'year']
     time_options.extend(get_report_years())
-    org_options: Generator[Union[Any, None], None, None] = report.all_organizations(include_none=True)
+    org_options: Generator[Organization, None,
+                           None] = report.all_organizations(include_none=True)
     for org in org_options:
         for time in time_options:
             yield {'organization': org, 'time': time}
 
 
-def matomo_organization_list(start_date, end_date, descending=True, sort_by="total_visits") -> List[Any]:
+def matomo_organization_list(start_date: datetime,
+                             end_date: datetime,
+                             descending=True,
+                             sort_by="visits") -> List[VisitsByOrganization]:
     # Fetch all organizations which have at least 1 dataset
-    organizations_with_datasets = report__organization_list(only_orgs_with_packages=True)
+    organizations_with_datasets: Generator[Organization, None, None] = report.get_all_organizations(
+        only_orgs_with_packages=True)
     # Fetch total visits per package within given date range
-    package_stats: List[Dict[str, Any]] = PackageStats.get_total_visits(start_date, end_date, descending)
+    package_stats: List[VisitsByPackage] = PackageStats.get_total_visits(
+        start_date, end_date, descending)
 
     # Count org specific sums
-    totals_by_organization: Dict[str, Any] = {}
+    totals_by_organization: GroupedVisits = {}
     for stat in package_stats:
-        org: Union[Dict[str, Any], None] = totals_by_organization.get(stat['owner_org'])
-        if org:
-            org['visits'] += stat['visits']
-            org['entrances'] += stat['entrances']
-            org['downloads'] += stat['downloads']
-        else:
-            totals_by_organization[stat['owner_org']] = {'visits': stat['visits'],
-                                                         'entrances': stat['entrances'],
-                                                         'downloads': stat['downloads']}
-
+        organization_id: Optional[str] = stat.get('owner_org', None)
+        if organization_id:
+            is_new = not bool(totals_by_organization.get(organization_id))
+            if is_new:
+                totals_by_organization[organization_id] = {}
+            totals_by_organization[organization_id]['visits'] = totals_by_organization[organization_id].get(
+                'visits', 0) + stat.get('visits', 0)
+            totals_by_organization[organization_id]['entrances'] = totals_by_organization[organization_id].get(
+                'entrances', 0) + stat.get('entrances', 0)
+            totals_by_organization[organization_id]['downloads'] = totals_by_organization[organization_id].get(
+                'downloads', 0) + stat.get('downloads', 0)
     # Format into list of org dicts with stats totals
-    organizations: List[Dict[str, Any]] = []
+    organizations: List[VisitsByOrganization] = []
     for organization in organizations_with_datasets:
         org_id: str = organization.get('id', '')
-        stats: Dict[str, Any] = totals_by_organization.get(org_id, {})
+        stats = totals_by_organization.get(org_id, {})
         organizations.append({
-            "organization_name": organization.get('name'),
-            "organization_title": organization.get('title'),
+            "organization_name": organization.get('name', ''),
+            "organization_title": organization.get('title', ''),
             "organization_title_translated": organization.get('title_translated'),
-            "total_visits": stats.get('visits', 0),
-            "total_downloads": stats.get('downloads', 0),
-            "total_entrances": stats.get('entrances', 0)
-            })
+            "visits": stats.get('visits', 0),
+            "downloads": stats.get('downloads', 0),
+            "entrances": stats.get('entrances', 0)
+        })
 
     return sorted(organizations, key=lambda organization: organization[sort_by], reverse=descending)
+
+
+def matomo_datasets_by_organization(organization_name: str,
+                                    start_date: datetime,
+                                    end_date: datetime,
+                                    descending=True,
+                                    sort_by='visits') -> List[VisitsByPackage]:
+    organization = get_action('organization_show')(
+        {}, {'id': organization_name})
+    organization_id: str = organization.get('id')
+
+    datasets: Generator[Dict[str, Any], None, None] = package_generator('*:*', 1000,
+                                                                        fq='+owner_org:%s' % organization_id,
+                                                                        fl='id,name,title,extras_title_translated')
+
+    # Fetch total visits per package within given date range
+    package_stats: List[VisitsByPackage] = PackageStats.get_total_visits(start_date=start_date,
+                                                                         end_date=end_date,
+                                                                         descending=True,
+                                                                         organization_id=organization_id)
+
+    visits_by_dataset: GroupedVisits = {
+        pkg.get('package_id', ''): {'visits': pkg.get('visits', 0),
+                                    'entrances': pkg.get('entrances', 0),
+                                    'downloads': pkg.get('downloads', 0)}
+        for pkg in package_stats}
+
+    # Map the visit data onto relevant datasets
+    result: List[VisitsByPackage] = []
+    for dataset in datasets:
+        id: str = dataset.get('id', '')
+        visit = visits_by_dataset.get(id, {})
+        result.append({
+            "package_id": id,
+            "package_name": dataset.get('name'),
+            "package_title_translated": dataset.get('title_translated', None),
+            "visits": visit.get('visits', 0),
+            "entrances": visit.get('entrances', 0),
+            "downloads": visit.get('downloads', 0)
+        })
+
+    return sorted(result, key=lambda dataset: dataset[sort_by], reverse=descending)
 
 
 def matomo_dataset_report(organization: str, time: str) -> Dict[str, Any]:
@@ -78,18 +129,14 @@ def matomo_dataset_report(organization: str, time: str) -> Dict[str, Any]:
     if organization_name is None:
         return {
             'report_name': 'matomo-dataset',
-            'table': matomo_organization_list(start_date, end_date, descending=True, sort_by='total_visits')
+            'table': matomo_organization_list(start_date, end_date, descending=True, sort_by='visits')
         }
     else:
         # get given organizations datasets with the popularity statistics
-        packages = PackageStats.get_total_visits_for_organization(
-            organization_name,
-            start_date=start_date,
-            end_date=end_date)
-
         return {
             'report_name': 'matomo-dataset',
-            'table': packages
+            'table': matomo_datasets_by_organization(organization_name=organization_name, start_date=start_date,
+                                                     end_date=end_date, descending=True, sort_by='visits')
         }
 
 
@@ -120,10 +167,11 @@ def matomo_resource_report(organization: str, time: str):
         return {
             'report_name': 'matomo-resource',
             'table': matomo_organization_list(start_date, end_date, descending=True, sort_by='total_downloads')
-            }
+        }
 
     # Get the resources for the organization
-    resources = ResourceStats.get_resource_stats_for_organization(organization_name, start_date, end_date)
+    resources = ResourceStats.get_resource_stats_for_organization(
+        organization_name, start_date, end_date)
 
     return {
         'report_name': 'matomo-resource',
@@ -161,7 +209,8 @@ def matomo_location_report():
 
     sessions_by_month = AudienceLocationDate.special_total_by_months()
 
-    data_for_export = AudienceLocationDate.special_total_by_months(datetime(2000, 1, 1), last_month_end)
+    data_for_export = AudienceLocationDate.special_total_by_months(
+        datetime(2000, 1, 1), last_month_end)
 
     first_date = AudienceLocationDate.get_first_date()
 
@@ -192,7 +241,8 @@ def matomo_location_report_info():
 
 def matomo_most_popular_search_terms(time):
     start_date, end_date = last_calendar_period(time)
-    most_popular_search_terms = SearchStats.get_most_popular_search_terms(start_date, end_date)
+    most_popular_search_terms = SearchStats.get_most_popular_search_terms(
+        start_date, end_date)
     return {
         'table': most_popular_search_terms
     }

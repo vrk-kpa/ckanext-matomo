@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from typing import Dict, Optional, Generator, Any, List, Literal
+from typing import Dict, Optional, List
 
 from sqlalchemy import types, func, Column, ForeignKey, not_, desc
 from sqlalchemy.orm import relationship
@@ -10,7 +10,7 @@ import ckan.model as model
 from ckan.plugins.toolkit import get_action
 
 from ckanext.matomo.utils import package_generator, last_calendar_period
-from ckanext.matomo.types import Visit, Visits
+from ckanext.matomo.types import Visits, VisitsByPackage
 
 log = __import__('logging').getLogger(__name__)
 
@@ -126,15 +126,17 @@ class PackageStats(Base):
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         descending: bool = True,
-        package_id: Optional[str] = None
-    ) -> List[Visit]:
+        package_id: Optional[str] = None,
+        organization_id: Optional[str] = None
+    ) -> List[VisitsByPackage]:
         '''
         Returns datasets and their visitors amount summed during time span, grouped by dataset.
 
-        :param start_date: datetime
-        :param end_date: datetime
-        :param descending: bool
-        :param package_id: str
+        :param start_date: Optional[datetime] - time range filter start - default 2000-01-01
+        :param end_date: Optional[datetime] - time range filter end - default yesterday 23:59:59
+        :param descending: bool - sorting direction - default True for descending sorting
+        :param package_id: Optional[str] - package_id filtering
+        :param organization_id: Optional[str} - organization_id / owner_org filtering
         :return: [{ package_id: str, owner_org: str, visits: int, entrances: int, downloads: int }, ...]
         '''
         if not start_date:
@@ -151,6 +153,9 @@ class PackageStats(Base):
         if package_id:
             query = query.filter(cls.package_id == package_id)
 
+        if organization_id:
+            query = query.filter(model.Package.owner_org == organization_id)
+
         visits_by_dataset = (query.join(model.Package, cls.package_id == model.Package.id)
                              .filter(model.Package.state == 'active')
                              .filter(model.Package.private == False)  # noqa: E712
@@ -158,79 +163,15 @@ class PackageStats(Base):
                              .order_by(sorting_direction('total_visits', descending))
                              .all())
 
-        return [{
-                "package_id": dataset.package_id or '',
-                "owner_org": cls.get_owner_org(dataset.package_id) or '',
+        result: List[VisitsByPackage] = [{
+                "package_id": dataset.package_id,
+                "owner_org": cls.get_owner_org(dataset.package_id),
                 "visits": dataset.total_visits or 0,
                 "entrances": dataset.total_entrances or 0,
                 "downloads": dataset.total_downloads or 0,
                 } for dataset in visits_by_dataset]
 
-    # Same as above, but uses organization to filter datasets belonging to only that organization
-    @classmethod
-    def get_total_visits_for_organization(
-        cls,
-        organization_name: str,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-        descending: bool = True,
-        package_id: Optional[str] = None
-    ) -> List[Visit]:
-        '''
-        Returns single organization's datasets and their visitors amount summed during time span, grouped by dataset.
-
-        :param start_date: datetime
-        :param end_date: datetime
-        :param descending: bool
-        :param package_id: str
-        :return: [{ package_id: str, owner_org: str, visits: int, entrances: int, downloads: int }, ...]
-        '''
-
-        query = model.Session.query(
-            cls.package_id,
-            func.sum(cls.visits).label('total_visits'),
-            func.sum(cls.downloads).label('total_downloads'),
-            func.sum(cls.entrances).label('total_entrances')
-        ).filter(cls.visit_date >= start_date).filter(cls.visit_date <= end_date)
-
-        if package_id:
-            query = query.filter(cls.package_id == package_id)
-
-        organization = get_action('organization_show')({}, {'id': organization_name})
-        organization_id: str = organization.get('id')
-
-        datasets: Generator[Dict[str, Any], None, None] = package_generator('*:*', 1000,
-                                                                            fq = '+owner_org:%s' % organization_id,
-                                                                            fl = 'id,name,title,extras_title_translated')
-
-        visits = (query.join(model.Package, cls.package_id == model.Package.id)
-                             .filter(model.Package.state == 'active')
-                             .filter(model.Package.private == False)  # noqa: E712
-                             .filter(model.Package.owner_org == organization_id)
-                             .group_by(cls.package_id)
-                             .order_by(sorting_direction('total_visits', descending))
-                             .all())
-
-        visits_by_dataset: Dict[str, Dict[Literal['visits', 'entrances', 'downloads'], int]] = {
-            dataset_id: {'visits': visits, 'entrances': entrances, 'downloads': downloads}
-                for dataset_id, visits, entrances, downloads in visits
-                        }
-
-        # Map the visit data onto relevant datasets
-        result: List[Visit] = []
-        for dataset in datasets:
-            id: str = dataset.get('id', '')
-            visit: Dict[Literal['visits', 'entrances', 'downloads'], int] = visits_by_dataset.get(id, {})
-            result.append({
-                "package_name": dataset.get('name', ''),
-                "package_title_translated": dataset.get('title_translated', ''),
-                "package_id": id,
-                "visits": visit.get('visits', 0),
-                "entrances": visit.get('entrances', 0),
-                "downloads": visit.get('downloads', 0)
-            })
-
-        return sorted(result, key=lambda dataset: dataset.get('visits', []), reverse=descending)
+        return result
 
     @classmethod
     def get_last_visits_by_id(cls, package_id, time='year') -> Visits:
@@ -302,7 +243,7 @@ class PackageStats(Base):
         visits_dict: Visits  = PackageStats.get_last_visits_by_id(dataset_id, time = 'year')
 
         visit_list: List[Dict[str, int]] = []
-        visits: List[Visit] = visits_dict.get('packages', [])
+        visits: List[VisitsByPackage] = visits_dict.get('packages', [])
 
         # Creates a weekly grouped list for last year
         current_end_of_week: datetime = get_end_of_last_week(datetime.now())
@@ -339,8 +280,8 @@ class PackageStats(Base):
         return results
 
     @classmethod
-    def as_dict(cls, pkg) -> Visit:
-        result: Visit = {}
+    def as_dict(cls, pkg) -> VisitsByPackage:
+        result: VisitsByPackage = {}
         package_name: str = PackageStats.get_package_name_by_id(pkg.package_id)
         result['package_name'] = package_name
         result['package_id'] = pkg.package_id
@@ -352,7 +293,7 @@ class PackageStats(Base):
 
     @classmethod
     def convert_to_dict(cls, package_stats, total_visits: Optional[int]) -> Visits:
-        visits: List[Visit] = []
+        visits: List[VisitsByPackage] = []
         for pkg in package_stats:
             visits.append(PackageStats.as_dict(pkg))
 

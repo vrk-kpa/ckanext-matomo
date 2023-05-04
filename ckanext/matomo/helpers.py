@@ -1,10 +1,11 @@
 from datetime import date, datetime
 from flask import request
-from typing import Dict, Any, Union, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 from ckan.plugins.toolkit import render_snippet, config
 from ckan.plugins import toolkit as tk
 from ckanext.matomo.reports import last_calendar_period, get_report_years
 from ckanext.matomo.model import PackageStats, ResourceStats
+from ckanext.matomo.types import Visits
 
 
 def matomo_snippet():
@@ -23,7 +24,7 @@ def get_organization_url(organization: str) -> str:
         return request.path
     organization_path: str = "%s/%s" % (request.path, organization)
     params = dict(list(request.args.items()))
-    time: Union[str, None] = params.get('time')
+    time: Optional[str] = params.get('time')
     if time:
         organization_path = "%s?time=%s" % (organization_path, time)
     return tk.url_for(organization_path)
@@ -33,7 +34,7 @@ def get_visits_for_resource(id: str) -> Dict[str, Any]:
     return ResourceStats.get_all_visits(id)
 
 
-def get_visits_for_dataset(id: str) -> Dict[str, Any]:
+def get_visits_for_dataset(id: str) -> Visits:
     return PackageStats.get_all_visits(id)
 
 
@@ -52,7 +53,7 @@ def format_date(datestr) -> str:
     return dateobj.strftime('%d-%m-%Y')
 
 
-def get_date_range(time: Union[str, None] = None) -> Tuple[datetime, datetime]:
+def get_date_range(time: Optional[str] = None) -> Tuple[datetime, datetime]:
     if not time:
         params = dict(list(request.args.items()))
         time = params.get('time', 'month')
