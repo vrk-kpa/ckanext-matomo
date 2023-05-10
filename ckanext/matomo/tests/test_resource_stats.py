@@ -79,7 +79,7 @@ def test_resource_get_top(app):
             stat_date = stat_date - timedelta(weeks=1)
 
     top_resources = ResourceStats.get_top()
-    resources = top_resources.get('resources')
+    resources = top_resources.get('resources', [])
 
     assert resources[0].get('resource_id') == resource_ids[0]
     assert resources[0].get('downloads') == 200

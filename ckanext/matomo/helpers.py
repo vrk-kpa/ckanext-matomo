@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from flask import request
-from typing import Dict, Any, List, Tuple, Optional
+from typing import List, Tuple, Optional
 from ckan.plugins.toolkit import render_snippet, config
 from ckan.plugins import toolkit as tk
 from ckanext.matomo.reports import last_calendar_period, get_report_years
@@ -30,12 +30,12 @@ def get_organization_url(organization: str) -> str:
     return tk.url_for(organization_path)
 
 
-def get_visits_for_resource(id: str) -> Dict[str, Any]:
-    return ResourceStats.get_all_visits(id)
-
-
 def get_visits_for_dataset(id: str) -> Visits:
     return PackageStats.get_all_visits(id)
+
+
+def get_visits_for_resource(id: str) -> Visits:
+    return ResourceStats.get_all_visits(id)
 
 
 def get_download_count_for_dataset(id: str, time: str) -> int:
@@ -46,6 +46,16 @@ def get_download_count_for_dataset(id: str, time: str) -> int:
 def get_visit_count_for_dataset(id: str, time: str) -> int:
     start_date, end_date = get_date_range(time)
     return PackageStats.get_visit_count_for_dataset(id, start_date, end_date)
+
+
+def get_download_count_for_resource(id: str, time: str) -> int:
+    start_date, end_date = get_date_range(time)
+    return ResourceStats.get_stat_counts_by_id_and_date_range(id, start_date, end_date).get('downloads', 0)
+
+
+def get_visit_count_for_resource(id: str, time: str) -> int:
+    start_date, end_date = get_date_range(time)
+    return ResourceStats.get_stat_counts_by_id_and_date_range(id, start_date, end_date).get('visits', 0)
 
 
 def format_date(datestr) -> str:

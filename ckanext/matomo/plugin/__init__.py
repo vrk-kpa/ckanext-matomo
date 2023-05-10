@@ -69,6 +69,8 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin, DefaultTranslation):
             'get_visits_for_dataset': helpers.get_visits_for_dataset,
             'get_visit_count_for_dataset': helpers.get_visit_count_for_dataset,
             'get_download_count_for_dataset': helpers.get_download_count_for_dataset,
+            'get_visit_count_for_resource': helpers.get_visit_count_for_resource,
+            'get_download_count_for_resource': helpers.get_download_count_for_resource,
             'get_organization_url': helpers.get_organization_url,
             'format_date': helpers.format_date,
             'get_date_range': helpers.get_date_range,

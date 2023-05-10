@@ -9,12 +9,13 @@ from sqlalchemy.ext.declarative import declarative_base
 import ckan.model as model
 from ckan.plugins.toolkit import get_action
 
-from ckanext.matomo.utils import package_generator, last_calendar_period
-from ckanext.matomo.types import Visits, VisitsByPackage
+from ckanext.matomo.utils import last_calendar_period
+from ckanext.matomo.types import Visit, Visits, VisitsByPackage, Resource, VisitsByResource
 
 log = __import__('logging').getLogger(__name__)
 
 Base = declarative_base()
+
 
 def sorting_direction(value, descending):
     if descending:
@@ -30,7 +31,8 @@ class PackageStats(Base):
     """
     __tablename__: str = 'package_stats'
 
-    package_id = Column(types.UnicodeText, nullable=False, index=True, primary_key=True)
+    package_id = Column(types.UnicodeText, nullable=False,
+                        index=True, primary_key=True)
     visit_date = Column(types.DateTime, default=datetime.now, primary_key=True)
     visits = Column(types.Integer, default=0)
     entrances = Column(types.Integer, default=0)
@@ -83,7 +85,8 @@ class PackageStats(Base):
         :param entrances: number of entrances during date
         :return: True for a successful update, otherwise False
         '''
-        package = model.Session.query(cls).filter(cls.package_id == item_id).filter(cls.visit_date == visit_date).first()
+        package = model.Session.query(cls).filter(
+            cls.package_id == item_id).filter(cls.visit_date == visit_date).first()
         if package is None:
             package = PackageStats(package_id=item_id, visit_date=visit_date,
                                    visits=visits, entrances=entrances, downloads=downloads)
@@ -92,7 +95,8 @@ class PackageStats(Base):
             package.visits = visits
             package.entrances = entrances
 
-        log.debug("Number of visits for date: %s updated for package id: %s", visit_date, item_id)
+        log.debug(
+            "Number of visits for date: %s updated for package id: %s", visit_date, item_id)
         model.Session.flush()
         return True
 
@@ -102,19 +106,23 @@ class PackageStats(Base):
         Add's downloads amount to package, by adding downloads together.
         If package doesn't have any stats, adds stats object with empty visits and entrances
         '''
-        package = model.Session.query(cls).filter(cls.package_id == package_id).filter(cls.visit_date == visit_date).first()
+        package = model.Session.query(cls).filter(
+            cls.package_id == package_id).filter(cls.visit_date == visit_date).first()
         if package is None:
-            cls.update_visits(item_id=package_id, visit_date=visit_date, visits=0, entrances=0, downloads=downloads)
+            cls.update_visits(item_id=package_id, visit_date=visit_date,
+                              visits=0, entrances=0, downloads=downloads)
         else:
             package.downloads = downloads
 
-        log.debug("Downloads updated for date: %s and packag: %s", visit_date, package_id)
+        log.debug("Downloads updated for date: %s and packag: %s",
+                  visit_date, package_id)
         model.Session.flush()
         return True
 
     @classmethod
     def get_package_name_by_id(cls, package_id) -> str:
-        package = model.Session.query(model.Package).filter(model.Package.id == package_id).first()
+        package = model.Session.query(model.Package).filter(
+            model.Package.id == package_id).first()
         pack_name: str = ""
         if package is not None:
             pack_name = package.title or package.name
@@ -164,12 +172,12 @@ class PackageStats(Base):
                              .all())
 
         result: List[VisitsByPackage] = [{
-                "package_id": dataset.package_id,
-                "owner_org": cls.get_owner_org(dataset.package_id),
-                "visits": dataset.total_visits or 0,
-                "entrances": dataset.total_entrances or 0,
-                "downloads": dataset.total_downloads or 0,
-                } for dataset in visits_by_dataset]
+            "package_id": dataset.package_id,
+            "owner_org": cls.get_owner_org(dataset.package_id),
+            "visits": dataset.total_visits or 0,
+            "entrances": dataset.total_entrances or 0,
+            "downloads": dataset.total_downloads or 0,
+        } for dataset in visits_by_dataset]
 
         return result
 
@@ -177,17 +185,19 @@ class PackageStats(Base):
     def get_last_visits_by_id(cls, package_id, time='year') -> Visits:
         beginning_of_period, end_of_period = last_calendar_period(time)
 
-        package_visits = model.Session.query(cls).filter(cls.package_id == package_id).filter(
+        package_visits: List[cls] = model.Session.query(cls).filter(cls.package_id == package_id).filter(
             cls.visit_date >= beginning_of_period).filter(cls.visit_date <= end_of_period).all()
 
         # Returns the total number of visits since the beginning of all times
-        total_visits: int = model.Session.query(func.sum(cls.visits)).filter(cls.package_id == package_id).scalar()
+        total_visits: int = model.Session.query(func.sum(cls.visits)).filter(
+            cls.package_id == package_id).scalar()
         visits: Visits = {}
 
         if total_visits is not None:
             visits = PackageStats.convert_to_dict(package_visits, total_visits)
 
-        total_downloads: int = model.Session.query(func.sum(cls.downloads)).filter(cls.package_id == package_id).scalar()
+        total_downloads: int = model.Session.query(
+            func.sum(cls.downloads)).filter(cls.package_id == package_id).scalar()
         visits['total_downloads'] = total_downloads if total_downloads else 0
         return visits
 
@@ -214,11 +224,14 @@ class PackageStats(Base):
                            .group_by(cls.package_id))
 
         if start_date:
-            unique_packages = unique_packages.filter(cls.visit_date >= start_date)
+            unique_packages = unique_packages.filter(
+                cls.visit_date >= start_date)
         if end_date:
-            unique_packages = unique_packages.filter(cls.visit_date <= end_date)
+            unique_packages = unique_packages.filter(
+                cls.visit_date <= end_date)
 
-        unique_packages = unique_packages.order_by(func.count(cls.visits).desc()).limit(limit).all()
+        unique_packages = unique_packages.order_by(
+            func.count(cls.visits).desc()).limit(limit).all()
 
         # Adding last date associated to this package stat and filtering out private and deleted packages
         if unique_packages is not None:
@@ -230,7 +243,8 @@ class PackageStats(Base):
                 if tot_package is None:
                     continue
 
-                last_date = model.Session.query(func.max(cls.visit_date)).filter(cls.package_id == package_id).first()
+                last_date = model.Session.query(func.max(cls.visit_date)).filter(
+                    cls.package_id == package_id).first()
 
                 ps = PackageStats(package_id=package_id,
                                   visit_date=last_date[0], visits=package[1], entrances=package[2], downloads=package[3])
@@ -240,7 +254,8 @@ class PackageStats(Base):
 
     @classmethod
     def get_all_visits(cls, dataset_id) -> Visits:
-        visits_dict: Visits  = PackageStats.get_last_visits_by_id(dataset_id, time = 'year')
+        visits_dict: Visits = PackageStats.get_last_visits_by_id(
+            dataset_id, time='year')
 
         visit_list: List[Dict[str, int]] = []
         visits: List[VisitsByPackage] = visits_dict.get('packages', [])
@@ -254,11 +269,13 @@ class PackageStats(Base):
                                                           - timedelta(days=365))
 
         while current_end_of_week > start_date:
-            current_start_of_week: datetime = get_beginning_of_week(current_end_of_week)
+            current_start_of_week: datetime = get_beginning_of_week(
+                current_end_of_week)
             weekly_download_count = 0
             weekly_visit_count = 0
             for visit in visits:
-                visit_date: datetime = datetime.strptime(visit.get('visit_date', ''), '%d-%m-%Y')
+                visit_date: datetime = datetime.strptime(
+                    visit.get('visit_date', ''), '%d-%m-%Y')
                 # Do nothing if date of visit isn't in period of current week
                 if visit_date < current_start_of_week or visit_date > current_end_of_week:
                     continue
@@ -272,7 +289,7 @@ class PackageStats(Base):
         # Revert visit list to make it end on previous week
         visit_list = visit_list[::-1]
 
-        results: Visits  = {
+        results: Visits = {
             "visits": visit_list,
             "total_visits": visits_dict.get('total_visits', 0),
             "total_downloads": visits_dict.get('total_downloads', 0)
@@ -306,7 +323,8 @@ class PackageStats(Base):
 
     @classmethod
     def get_latest_update_date(cls):
-        result = model.Session.query(cls).order_by(cls.visit_date.desc()).first()
+        result = model.Session.query(cls).order_by(
+            cls.visit_date.desc()).first()
         if result is None:
             return None
         else:
@@ -314,7 +332,8 @@ class PackageStats(Base):
 
     @classmethod
     def get_owner_org(cls, package_id) -> Optional[str]:
-        result = model.Session.query(model.Package.id, model.Package.owner_org).filter(model.Package.id == package_id).first()
+        result = model.Session.query(model.Package.id, model.Package.owner_org).filter(
+            model.Package.id == package_id).first()
         if result.owner_org:
             return result.owner_org
         else:
@@ -328,7 +347,8 @@ class ResourceStats(Base):
     """
     __tablename__: str = 'resource_stats'
 
-    resource_id = Column(types.UnicodeText, nullable=False, index=True, primary_key=True)
+    resource_id = Column(types.UnicodeText, nullable=False,
+                         index=True, primary_key=True)
     visit_date = Column(types.DateTime, default=datetime.now, primary_key=True)
     visits = Column(types.Integer, default=0)
     downloads = Column(types.Integer, default=0)
@@ -347,9 +367,11 @@ class ResourceStats(Base):
         :param visits: number of visits until visit_date
         :return: True for a successful update, otherwise False
         '''
-        resource = model.Session.query(cls).filter(cls.resource_id == item_id).filter(cls.visit_date == visit_date).first()
+        resource = model.Session.query(cls).filter(
+            cls.resource_id == item_id).filter(cls.visit_date == visit_date).first()
         if resource is None:
-            resource = ResourceStats(resource_id=item_id, visit_date=visit_date, visits=visits)
+            resource = ResourceStats(
+                resource_id=item_id, visit_date=visit_date, visits=visits)
             model.Session.add(resource)
         else:
             resource.visits = visits
@@ -370,9 +392,11 @@ class ResourceStats(Base):
         :param downloads: number of downloads until visit_date
         :return: True for a successful update, otherwise False
         '''
-        resource = model.Session.query(cls).filter(cls.resource_id == item_id).filter(cls.visit_date == visit_date).first()
+        resource = model.Session.query(cls).filter(
+            cls.resource_id == item_id).filter(cls.visit_date == visit_date).first()
         if resource is None:
-            resource = ResourceStats(resource_id=item_id, visit_date=visit_date, downloads=downloads)
+            resource = ResourceStats(
+                resource_id=item_id, visit_date=visit_date, downloads=downloads)
             model.Session.add(resource)
         else:
             resource.downloads = downloads
@@ -384,31 +408,35 @@ class ResourceStats(Base):
         return True
 
     @classmethod
-    def get_resource_info_by_id(cls, resource_id):
+    def get_resource_info_by_id(cls, resource_id) -> Resource:
         resource = get_action('resource_show')({}, {'id': resource_id})
-        package = get_action('package_show')({}, {'id': resource.get('package_id')})
-        result = {'resource_id': resource.get('id'), 'resource_name': resource.get('name'),
-                  'resource_name_translated': resource.get('name_translated'), 'package_id': package.get('id'),
-                  'package_name': package.get('name'), 'package_title': package.get('title'),
-                  'package_title_translated': package.get('title_translated')}
-
+        package = get_action('package_show')(
+            {}, {'id': resource.get('package_id')})
+        result: Resource = {'resource_id': resource.get('id'), 'resource_name': resource.get('name'),
+                            'resource_name_translated': resource.get('name_translated'), 'package_id': package.get('id'),
+                            'package_name': package.get('name'), 'package_title': package.get('title'),
+                            'package_title_translated': package.get('title_translated')}
 
         return result
 
     @classmethod
-    def get_all_visits_by_id(cls, resource_id):
-        resource_visits = model.Session.query(cls).filter(cls.resource_id == resource_id).all()
-        total_visits = model.Session.query(func.sum(cls.visits)).filter(cls.resource_id == resource_id).scalar()
-        total_downloads = model.Session.query(func.sum(cls.downloads)).filter(cls.resource_id == resource_id).scalar()
-        visits = {}
+    def get_all_visits_by_id(cls, resource_id) -> Visits:
+        resource_visits = model.Session.query(cls).filter(
+            cls.resource_id == resource_id).all()
+        total_visits = model.Session.query(func.sum(cls.visits)).filter(
+            cls.resource_id == resource_id).scalar()
+        total_downloads = model.Session.query(func.sum(cls.downloads)).filter(
+            cls.resource_id == resource_id).scalar()
+        visits: Visits = {}
         if total_visits is not None or total_downloads is not None:
-            visits = ResourceStats.convert_to_dict(resource_visits, total_visits, total_downloads)
+            visits = ResourceStats.convert_to_dict(
+                resource_visits, total_visits, total_downloads)
         return visits
 
     @classmethod
     def get_stat_counts_by_id_and_date_range(cls, resource_id: str,
                                              start_date: Optional[datetime] = None,
-                                             end_date: Optional[datetime] = None) -> Dict[str, int]:
+                                             end_date: Optional[datetime] = None) -> Visit:
         '''
         Gets summed up visits and downloads for given resource
 
@@ -419,16 +447,18 @@ class ResourceStats(Base):
         '''
 
         if not start_date:
-            start_date = datetime.today() - relativedelta(months=1, hour=0, minute=0, second=0, microsecond=0)
+            start_date = datetime.today() - relativedelta(months=1, hour=0,
+                                                          minute=0, second=0, microsecond=0)
         if not end_date:
-            end_date = datetime.today().replace(hour=23, minute=59, second=59, microsecond=999999)
+            end_date = datetime.today().replace(
+                hour=23, minute=59, second=59, microsecond=999999)
 
         total_visits: int = model.Session.query(func.sum(cls.visits)).filter(cls.resource_id == resource_id,
-                                                                        cls.visit_date >= start_date,
-                                                                        cls.visit_date <= end_date).scalar()
+                                                                             cls.visit_date >= start_date,
+                                                                             cls.visit_date <= end_date).scalar()
         total_downloads: int = model.Session.query(func.sum(cls.downloads)).filter(cls.resource_id == resource_id,
-                                                                              cls.visit_date >= start_date,
-                                                                              cls.visit_date <= end_date).scalar()
+                                                                                   cls.visit_date >= start_date,
+                                                                                   cls.visit_date <= end_date).scalar()
         return {'visits': total_visits or 0, 'downloads': total_downloads or 0}
 
     @classmethod
@@ -450,42 +480,78 @@ class ResourceStats(Base):
                 if resource is None:
                     continue
 
-                last_date = model.Session.query(func.max(cls.visit_date)).filter(cls.resource_id == resource_id).first()
+                last_date = model.Session.query(func.max(cls.visit_date)).filter(
+                    cls.resource_id == resource_id).first()
 
-                rs = ResourceStats(resource_id=resource_id, visit_date=last_date[0], visits=visits, downloads=downloads)
+                rs = ResourceStats(
+                    resource_id=resource_id, visit_date=last_date[0], visits=visits, downloads=downloads)
                 resource_stats.append(rs)
         dictat = ResourceStats.convert_to_dict(resource_stats, None, None)
         return dictat
 
     @classmethod
-    def get_resource_stats_for_organization(cls,
-                                            organization_name: str,
-                                            start_date: Optional[datetime],
-                                            end_date: Optional[datetime]):
-        org_id: str = get_action('organization_show')({}, {'id': organization_name}).get('id')
-        packages = package_generator('*:*', 1000, fq = '+owner_org:%s' % org_id)
+    def get_total_downloads(cls,
+                            start_date: Optional[datetime] = None,
+                            end_date: Optional[datetime] = None,
+                            descending: bool = True,
+                            organization_id: Optional[str] = None) -> List[VisitsByResource]:
+        '''
+        Returns resources and their download amount summed during time span, grouped by resource.
+
+        :param start_date: Optional[datetime] - time range filter start - default 2000-01-01
+        :param end_date: Optional[datetime] - time range filter end - default yesterday 23:59:59
+        :param descending: bool - sorting direction - default True for descending sorting
+        :param organization_id: Optional[str} - organization_id / owner_org filtering
+        :return: [{'resource_id': str, 'package_id': str, 'visits': int, 'downloads': int, 'visit_date': str}, ...]
+        '''
+
+        if not start_date:
+            start_date = datetime(2000, 1, 1, 0, 0, 0, 0)
+        if not end_date:
+            end_date = datetime.today() - relativedelta(days=1, hour=23, minute=59, second=59)
+
+        query = model.Session.query(
+            model.Resource.id,
+            model.Resource.package_id,
+            func.sum(cls.visits).label('visits'),
+            func.sum(cls.downloads).label('downloads'),
+            func.max(cls.visit_date).label('last_visit')
+        ).filter(cls.visit_date >= start_date).filter(cls.visit_date <= end_date)
+
+        visits_by_resource = (query.join(model.Resource, model.Resource.id == cls.resource_id)
+                              .group_by(model.Resource.id)
+                              .order_by(sorting_direction('downloads', descending))).all()
+
+        if organization_id:
+            organizations_packages_query = (model.Session.query(model.Package.id, model.Package.owner_org)
+                .filter(model.Package.owner_org == organization_id)
+                .filter(model.Package.state == 'active')
+                .filter(model.Package.private == False)  # noqa: E712
+                .group_by(model.Package.id).all())
+            org_packages = [
+                package.id for package in organizations_packages_query]
+            visits_by_resource: List[ResourceStats] = [
+                visit for visit in visits_by_resource if visit.package_id in org_packages]
 
         resource_stats: List[ResourceStats] = []
-        # Add last date associated to the resource stat
-        for package in packages:
-            for resource in package.get('resources', []):
-                resource_id = resource.get('id')
-                stats = ResourceStats.get_stat_counts_by_id_and_date_range(resource_id, start_date, end_date)
-                last_date = model.Session.query(func.max(cls.visit_date)).filter(cls.resource_id == resource_id,
-                                                                                cls.visit_date >= start_date,
-                                                                                cls.visit_date <= end_date).first()[0]
 
-                rs = ResourceStats(resource_id=resource_id, visit_date=last_date, **stats)
-                resource_stats.append(rs)
-        dictat = ResourceStats.convert_to_dict(resource_stats, None, None)
-        dictat['resources'] = sorted(dictat['resources'], key=lambda resource: resource["downloads"], reverse=True)
+        for resource in visits_by_resource:
+            rs = ResourceStats(resource_id=resource.id,
+                               visit_date=resource.last_visit,
+                               visits=resource.visits,
+                               downloads=resource.downloads)
+            resource_stats.append(rs)
+        dictat: Visits = ResourceStats.convert_to_dict(
+            resource_stats, None, None)
 
-        return dictat
+        return sorted(dictat.get(
+            'resources', []), key=lambda resource: resource.get('downloads', ''), reverse=True)
 
     @classmethod
-    def as_dict(cls, res):
-        result = {}
-        res_info = ResourceStats.get_resource_info_by_id(res.resource_id)
+    def as_dict(cls, res) -> VisitsByResource:
+        result: VisitsByResource = {}
+        res_info: Resource = ResourceStats.get_resource_info_by_id(
+            res.resource_id)
         result['resource_id'] = res_info['resource_id']
         result['resource_name'] = res_info['resource_name']
         result['resource_name_translated'] = res_info['resource_name_translated']
@@ -495,18 +561,19 @@ class ResourceStats(Base):
         result['package_title_translated'] = res_info['package_title_translated']
         result['visits'] = res.visits
         result['downloads'] = res.downloads
-        result['visit_date'] = res.visit_date.strftime("%d-%m-%Y") if res.visit_date else ''
+        result['visit_date'] = res.visit_date.strftime(
+            "%d-%m-%Y") if res.visit_date else ''
 
         return result
 
     @classmethod
-    def convert_to_dict(cls, resource_stats, total_visits = None, total_downloads = None):
-        visits = []
+    def convert_to_dict(cls, resource_stats, total_visits=None, total_downloads=None) -> Visits:
+        visits: List[VisitsByResource] = []
 
         for resource in resource_stats:
             visits.append(ResourceStats.as_dict(resource))
 
-        results = {
+        results: Visits = {
             "resources": visits
         }
         if total_visits is not None:
@@ -518,29 +585,17 @@ class ResourceStats(Base):
         return results
 
     @classmethod
-    def get_last_visits_by_dataset_id(cls, package_id, num_days=30):
-        # Fetch all resources associated to this package id
-        subquery = model.Session.query(model.Resource.id).filter(model.Resource.package_id == package_id).subquery()
-
-        start_date = datetime.now() - timedelta(num_days)
-        resource_stats = model.Session.query(cls).filter(cls.resource_id.in_(subquery)).filter(
-            cls.visit_date >= start_date).all()
-        total_visits = model.Session.query(func.sum(cls.visits)).filter(cls.resource_id.in_(subquery)).scalar()
-        visits = ResourceStats.convert_to_dict(resource_stats, total_visits)
-
-        return visits
-
-    @classmethod
     def get_download_count_for_dataset(cls, package_id: str, start_date: datetime, end_date: datetime) -> int:
         # Returns a list of visits between the dates
-        subquery = model.Session.query(model.Resource.id).filter(model.Resource.package_id == package_id).subquery()
+        subquery = model.Session.query(model.Resource.id).filter(
+            model.Resource.package_id == package_id).subquery()
         visits = model.Session.query(cls).filter(cls.resource_id.in_(subquery)).filter(cls.visit_date >= start_date).filter(
             cls.visit_date <= end_date).all()
 
         return sum(filter(None, [visit.__dict__.get('downloads', 0) for visit in visits]))
 
     @classmethod
-    def get_all_visits(cls, id):
+    def get_all_visits(cls, id) -> Visits:
         visits_dict = ResourceStats.get_all_visits_by_id(id)
         total_downloads = visits_dict.get('total_downloads', 0)
         total_visits = visits_dict.get('total_visits', 0)
@@ -557,7 +612,8 @@ class ResourceStats(Base):
             weekly_download_count = 0
             weekly_visit_count = 0
             for visit in visits:
-                visit_date = datetime.strptime(visit.get('visit_date'), '%d-%m-%Y')
+                visit_date = datetime.strptime(
+                    visit.get('visit_date', ''), '%d-%m-%Y')
                 # Do nothing if date of visit isn't in period of current week
                 if visit_date < current_start_of_week or visit_date > current_end_of_week:
                     continue
@@ -574,7 +630,7 @@ class ResourceStats(Base):
         # Revert visit list to make it end on previous week
         visit_list = visit_list[::-1]
 
-        results = {
+        results: Visits = {
             "visits": visit_list,
             "total_downloads": total_downloads,
             "total_visits": total_visits,
@@ -582,20 +638,13 @@ class ResourceStats(Base):
         return results
 
     @classmethod
-    def get_latest_update_date(cls):
-        result = model.Session.query(cls).order_by(cls.visit_date.desc()).first()
+    def get_latest_update_date(cls) -> Optional[str]:
+        result = model.Session.query(cls).order_by(
+            cls.visit_date.desc()).first()
         if result is None:
             return None
         else:
             return result.visit_date
-
-    @classmethod
-    def get_visits_by_resource_id_between_two_dates(cls, resource_id, start_date, end_date):
-        # Returns a list of visits between the dates
-        visits = model.Session.query(cls).filter(cls.resource_id == resource_id).filter(cls.visit_date >= start_date).filter(
-            cls.visit_date <= end_date).all()
-        return visits
-
 
 class AudienceLocation(Base):
     """
@@ -604,10 +653,12 @@ class AudienceLocation(Base):
     """
     __tablename__ = 'audience_location'
 
-    id = Column(types.Integer, primary_key=True, autoincrement=True, unique=True)
+    id = Column(types.Integer, primary_key=True,
+                autoincrement=True, unique=True)
     location_name = Column(types.UnicodeText, nullable=False, primary_key=True)
 
-    visits_by_date = relationship("AudienceLocationDate", back_populates="location")
+    visits_by_date = relationship(
+        "AudienceLocationDate", back_populates="location")
 
     @classmethod
     def get(cls, id):
@@ -616,7 +667,8 @@ class AudienceLocation(Base):
     @classmethod
     def update_location(cls, location_name):
         # Check if the location can be found
-        location = model.Session.query(cls).filter(cls.location_name == location_name)
+        location = model.Session.query(cls).filter(
+            cls.location_name == location_name)
         if location is None:
             # Add location if not in db
             location = AudienceLocation(location_name=location_name)
@@ -637,13 +689,15 @@ class AudienceLocationDate(Base):
     """
     __tablename__ = 'audience_location_date'
 
-    id = Column(types.Integer, primary_key=True, autoincrement=True, unique=True)
+    id = Column(types.Integer, primary_key=True,
+                autoincrement=True, unique=True)
     date = Column(types.DateTime, default=datetime.now, primary_key=True)
 
     visits = Column(types.Integer, default=0)
     location_id = Column(types.Integer, ForeignKey('audience_location.id'))
 
-    location = relationship("AudienceLocation", back_populates="visits_by_date")
+    location = relationship(
+        "AudienceLocation", back_populates="visits_by_date")
 
     @classmethod
     def update_visits(cls, location_name, visit_date, visits):
@@ -656,7 +710,8 @@ class AudienceLocationDate(Base):
         :return: True for a successful update, otherwise False
         '''
         # find location_id by name
-        location = model.Session.query(AudienceLocation).filter(AudienceLocation.location_name == location_name).first()
+        location = model.Session.query(AudienceLocation).filter(
+            AudienceLocation.location_name == location_name).first()
 
         # if not found add location as new location
         if location is None:
@@ -669,7 +724,8 @@ class AudienceLocationDate(Base):
             cls.date == visit_date).first()
         # if not add them as a new row
         if location_by_date is None:
-            location_by_date = AudienceLocationDate(location_id=location.id, date=visit_date, visits=visits)
+            location_by_date = AudienceLocationDate(
+                location_id=location.id, date=visit_date, visits=visits)
             model.Session.add(location_by_date)
         else:
             location_by_date.visits = visits
@@ -796,7 +852,8 @@ class AudienceLocationDate(Base):
 
         for r in result:
             if all_visits != 0:
-                r['percent_visits'] = 100.0 * r.get('total_visits', 0.0) / all_visits
+                r['percent_visits'] = 100.0 * \
+                    r.get('total_visits', 0.0) / all_visits
             else:
                 r['percent_visits'] = 0.0
 
@@ -804,9 +861,11 @@ class AudienceLocationDate(Base):
 
     @classmethod
     def special_total_location_to_rest(cls, start_date, end_date, location):
-        location_details = cls.get_total_visits_by_location(start_date, end_date, location)
+        location_details = cls.get_total_visits_by_location(
+            start_date, end_date, location)
         location_details['location_name'] = location
-        rest = cls.get_total_visits_by_location(start_date, end_date, '!' + location)
+        rest = cls.get_total_visits_by_location(
+            start_date, end_date, '!' + location)
         rest['location_name'] = 'Other'
 
         return [
@@ -828,14 +887,16 @@ class AudienceLocationDate(Base):
         results = []
 
         for item in visits:
-            combined_date = str(item['date'].month) + '-' + str(item['date'].year)
+            combined_date = str(item['date'].month) + \
+                '-' + str(item['date'].year)
             if combined_date in unique_months:
                 for x in results:
                     if x['combined_date'] == combined_date:
                         x['visits'] += item['visits']
             else:
                 unique_months.append(combined_date)
-                results.append({'combined_date': combined_date, 'date': item['date'].__str__(), 'visits': item['visits']})
+                results.append({'combined_date': combined_date, 'date': item['date'].__str__(
+                ), 'visits': item['visits']})
 
         results.sort(key=lambda x: x['date'])
 
@@ -843,12 +904,14 @@ class AudienceLocationDate(Base):
 
     @classmethod
     def get_location_name_by_id(cls, location_id):
-        location = model.Session.query(AudienceLocation).filter(AudienceLocation.id == location_id).first()
+        location = model.Session.query(AudienceLocation).filter(
+            AudienceLocation.id == location_id).first()
         return location.location_name
 
     @classmethod
     def get_location_id_by_name(cls, location_name):
-        location = model.Session.query(AudienceLocation).filter(AudienceLocation.location_name == location_name).first()
+        location = model.Session.query(AudienceLocation).filter(
+            AudienceLocation.location_name == location_name).first()
         location_id = []
         if location is not None:
             location_id = location.id
@@ -892,7 +955,8 @@ class SearchStats(Base):
     """
     __tablename__ = 'search_terms'
 
-    id = Column(types.Integer, primary_key=True, autoincrement=True, unique=True)
+    id = Column(types.Integer, primary_key=True,
+                autoincrement=True, unique=True)
     search_term = Column(types.UnicodeText, nullable=False, primary_key=True)
     date = Column(types.DateTime, default=datetime.now, primary_key=True)
     count = Column(types.Integer, default=0)
@@ -918,9 +982,11 @@ class SearchStats(Base):
         :param count: Number of times the search term was searched
         :return: True for a successful update, otherwise False
         '''
-        row = model.Session.query(cls).filter(cls.search_term == search_term, cls.date == date).first()
+        row = model.Session.query(cls).filter(
+            cls.search_term == search_term, cls.date == date).first()
         if row is None:
-            model.Session.add(SearchStats(search_term=search_term, date=date, count=count))
+            model.Session.add(SearchStats(
+                search_term=search_term, date=date, count=count))
         else:
             row.count = count
         model.Session.commit()
@@ -929,7 +995,8 @@ class SearchStats(Base):
 
     @classmethod
     def get_most_popular_search_terms(cls, start_date, end_date, limit=50):
-        results = model.Session.query(cls).filter(cls.date >= start_date).filter(cls.date <= end_date).all()
+        results = model.Session.query(cls).filter(
+            cls.date >= start_date).filter(cls.date <= end_date).all()
         search_term_counts = {}
         for result in results:
             if result.search_term in search_term_counts:
@@ -937,7 +1004,8 @@ class SearchStats(Base):
                 if result.date > search_term_counts[result.search_term]['date']:
                     search_term_counts[result.search_term]['date'] = result.date
             else:
-                search_term_counts[result.search_term] = {'count': result.count}
+                search_term_counts[result.search_term] = {
+                    'count': result.count}
                 search_term_counts[result.search_term]['date'] = result.date
 
         search_term_list = []

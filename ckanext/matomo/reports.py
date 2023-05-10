@@ -5,7 +5,8 @@ from ckanext.report import lib as report
 from ckanext.report.types import Organization
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
 from ckanext.matomo.utils import package_generator, get_report_years, last_calendar_period
-from ckanext.matomo.types import VisitsByOrganization, VisitsByPackage, GroupedVisits, Time, OrganizationAndTime
+from ckanext.matomo.types import VisitsByOrganization, VisitsByPackage, VisitsByResource, GroupedVisits, TimeOptions, \
+                                 OrganizationAndTimeOptions, Report
 
 log = __import__('logging').getLogger(__name__)
 
@@ -16,14 +17,14 @@ except ImportError:
     from collections import OrderedDict
 
 
-def time_option_combinations() -> Generator[Time, None, None]:
+def time_option_combinations() -> Generator[TimeOptions, None, None]:
     time_options: list[str] = ['week', 'month', 'year']
     time_options.extend(get_report_years())
     for time in time_options:
         yield {'time': time}
 
 
-def org_and_time_option_combinations() -> Generator[OrganizationAndTime, None, None]:
+def org_and_time_option_combinations() -> Generator[OrganizationAndTimeOptions, None, None]:
     time_options: list[str] = ['week', 'month', 'year']
     time_options.extend(get_report_years())
     org_options: Generator[Organization, None,
@@ -153,7 +154,50 @@ def matomo_dataset_report_info():
     }
 
 
-def matomo_resource_report(organization: str, time: str):
+def matomo_resources_by_organization(organization_name: str,
+                                     start_date: datetime,
+                                     end_date: datetime,
+                                     descending=True,
+                                     sort_by='downloads') -> List[VisitsByResource]:
+    organization = get_action('organization_show')(
+        {}, {'id': organization_name})
+    organization_id: str = organization.get('id')
+
+    packages: Generator[Dict[str, Any], None, None] = package_generator('*:*', 1000,
+                                                                        fq='+owner_org:%s' % organization_id)
+    # Fetch total visits per package within given date range
+    resource_stats: List[VisitsByResource] = ResourceStats.get_total_downloads(start_date=start_date,
+                                                                               end_date=end_date,
+                                                                               descending=True,
+                                                                               organization_id=organization_id)
+
+    visits_by_resource: GroupedVisits = {
+        res.get('resource_id', ''): {'visits': res.get('visits', 0),
+                                     'downloads': res.get('downloads', 0),
+                                     'visit_date': res.get('visit_date', '')}
+        for res in resource_stats}
+
+    # Map the visit data onto relevant resources
+    result: List[VisitsByResource] = []
+    for package in packages:
+        package_id: str = package.get('id', '')
+        for resource in package.get('resources', []):
+            resource_id = resource.get('id')
+            visit = visits_by_resource.get(resource_id, {})
+            result.append(
+                {'resource_id': resource_id, 'resource_name': resource.get('name', ''),
+                 'resource_name_translated': resource.get('name_translated'),
+                 'package_id': package_id, 'package_name': package.get('name', ''), 'package_title': package.get('title', ''),
+                 'package_title_translated': package.get('title_translated'),
+                 'owner_org': package.get('owner_org'),
+                 'visits': visit.get('visits', 0),
+                 'downloads': visit.get('downloads', 0),
+                 'visit_date': visit.get('visit_date', '')})
+
+    return sorted(result, key=lambda dataset: dataset[sort_by], reverse=descending)
+
+
+def matomo_resource_report(organization: str, time: str) -> Report:
     '''
     Generates report based on matomo data.
     Total sum of resource dowloands per organization (all resources of all organization's packages)
@@ -166,16 +210,13 @@ def matomo_resource_report(organization: str, time: str):
     if organization_name is None:
         return {
             'report_name': 'matomo-resource',
-            'table': matomo_organization_list(start_date, end_date, descending=True, sort_by='total_downloads')
+            'table': matomo_organization_list(start_date, end_date, descending=True, sort_by='downloads')
         }
-
-    # Get the resources for the organization
-    resources = ResourceStats.get_resource_stats_for_organization(
-        organization_name, start_date, end_date)
 
     return {
         'report_name': 'matomo-resource',
-        'table': resources
+        'table': matomo_resources_by_organization(organization_name=organization_name, start_date=start_date,
+                                                  end_date=end_date, descending=True, sort_by='downloads')
     }
 
 
