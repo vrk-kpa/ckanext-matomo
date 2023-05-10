@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from typing import List, Generator, Dict, Any, Optional
 from ckan.plugins.toolkit import get_action
 from ckanext.report import lib as report
-from ckanext.report.types import Organization
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
 from ckanext.matomo.utils import package_generator, get_report_years, last_calendar_period
 from ckanext.matomo.types import VisitsByOrganization, VisitsByPackage, VisitsByResource, GroupedVisits, TimeOptions, \
@@ -27,8 +26,7 @@ def time_option_combinations() -> Generator[TimeOptions, None, None]:
 def org_and_time_option_combinations() -> Generator[OrganizationAndTimeOptions, None, None]:
     time_options: list[str] = ['week', 'month', 'year']
     time_options.extend(get_report_years())
-    org_options: Generator[Organization, None,
-                           None] = report.all_organizations(include_none=True)
+    org_options = report.all_organizations(include_none=True)
     for org in org_options:
         for time in time_options:
             yield {'organization': org, 'time': time}
@@ -39,7 +37,7 @@ def matomo_organization_list(start_date: datetime,
                              descending=True,
                              sort_by="visits") -> List[VisitsByOrganization]:
     # Fetch all organizations which have at least 1 dataset
-    organizations_with_datasets: Generator[Organization, None, None] = report.get_all_organizations(
+    organizations_with_datasets = report.get_all_organizations(
         only_orgs_with_packages=True)
     # Fetch total visits per package within given date range
     package_stats: List[VisitsByPackage] = PackageStats.get_total_visits(
