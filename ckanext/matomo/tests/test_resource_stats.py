@@ -3,6 +3,7 @@ import ckan.tests.factories as factories
 from datetime import datetime, timedelta
 from ckanext.matomo.model import ResourceStats
 from ckanext.matomo.commands import init_db
+from ckanext.matomo.utils import last_calendar_period
 import uuid
 
 
@@ -50,7 +51,8 @@ def test_resource_get_download_count_for_dataset_during_last_12_months(app):
     ResourceStats.update_downloads(resource_id, stat_date, 21)
     stat_date = datetime.strptime('2021-10-16', '%Y-%m-%d')
     ResourceStats.update_downloads(resource_id, stat_date, 21)
-    downloads_during_last_12_months = ResourceStats.get_download_count_for_dataset_during_last_12_months(package_id)
+    start_date, end_date = last_calendar_period('year')
+    downloads_during_last_12_months = ResourceStats.get_download_count_for_dataset(package_id, start_date, end_date)
 
     assert downloads_during_last_12_months == 26
 
@@ -79,7 +81,7 @@ def test_resource_get_top(app):
             stat_date = stat_date - timedelta(weeks=1)
 
     top_resources = ResourceStats.get_top()
-    resources = top_resources.get('resources')
+    resources = top_resources.get('resources', [])
 
     assert resources[0].get('resource_id') == resource_ids[0]
     assert resources[0].get('downloads') == 200

@@ -15,7 +15,7 @@
           {% set org_title = h.get_translated(row, 'organization_title') or org_name %}
           <tr>
             <td>{{ h.link_to(org_title, h.get_organization_url(org_name)) }}</td>
-            <td>{{ row.get('total_downloads') }}</td>
+            <td>{{ row.get('downloads') }}</td>
           </tr>
         {% endfor %}
       </table>
@@ -38,8 +38,8 @@
         <td>{{ h.link_to(h.truncate(resource_name, length=50,whole_word=True), h.url_for('dataset_resource.read',id=resource.package_id,resource_id=resource.resource_id)) }}<br />
           <em>in {{ h.link_to(package_title, h.url_for('dataset.read', id=resource.package_id)) }}</em>
         </td>
-        <td>{{ resource.downloads }}</td>
-        <td>{{ resource.visit_date }}</td>
+        <td>{{ resource.get('downloads') }}</td>
+        <td>{{ resource.get('visit_date') }}</td>
       </tr>
       {% endfor %}
       </table>

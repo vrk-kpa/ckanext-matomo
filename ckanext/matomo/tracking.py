@@ -61,10 +61,13 @@ def post_analytics(category, action, name, download=False):
 
 # Required to be a free function to work with background jobs
 def matomo_track(matomo_url, matomo_site_id, event, test_mode):
-    log = logging.getLogger('ckanext.matomo')
+    log = logging.getLogger('ckanext.matomo.tracking')
     if test_mode:
-        log.warn("Would send API event to Matomo: %s", event)
+        log.info("Would send API event to Matomo: %s", event)
     else:
-        log.warn("Sending API event to Matomo: %s", event)
+        log.info("Sending API event to Matomo: %s", event)
         api = MatomoAPI(matomo_url, matomo_site_id, token_auth=toolkit.config.get('ckanext.matomo.token_auth'))
-        api.tracking(event)
+        r = api.tracking(event)
+        if not r.ok:
+            log.warn('Error when posting tracking event to matomo: %s %s' % (r.status_code, r.reason))
+            log.warn('With request: %s' % r.url)
