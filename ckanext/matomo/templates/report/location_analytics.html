@@ -1,12 +1,6 @@
-{% if h.ckan_version().split('.')|map('int')|list >= [2, 9, 0] %}
-  {% asset "ytp_resources/d3_js" %}
-  {% asset "ckanext-matomo_js/chart-doughnut_js" %}
-  {% asset "ckanext-matomo_js/chart-column_js" %}
-{% else %}
-  {% resource "ytp_dataset_js/d3.js" %}
-  {% resource "ckanext-matomo_js/chart-doughnut.js" %}
-  {% resource "ckanext-matomo_js/chart-column.js" %}
-{% endif %}
+{% asset "ytp_resources/d3_js" %}
+{% asset "ckanext-matomo_js/chart-doughnut_js" %}
+{% asset "ckanext-matomo_js/chart-column_js" %}
 
 <script>
   var chartData = {
@@ -74,7 +68,7 @@
 </div>
 <hr class="page-break">
 <div>
-  <h2>{% trans %}Audience locations{% endtrans %}</h2> 
+  <h2>{% trans %}Audience locations{% endtrans %}</h2>
   <p>{% trans %}Collected since{% endtrans %} {{ h.render_datetime(data['data']['first_date']) }}</p>
   {% if data['data']['top_locations'] %}
     <table class="table table-condensed table-bordered table-striped">

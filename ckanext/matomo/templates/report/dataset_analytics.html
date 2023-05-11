@@ -18,10 +18,10 @@
           {% set org_title = h.get_translated(row, 'organization_title') or org_name %}
           <tr>
             <td>{{ h.link_to(org_title, h.get_organization_url(org_name)) }}</td>
-            <td>{{ row.get('total_visits') }}</td>
-            <td>{{ row.get('total_entrances') }}</td>
-            {% snippet "report/snippets/entrances_percentage_td.html", total_visits=row.get('total_visits'), total_entrances=row.get('total_entrances') %}
-            <td>{{ row.get('total_downloads') }}</td>
+            <td>{{ row.get('visits', 0) }}</td>
+            <td>{{ row.get('entrances', 0) }}</td>
+            {% snippet "report/snippets/entrances_percentage_td.html", visits=row.get('visits', 0), entrances=row.get('entrances', 0) %}
+            <td>{{ row.get('downloads', 0) }}</td>
           </tr>
         {% endfor %}
       </table>
@@ -43,10 +43,10 @@
           {% set package_title = h.get_translated(row, 'package_title') or row.get('package_name') %}
           <tr>
             <td>{{ h.link_to(package_title, h.url_for('dataset.read', id=row.package_id)) }}</td>
-            <td>{{ row.visits }}</td>
-            <td>{{ row.entrances }}</td>
-            {% snippet "report/snippets/entrances_percentage_td.html", total_visits=row.visits, total_entrances=row.entrances %}
-            <td>{{ row.downloads }}</td>
+            <td>{{ row.get('visits', 0) }}</td>
+            <td>{{ row.get('entrances', 0) }}</td>
+            {% snippet "report/snippets/entrances_percentage_td.html", visits=row.get('visits', 0), entrances=row.get('entrances', 0) %}
+            <td>{{ row.get('downloads', 0) }}</td>
           </tr>
         {% endfor %}
       </table>
@@ -54,7 +54,4 @@
         <p>{% trans %}No analytics found for most downloaded datasets.{% endtrans %}</p>
       {% endif %}
     {% endif %}
-
- </div>
-
-
+</div>

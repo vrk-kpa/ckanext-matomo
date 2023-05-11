@@ -10,11 +10,11 @@
         <th>{% trans %}Total searches{% endtrans %}</th>
         <th>{% trans %}Last searched date{% endtrans %}</th>
       </tr>
-        {% for search_term in table %}
+        {% for row in table %}
           <tr>
-            <td>{{ search_term.search_term }}</td>
-            <td>{{ search_term.count }}</td>
-            <td>{{ h.format_date(search_term.latest_search_date) }}</td>
+            <td>{{ row.search_term }}</td>
+            <td>{{ row.count }}</td>
+            <td>{{ h.format_date(row.latest_search_date) }}</td>
           </tr>
         {% endfor %}
       </table>
