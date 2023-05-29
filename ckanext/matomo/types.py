@@ -5,7 +5,7 @@ VisitsByPackage = TypedDict('VisitsByPackage', {'package_id': str,
                                                 'package_name': Optional[str],
                                                 'package_title_translated': Optional[LocalizationObject],
                                                 'owner_org': Optional[str],
-                                                'visits': int, 'entrances': int, 'downloads': int,
+                                                'visits': int, 'entrances': int, 'downloads': int, 'events': int,
                                                 'visit_date': str}, total=False)
 VisitsByResource = TypedDict('VisitsByResource', {'resource_id': str, 'resource_name': str,
                                                   'resource_name_translated': Optional[LocalizationObject],
@@ -14,10 +14,10 @@ VisitsByResource = TypedDict('VisitsByResource', {'resource_id': str, 'resource_
                                                   'package_title': str,
                                                   'package_title_translated': Optional[LocalizationObject],
                                                   'owner_org': Optional[str],
-                                                  'visits': int, 'entrances': int, 'downloads': int,
+                                                  'visits': int, 'entrances': int, 'downloads': int, 'events': int,
                                                   'visit_date': str}, total=False)
 Visit = TypedDict(
-    'Visit', {'visits': int, 'entrances': int, 'downloads': int, 'visit_date': str}, total=False)
+    'Visit', {'visits': int, 'entrances': int, 'downloads': int, 'events': int, 'visit_date': str}, total=False)
 Visits = TypedDict('Visits', {'packages': List[VisitsByPackage], 'resources': List[VisitsByResource],
                               'visits': List[Dict[str, int]],
                               'total_visits': int,
@@ -32,7 +32,8 @@ VisitsByOrganization = TypedDict('VisitsByOrganization', {
     'organization_title_translated': Optional[LocalizationObject],
     'visits': int,
     'entrances': int,
-    'downloads': int
+    'downloads': int,
+    'events': int
 })
 GroupedVisits = Dict[str, Visit]
 Report = TypedDict('Report', {'report_name': str,

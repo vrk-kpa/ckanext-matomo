@@ -57,6 +57,8 @@ def matomo_organization_list(start_date: datetime,
                 'entrances', 0) + stat.get('entrances', 0)
             totals_by_organization[organization_id]['downloads'] = totals_by_organization[organization_id].get(
                 'downloads', 0) + stat.get('downloads', 0)
+            totals_by_organization[organization_id]['events'] = totals_by_organization[organization_id].get(
+                'events', 0) + stat.get('events', 0)
     # Format into list of org dicts with stats totals
     organizations: List[VisitsByOrganization] = []
     for organization in organizations_with_datasets:
@@ -68,7 +70,8 @@ def matomo_organization_list(start_date: datetime,
             "organization_title_translated": organization.get('title_translated'),
             "visits": stats.get('visits', 0),
             "downloads": stats.get('downloads', 0),
-            "entrances": stats.get('entrances', 0)
+            "entrances": stats.get('entrances', 0),
+            "events": stats.get('events', 0)
         })
 
     return sorted(organizations, key=lambda organization: organization[sort_by], reverse=descending)
@@ -96,7 +99,8 @@ def matomo_datasets_by_organization(organization_name: str,
     visits_by_dataset: GroupedVisits = {
         pkg.get('package_id', ''): {'visits': pkg.get('visits', 0),
                                     'entrances': pkg.get('entrances', 0),
-                                    'downloads': pkg.get('downloads', 0)}
+                                    'downloads': pkg.get('downloads', 0),
+                                    'events': pkg.get('events', 0)}
         for pkg in package_stats}
 
     # Map the visit data onto relevant datasets
@@ -110,7 +114,8 @@ def matomo_datasets_by_organization(organization_name: str,
             "package_title_translated": dataset.get('title_translated', None),
             "visits": visit.get('visits', 0),
             "entrances": visit.get('entrances', 0),
-            "downloads": visit.get('downloads', 0)
+            "downloads": visit.get('downloads', 0),
+            "events": visit.get('events', 0)
         })
 
     return sorted(result, key=lambda dataset: dataset[sort_by], reverse=descending)

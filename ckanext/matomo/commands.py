@@ -1,10 +1,13 @@
 import datetime
+import re
 import ckan.plugins.toolkit as toolkit
 from ckanext.matomo.matomo_api import MatomoAPI
 from ckanext.matomo.model import PackageStats, ResourceStats, AudienceLocationDate, SearchStats
+from typing import Dict, Any, List
 
 DATE_FORMAT = '%Y-%m-%d'
 
+log = __import__('logging').getLogger(__name__)
 
 def fetch(dryrun, since, until):
     if since:
@@ -32,8 +35,9 @@ def fetch(dryrun, since, until):
 
     # Dataset stats
 
-    dataset_page_statistics = api.dataset_page_statistics(**params)
-    resource_download_statistics = api.resource_download_statistics(**params)
+    dataset_page_statistics: Dict[str, Any] = api.dataset_page_statistics(**params)
+    resource_download_statistics: Dict[str, Any] = api.resource_download_statistics(**params)
+    event_statistics: Dict[str, Any] = api.events(**params)
     updated_package_ids_by_date = {}
 
     # Parse visits for datasets
@@ -53,23 +57,33 @@ def fetch(dryrun, since, until):
                 except toolkit.ObjectNotFound:
                     print('Package "{}" not found, skipping...'.format(package_name.encode('iso-8859-1')))
                     continue
-                package_id = package['id']
-                visits = sum(stats.get('nb_hits', 0) for stats in stats_list)
-                entrances = sum(int(stats.get('entry_nb_visits', 0)) for stats in stats_list)
+                if package.get('type') == 'dataset':
+                    package_id: str = package['id']
+                    visits: int = sum(stats.get('nb_hits', 0) for stats in stats_list)
+                    entrances: int = sum(int(stats.get('entry_nb_visits', 0)) for stats in stats_list)
 
-                # Check if there's download stats for resources included in this package
-                package_resources_statistics = resource_download_statistics.get(date_str, {}).get(package_id, {})
-                downloads = sum(stats.get('nb_hits', 0)
-                                for resource_stats_list in package_resources_statistics.values()
-                                for stats in resource_stats_list)
+                    # Check if there's download stats for resources included in this package
+                    package_resources_statistics: Dict[str, Any] = resource_download_statistics.get(date_str, {})\
+                        .get(package_id, {})
+                    downloads: int = sum(stats.get('nb_hits', 0)
+                                    for resource_stats_list in package_resources_statistics.values()
+                                    for stats in resource_stats_list)
 
-                if dryrun:
-                    print('Would create or update: package_id={}, date={}, visits={}, entrances={}, downloads={}'
-                          .format(package_id, date, visits, entrances, downloads))
-                else:
-                    PackageStats.create_or_update(package_id, date, visits, entrances, downloads)
+                    # Check if there's event stats (API usage / 'package_show') for this package
+                    package_event_statistics: List[Dict[str, Any]] = [event for event in event_statistics.get(date_str, [])
+                                                                       if package_name in event.get('Events_EventName')
+                                                                        or package_id in event.get('Events_EventName')]
+                    events: int = sum(stats.get('nb_events', 0)
+                                    for stats in package_event_statistics)
 
-                updated_package_ids.add(package_id)
+                    if dryrun:
+                        print('Would create or update: package_id={}, date={}, visits={}, \
+                               entrances={}, downloads={}, events={}'
+                            .format(package_id, date, visits, entrances, downloads, events))
+                    else:
+                        PackageStats.create_or_update(package_id, date, visits, entrances, downloads, events)
+
+                    updated_package_ids.add(package_id)
             except Exception as e:
                 print('Error updating dataset statistics for {}: {}'.format(package_name, e))
 
@@ -86,7 +100,7 @@ def fetch(dryrun, since, until):
                         downloads = sum(stats.get('nb_hits', 0) for stats in resource_stats)
                         if dryrun:
                             print('Would create or update: resource_id={}, date={}, downloads={}'
-                                  .format(resource_id, date, visits))
+                                  .format(resource_id, date, downloads))
                         else:
                             ResourceStats.update_downloads(resource_id, date, downloads)
                     except Exception as e:
@@ -106,8 +120,35 @@ def fetch(dryrun, since, until):
             except Exception as e:
                 print('Error updating download statistics for {}: {}'.format(package_id, e))
 
-    # Resource page views
+    # Loop API event stats (as a fallback if dataset had no stats)
+    for date_str, date_statistics in event_statistics.items():
+        date = datetime.datetime.strptime(date_str, DATE_FORMAT)
+        updated_package_ids = updated_package_ids_by_date.get(date_str, set())
 
+        for stats in date_statistics:
+            regex = re.compile('.*id=(.*)&?.*$', re.I)
+            match = regex.match(stats.get('Events_EventName'))
+            if match:
+                package_id_or_name = match[1]
+                try:
+                    package = package_show({'ignore_auth': True}, {'id': package_id_or_name})
+                except toolkit.ObjectNotFound:
+                    print('Package "{}" not found, skipping...'.format(package_id_or_name.encode('iso-8859-1')))
+                    continue
+                package_id = package.get('id')
+                if package_id and package_id not in updated_package_ids:
+                    # Add event-stats for package
+                    try:
+                        events = stats.get('nb_events', 0)
+                        if dryrun:
+                            print('Would create or update: package_id={}, date={}, events={}'
+                                .format(package_id, date, events))
+                        else:
+                            PackageStats.update_events(package_id, date, events)
+                    except Exception as e:
+                        print('Error updating API event statistics for {}: {}'.format(package_id, e))
+
+    # Resource page views
     resource_page_statistics = api.resource_page_statistics(**params)
 
     for date_str, date_statistics in resource_page_statistics.items():
@@ -123,7 +164,6 @@ def fetch(dryrun, since, until):
                 print('Error updating resource statistics for {}: {}'.format(resource_id, e))
 
     # Visits by country
-
     visits_by_country = api.visits_by_country(**params)
 
     for date_str, date_statistics in visits_by_country.items():
@@ -142,7 +182,6 @@ def fetch(dryrun, since, until):
                 print('Error updating country statistics for {}: {}'.format(country_name, e))
 
     # Search terms
-
     search_terms = api.search_terms(**params)
 
     for date_str, date_statistics in search_terms.items():

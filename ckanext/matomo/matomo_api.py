@@ -2,6 +2,9 @@ import requests
 import datetime
 import uuid
 
+from typing import Dict, Any
+
+log = __import__('logging').getLogger(__name__)
 
 class MatomoException(RuntimeError):
     pass
@@ -33,20 +36,20 @@ class MatomoAPI(object):
 
         return result
 
-    def resource_download_statistics(self, period='month', date='today'):
-        data = self.get({'method': 'Actions.getDownloads',
+    def resource_download_statistics(self, period='month', date='today') -> Dict[str, Any]:
+        data: Dict[str, Any] = self.get({'method': 'Actions.getDownloads',
                          'period': period,
                          'date': date,
                          'flat': 1,
                          'filter_column': 'label',
                          'filter_pattern': '/data/([^/]+/)?dataset/[^/]+/resource/[^/]+/download/[^/]+$'})
 
-        def handle(data):
-            result = {}
+        def handle(data) -> Dict[str, Any]:
+            result: Dict[str, Any] = {}
             for datum in data:
                 # Request filter pattern ensures this is correct
-                dataset_id = datum['label'].split('/')[-5]
-                resource_id = datum['label'].split('/')[-3]
+                dataset_id: str = datum['label'].split('/')[-5]
+                resource_id: str = datum['label'].split('/')[-3]
 
                 result.setdefault(dataset_id, {}).setdefault(resource_id, []).append(datum)
 
@@ -54,64 +57,77 @@ class MatomoAPI(object):
 
         return _process_one_or_more_dates_result(data, handle)
 
-    def dataset_page_statistics(self, period='month', date='today'):
-        data = self.get({'method': 'Actions.getPageUrls',
+    def dataset_page_statistics(self, period='month', date='today') -> Dict[str, Any]:
+        data: Dict[str, Any] = self.get({'method': 'Actions.getPageUrls',
                          'period': period,
                          'date': date,
                          'flat': 1,
                          'filter_column': 'label',
                          'filter_pattern': '/data/([^/]+/)?dataset/[^/]+$'})
 
-        def handle(data):
-            result = {}
+        def handle(data) -> Dict[str, Any]:
+            result: Dict[str, Any] = {}
 
             for datum in data:
                 # Request filter pattern ensures this is correct
-                dataset_name = datum['label'].split('/')[-1]
+                dataset_name: str = datum['label'].split('/')[-1]
                 result.setdefault(dataset_name, []).append(datum)
 
             return result
 
         return _process_one_or_more_dates_result(data, handle)
 
-    def resource_page_statistics(self, period='month', date='today'):
-        data = self.get({'method': 'Actions.getPageUrls',
+    def resource_page_statistics(self, period='month', date='today') -> Dict[str, Any]:
+        data: Dict[str, Any] = self.get({'method': 'Actions.getPageUrls',
                          'period': period,
                          'date': date,
                          'flat': 1,
                          'filter_column': 'label',
                          'filter_pattern': '[^/]*/data/([^/]+/)?dataset/[^/]+/resource/[^/]+$'})
 
-        def handle(data):
-            result = {}
+        def handle(data) -> Dict[str, Any]:
+            result: Dict[str, Any] = {}
 
             for datum in data:
                 # Request filter pattern ensures this is correct
-                resource_id = datum['label'].split('/')[-1].split('?', 1)[0]
+                resource_id: str = datum['label'].split('/')[-1].split('?', 1)[0]
                 result.setdefault(resource_id, []).append(datum)
 
             return result
 
         return _process_one_or_more_dates_result(data, handle)
 
-    def visits_by_country(self, period='month', date='today'):
-        data = self.get({'method': 'UserCountry.getCountry',
+    def visits_by_country(self, period='month', date='today') -> Dict[str, Any]:
+        data: Dict[str, Any] = self.get({'method': 'UserCountry.getCountry',
                          'period': period,
                          'date': date,
                          'flat': 1})
 
-        def handle(data):
+        def handle(data) -> Dict[str, Any]:
             return data
 
         return _process_one_or_more_dates_result(data, handle)
 
-    def search_terms(self, period='month', date='today'):
-        data = self.get({'method': 'Actions.getSiteSearchKeywords',
+    def search_terms(self, period='month', date='today') -> Dict[str, Any]:
+        data: Dict[str, Any] = self.get({'method': 'Actions.getSiteSearchKeywords',
                          'period': period,
                          'date': date,
                          'flat': 1})
 
-        def handle(data):
+        def handle(data) -> Dict[str, Any]:
+            return data
+
+        return _process_one_or_more_dates_result(data, handle)
+
+    def events(self, period='month', date='today') -> Dict[str, Any]:
+        data: Dict[str, Any] = self.get({'method': 'Events.getAction',
+                         'period': period,
+                         'date': date,
+                         'filter_column': 'Events_EventAction',
+                         'filter_pattern': '^package_show',
+                         'flat': 1})
+
+        def handle(data) -> Dict[str, Any]:
             return data
 
         return _process_one_or_more_dates_result(data, handle)
@@ -127,7 +143,7 @@ class MatomoAPI(object):
     def tracking(self, extra_params):
         params = self.tracking_params.copy()
         params.update(extra_params)
-        params['rand'] = uuid.uuid1()
+        params['rand'] = str(uuid.uuid4())
 
         if self.token_auth is not None:
             params['token_auth'] = self.token_auth
@@ -135,13 +151,13 @@ class MatomoAPI(object):
         return requests.get(self.tracking_url, params=params)
 
 
-def _process_one_or_more_dates_result(data, handler):
+def _process_one_or_more_dates_result(data, handler) -> Dict[str, Any]:
     # Single date
     if isinstance(data, list):
         result = handler(data)
     # Multiple dates
     else:
-        result = {}
+        result: Dict[str, Any] = {}
         for date, date_data in data.items():
             result[date] = handler(date_data)
 

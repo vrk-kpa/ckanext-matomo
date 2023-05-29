@@ -37,13 +37,14 @@ class PackageStats(Base):
     visits = Column(types.Integer, default=0)
     entrances = Column(types.Integer, default=0)
     downloads = Column(types.Integer, default=0)
+    events = Column(types.Integer, default=0)
 
     @classmethod
     def get(cls, id):
         return model.Session.query(cls).filter(cls.package_id == id).first()
 
     @classmethod
-    def create_or_update(cls, package_id, visit_date, visits, entrances, downloads):
+    def create_or_update(cls, package_id, visit_date, visits, entrances, downloads, events):
         '''
         Creates a new PackageStats or updates an existing one for the same package_id/visit_date
         :param package_id: package id
@@ -60,21 +61,23 @@ class PackageStats(Base):
 
         if package is None:
             package = PackageStats(package_id=package_id, visit_date=visit_date,
-                                   visits=visits, entrances=entrances, downloads=downloads)
+                                   visits=visits, entrances=entrances, downloads=downloads,
+                                   events=events)
             model.Session.add(package)
         else:
             package.visits = visits
             package.entrances = entrances
             package.downloads = downloads
+            package.events = events
 
         model.Session.commit()
-        log.debug("Number of visits and downloads for date: %s updated for package id: %s",
-                  visit_date, package_id)
+        log.debug("Updated the number of visits, downloads and events for date: %s for package id: %s",
+                  visit_date.strftime('%Y-%m-%d'), package_id)
         model.Session.flush()
         return True
 
     @classmethod
-    def update_visits(cls, item_id, visit_date, visits=0, entrances=0, downloads=0):
+    def update_visits(cls, item_id, visit_date, visits=0, entrances=0, downloads=0, events=0):
         '''
         Updates the number of visits for a certain package_id
         or creates a new one if it is the first visit for a certain date
@@ -83,20 +86,22 @@ class PackageStats(Base):
         :param visit_date: visit date to be updated
         :param visits: number of visits during date
         :param entrances: number of entrances during date
+        :param events: number of api events during date
         :return: True for a successful update, otherwise False
         '''
         package = model.Session.query(cls).filter(
             cls.package_id == item_id).filter(cls.visit_date == visit_date).first()
         if package is None:
             package = PackageStats(package_id=item_id, visit_date=visit_date,
-                                   visits=visits, entrances=entrances, downloads=downloads)
+                                   visits=visits, entrances=entrances, downloads=downloads, events=events)
             model.Session.add(package)
         else:
             package.visits = visits
             package.entrances = entrances
 
+
         log.debug(
-            "Number of visits for date: %s updated for package id: %s", visit_date, item_id)
+            "Updated the number of visits and entrances for date: %s for package id: %s", visit_date, item_id)
         model.Session.flush()
         return True
 
@@ -110,11 +115,30 @@ class PackageStats(Base):
             cls.package_id == package_id).filter(cls.visit_date == visit_date).first()
         if package is None:
             cls.update_visits(item_id=package_id, visit_date=visit_date,
-                              visits=0, entrances=0, downloads=downloads)
+                              visits=0, entrances=0, downloads=downloads, events=0)
         else:
             package.downloads = downloads
 
-        log.debug("Downloads updated for date: %s and packag: %s",
+        log.debug("Updated the number of downloads for date: %s and package: %s",
+                  visit_date, package_id)
+        model.Session.flush()
+        return True
+
+    @classmethod
+    def update_events(cls, package_id, visit_date, events):
+        '''
+        Adds events amount to package.
+        If package doesn't have any stats, adds stats object with empty visits, entrances and downloads
+        '''
+        package = model.Session.query(cls).filter(
+            cls.package_id == package_id).filter(cls.visit_date == visit_date).first()
+        if package is None:
+            cls.update_visits(item_id=package_id, visit_date=visit_date,
+                              visits=0, entrances=0, downloads=0, events=events)
+        else:
+            package.events = events
+
+        log.debug("Updated the number of API events for date: %s and package: %s",
                   visit_date, package_id)
         model.Session.flush()
         return True
@@ -145,7 +169,7 @@ class PackageStats(Base):
         :param descending: bool - sorting direction - default True for descending sorting
         :param package_id: Optional[str] - package_id filtering
         :param organization_id: Optional[str} - organization_id / owner_org filtering
-        :return: [{ package_id: str, owner_org: str, visits: int, entrances: int, downloads: int }, ...]
+        :return: [{ package_id: str, owner_org: str, visits: int, entrances: int, downloads: int, events: int }, ...]
         '''
         if not start_date:
             start_date = datetime(2000, 1, 1, 0, 0, 0, 0)
@@ -156,7 +180,8 @@ class PackageStats(Base):
             cls.package_id,
             func.sum(cls.visits).label('total_visits'),
             func.sum(cls.downloads).label('total_downloads'),
-            func.sum(cls.entrances).label('total_entrances')
+            func.sum(cls.entrances).label('total_entrances'),
+            func.sum(cls.events).label('total_events')
         ).filter(cls.visit_date >= start_date).filter(cls.visit_date <= end_date)
         if package_id:
             query = query.filter(cls.package_id == package_id)
@@ -177,6 +202,7 @@ class PackageStats(Base):
             "visits": dataset.total_visits or 0,
             "entrances": dataset.total_entrances or 0,
             "downloads": dataset.total_downloads or 0,
+            "events": dataset.total_events or 0,
         } for dataset in visits_by_dataset]
 
         return result
@@ -305,6 +331,7 @@ class PackageStats(Base):
         result['visits'] = pkg.visits
         result['entrances'] = pkg.entrances
         result['downloads'] = pkg.downloads
+        result['events'] = pkg.events
         result['visit_date'] = pkg.visit_date.strftime("%d-%m-%Y")
         return result
 
@@ -378,7 +405,7 @@ class ResourceStats(Base):
             resource.visit_date = visit_date
 
         model.Session.commit()
-        log.debug("Number of visits updated for resource id: %s", item_id)
+        log.debug("Updated the number of visits for resource id: %s", item_id)
         model.Session.flush()
         return True
 
@@ -403,7 +430,7 @@ class ResourceStats(Base):
             resource.visit_date = visit_date
 
         model.Session.commit()
-        log.debug("Number of downloads updated for resource id: %s", item_id)
+        log.debug("Updated the number of downloads for resource id: %s", item_id)
         model.Session.flush()
         return True
 
@@ -730,7 +757,7 @@ class AudienceLocationDate(Base):
         else:
             location_by_date.visits = visits
 
-        log.debug("Number of visits updated for location %s" % location_name)
+        log.debug("Updated the number of visits for location %s" % location_name)
         model.Session.flush()
         return True
 

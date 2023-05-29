@@ -12,6 +12,7 @@
         <th>{% trans %}Initial entrance{% endtrans %}</th>
         <th>{% trans %}Entrances of total views{% endtrans %}</th>
         <th>{% trans %}Downloads{% endtrans %}</th>
+        <th>{% trans %}API events{% endtrans %}</th>
       </tr>
         {% for row in data['table'] %}
           {% set org_name = row.get('organization_name') %}
@@ -22,6 +23,7 @@
             <td>{{ row.get('entrances', 0) }}</td>
             {% snippet "report/snippets/entrances_percentage_td.html", visits=row.get('visits', 0), entrances=row.get('entrances', 0) %}
             <td>{{ row.get('downloads', 0) }}</td>
+            <td>{{ row.get('events', 0) }}</td>
           </tr>
         {% endfor %}
       </table>
@@ -38,6 +40,7 @@
           <th>{% trans %}Initial entrance{% endtrans %}</th>
           <th>{% trans %}Entrances of total views{% endtrans %}</th>
           <th>{% trans %}Downloads{% endtrans %}</th>
+          <th>{% trans %}API events{% endtrans %}</th>
         </tr>
         {% for row in data['table'] %}
           {% set package_title = h.get_translated(row, 'package_title') or row.get('package_name') %}
@@ -47,6 +50,7 @@
             <td>{{ row.get('entrances', 0) }}</td>
             {% snippet "report/snippets/entrances_percentage_td.html", visits=row.get('visits', 0), entrances=row.get('entrances', 0) %}
             <td>{{ row.get('downloads', 0) }}</td>
+            <td>{{ row.get('events', 0) }}</td>
           </tr>
         {% endfor %}
       </table>
