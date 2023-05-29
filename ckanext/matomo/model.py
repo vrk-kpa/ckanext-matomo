@@ -7,12 +7,13 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 import ckan.model as model
-from ckan.plugins.toolkit import get_action
+from ckan.plugins.toolkit import get_action, ObjectNotFound
 
 from ckanext.matomo.utils import last_calendar_period
 from ckanext.matomo.types import Visit, Visits, VisitsByPackage, Resource, VisitsByResource
 
-log = __import__('logging').getLogger(__name__)
+import logging
+log = logging.getLogger(__name__)
 
 Base = declarative_base()
 
@@ -437,12 +438,11 @@ class ResourceStats(Base):
     @classmethod
     def get_resource_info_by_id(cls, resource_id) -> Resource:
         resource = get_action('resource_show')({}, {'id': resource_id})
-        package = get_action('package_show')(
-            {}, {'id': resource.get('package_id')})
+        package = get_action('package_show')({}, {'id': resource.get('package_id')})
         result: Resource = {'resource_id': resource.get('id'), 'resource_name': resource.get('name'),
-                            'resource_name_translated': resource.get('name_translated'), 'package_id': package.get('id'),
-                            'package_name': package.get('name'), 'package_title': package.get('title'),
-                            'package_title_translated': package.get('title_translated')}
+                        'resource_name_translated': resource.get('name_translated'), 'package_id': package.get('id'),
+                        'package_name': package.get('name'), 'package_title': package.get('title'),
+                        'package_title_translated': package.get('title_translated')}
 
         return result
 
@@ -575,30 +575,36 @@ class ResourceStats(Base):
             'resources', []), key=lambda resource: resource.get('downloads', ''), reverse=True)
 
     @classmethod
-    def as_dict(cls, res) -> VisitsByResource:
+    def as_dict(cls, res) -> Optional[VisitsByResource]:
         result: VisitsByResource = {}
-        res_info: Resource = ResourceStats.get_resource_info_by_id(
-            res.resource_id)
-        result['resource_id'] = res_info['resource_id']
-        result['resource_name'] = res_info['resource_name']
-        result['resource_name_translated'] = res_info['resource_name_translated']
-        result['package_id'] = res_info['package_id']
-        result['package_name'] = res_info['package_name']
-        result['package_title'] = res_info['package_title']
-        result['package_title_translated'] = res_info['package_title_translated']
-        result['visits'] = res.visits
-        result['downloads'] = res.downloads
-        result['visit_date'] = res.visit_date.strftime(
-            "%d-%m-%Y") if res.visit_date else ''
+        try:
+            res_info = ResourceStats.get_resource_info_by_id(
+                res.resource_id)
+            result['resource_id'] = res_info['resource_id']
+            result['resource_name'] = res_info['resource_name']
+            result['resource_name_translated'] = res_info['resource_name_translated']
+            result['package_id'] = res_info['package_id']
+            result['package_name'] = res_info['package_name']
+            result['package_title'] = res_info['package_title']
+            result['package_title_translated'] = res_info['package_title_translated']
+            result['visits'] = res.visits
+            result['downloads'] = res.downloads
+            result['visit_date'] = res.visit_date.strftime(
+                "%d-%m-%Y") if res.visit_date else ''
+            return result
 
-        return result
+        except ObjectNotFound:
+            print('Resource "{}" not found, skipping...'.format(res.resource_id.encode('iso-8859-1')))
+            return None
 
     @classmethod
     def convert_to_dict(cls, resource_stats, total_visits=None, total_downloads=None) -> Visits:
         visits: List[VisitsByResource] = []
 
         for resource in resource_stats:
-            visits.append(ResourceStats.as_dict(resource))
+            result = ResourceStats.as_dict(resource)
+            if result:
+                visits.append(result)
 
         results: Visits = {
             "resources": visits

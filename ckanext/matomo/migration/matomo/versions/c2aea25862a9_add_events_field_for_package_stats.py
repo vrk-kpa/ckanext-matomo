@@ -18,7 +18,7 @@ depends_on = None
 
 def upgrade():
     if not column_exists('package_stats', 'events'):
-        op.add_column('package_stats', sa.Column('events', sa.Integer, server_default=0))
+        op.add_column('package_stats', sa.Column('events', sa.Integer, default=0))
     pass
 
 
