@@ -1,22 +1,25 @@
 # Translations template for ckanext-matomo.
-# Copyright (C) 2022 ORGANIZATION
+# Copyright (C) 2023 ORGANIZATION
 # This file is distributed under the same license as the ckanext-matomo project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 # 
 # Translators:
 # Pasi Laakso <pasi.laakso@gofore.com>, 2021
 # Meeri Hakala <meeri.hakala@dvv.fi>, 2022
 # Ville Teräväinen, 2022
+# Eetu Mansikkamäki <eetu.mansikkamaki@gofore.com>, 2023
+# Roosa Lampinen, 2023
+# Suvi Nuttunen, 2023
 # 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: ckanext-matomo 0.0.1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-12-15 12:50+0000\n"
+"POT-Creation-Date: 2023-06-01 12:39+0000\n"
 "PO-Revision-Date: 2021-11-17 12:18+0000\n"
-"Last-Translator: Ville Teräväinen, 2022\n"
-"Language-Team: Finnish (https://www.transifex.com/avoindata/teams/7979/fi/)\n"
+"Last-Translator: Suvi Nuttunen, 2023\n"
+"Language-Team: Finnish (https://app.transifex.com/avoindata/teams/7979/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -24,97 +27,130 @@ msgstr ""
 "Language: fi\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ckanext/matomo/templates/report/analytics.html:2
-#: ckanext/matomo/templates/report/dataset_analytics.html:19
-msgid "Most viewed datasets"
-msgstr "Katsotuimmat tietoaineistot"
+#: ckanext/matomo/translations.py:8
+msgid "Matomo showing most audience locations (bot traffic is filtered out)"
+msgstr ""
+"Vierailijoiden sijainti maan mukaan lajiteltuna (bottien liikenne on "
+"suodatettu pois)"
 
-#: ckanext/matomo/templates/report/analytics.html:6
-#: ckanext/matomo/templates/report/dataset_analytics.html:23
-msgid "Dataset"
-msgstr "Tietoaineisto"
+#: ckanext/matomo/translations.py:9
+msgid "Most popular datasets"
+msgstr "Eniten katsotut tietoaineistot"
 
-#: ckanext/matomo/templates/report/analytics.html:7
-msgid "Last accessed day"
-msgstr "Viimeisin vierailu"
+#: ckanext/matomo/translations.py:10
+msgid "Matomo showing top datasets with most views by organization"
+msgstr "Tietoaineistot, joilla on eniten katselukertoja organisaatioittain"
 
-#: ckanext/matomo/templates/report/analytics.html:8
-msgid "Number views (since recording started)"
-msgstr "Näyttökertoja (seurannan alusta alkaen)"
-
-#: ckanext/matomo/templates/report/analytics.html:19
-#: ckanext/matomo/templates/report/dataset_analytics.html:40
-msgid "No analytics found for most downloaded datasets."
-msgstr "Eniten ladatuista tietoaineistoista ei löytynyt statistiikkaa. "
-
-#: ckanext/matomo/templates/report/analytics.html:21
-#: ckanext/matomo/templates/report/resource_analytics.html:2
-msgid "Most downloaded resources"
+#: ckanext/matomo/translations.py:11
+msgid "Most popular resources"
 msgstr "Ladatuimmat data-aineistot"
 
+#: ckanext/matomo/translations.py:12
+msgid "Matomo showing most downloaded resources"
+msgstr "Eniten ladatut tietoaineistot organisaatioittain"
+
+#: ckanext/matomo/templates/report/search_term_analytics.html:3
+#: ckanext/matomo/translations.py:13
+msgid "Most popular search terms"
+msgstr "Suosituimmat hakusanat"
+
+#: ckanext/matomo/translations.py:14
+msgid "Matomo showing most popular search terms"
+msgstr "Suosituimmat hakusanat ja viimeisimmät hakupäivämäärät"
+
+#: ckanext/matomo/templates/report/search_term_analytics.html:11
+#: ckanext/matomo/translations.py:15
+msgid "Last searched date"
+msgstr "Viimeksi haettu"
+
 #: ckanext/matomo/templates/report/dataset_analytics.html:5
+#: ckanext/matomo/templates/report/resource_analytics.html:5
 msgid "Organizations that have published data"
 msgstr "Dataa julkaisseet tuottajat"
 
-#: ckanext/matomo/templates/report/dataset_analytics.html:24
-#: ckanext/matomo/templates/report/organization_analytics.html:7
+#: ckanext/matomo/templates/report/dataset_analytics.html:10
+#: ckanext/matomo/templates/report/resource_analytics.html:10
+msgid "Organization"
+msgstr "Tuottaja"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:11
+#: ckanext/matomo/templates/report/dataset_analytics.html:39
 msgid "Total views"
 msgstr "Näyttökerrat yhteensä"
 
-#: ckanext/matomo/templates/report/dataset_analytics.html:25
-#: ckanext/matomo/templates/report/organization_analytics.html:8
+#: ckanext/matomo/templates/report/dataset_analytics.html:12
+#: ckanext/matomo/templates/report/dataset_analytics.html:40
 msgid "Initial entrance"
 msgstr "Uudet kävijät"
 
-#: ckanext/matomo/templates/report/dataset_analytics.html:26
-#: ckanext/matomo/templates/report/organization_analytics.html:9
+#: ckanext/matomo/templates/report/dataset_analytics.html:13
+#: ckanext/matomo/templates/report/dataset_analytics.html:41
 msgid "Entrances of total views"
 msgstr "Uusien kävijöiden osuus kaikista"
 
-#: ckanext/matomo/templates/report/dataset_analytics.html:27
-#: ckanext/matomo/templates/report/organization_analytics.html:10
+#: ckanext/matomo/templates/report/dataset_analytics.html:14
+#: ckanext/matomo/templates/report/dataset_analytics.html:42
+#: ckanext/matomo/templates/report/resource_analytics.html:11
+#: ckanext/matomo/templates/report/resource_analytics.html:30
 msgid "Downloads"
 msgstr "Lataukset"
 
-#: ckanext/matomo/templates/report/location_analytics.html:43
+#: ckanext/matomo/templates/report/dataset_analytics.html:15
+#: ckanext/matomo/templates/report/dataset_analytics.html:43
+msgid "API events"
+msgstr "Rajapintakutsujen määrä"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:32
+msgid "Most viewed datasets"
+msgstr "Katsotuimmat tietoaineistot"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:38
+msgid "Dataset"
+msgstr "Tietoaineisto"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:58
+msgid "No analytics found for most downloaded datasets."
+msgstr "Eniten ladatuista tietoaineistoista ei löytynyt statistiikkaa. "
+
+#: ckanext/matomo/templates/report/location_analytics.html:37
 msgid "Sessions by month"
 msgstr "Istuntoja kuukausittain"
 
-#: ckanext/matomo/templates/report/location_analytics.html:44
+#: ckanext/matomo/templates/report/location_analytics.html:38
 msgid "Dates"
 msgstr "Päivämäärät"
 
-#: ckanext/matomo/templates/report/location_analytics.html:45
-#: ckanext/matomo/templates/report/location_analytics.html:84
+#: ckanext/matomo/templates/report/location_analytics.html:39
+#: ckanext/matomo/templates/report/location_analytics.html:78
 msgid "Sessions"
 msgstr "Istunnot"
 
-#: ckanext/matomo/templates/report/location_analytics.html:53
-#: ckanext/matomo/templates/report/location_analytics.html:62
+#: ckanext/matomo/templates/report/location_analytics.html:47
+#: ckanext/matomo/templates/report/location_analytics.html:56
 msgid "Sessions last month"
 msgstr "Istuntoja viime kuussa"
 
-#: ckanext/matomo/templates/report/location_analytics.html:69
+#: ckanext/matomo/templates/report/location_analytics.html:63
 msgid "Sessions total"
 msgstr "Istuntoja yhteensä"
 
-#: ckanext/matomo/templates/report/location_analytics.html:77
+#: ckanext/matomo/templates/report/location_analytics.html:71
 msgid "Audience locations"
 msgstr "Vierailijoiden sijainnit maittain"
 
-#: ckanext/matomo/templates/report/location_analytics.html:78
+#: ckanext/matomo/templates/report/location_analytics.html:72
 msgid "Collected since"
 msgstr "Seuranta aloitettu"
 
-#: ckanext/matomo/templates/report/location_analytics.html:82
+#: ckanext/matomo/templates/report/location_analytics.html:76
 msgid "Countries"
 msgstr "Maat"
 
-#: ckanext/matomo/templates/report/location_analytics.html:83
+#: ckanext/matomo/templates/report/location_analytics.html:77
 msgid "Sessions (since recording started)"
 msgstr "Istuntoja (seurannan alusta alkaen)"
 
-#: ckanext/matomo/templates/report/location_analytics.html:95
+#: ckanext/matomo/templates/report/location_analytics.html:89
 msgid "No statistics found for audience locations."
 msgstr "Ei statistiikkaa vierailijoiden sijainneista."
 
@@ -126,48 +162,30 @@ msgstr "Näytettävien tilastojen määrä:"
 msgid "Timespan for records"
 msgstr "Tilastot ajalta"
 
-#: ckanext/matomo/templates/report/organization_analytics.html:2
-msgid "Organizations with most viewed datasets"
-msgstr "Tuottajat, joiden tietoaineistoja katsottu eniten"
+#: ckanext/matomo/templates/report/resource_analytics.html:23
+msgid "Most downloaded resources"
+msgstr "Ladatuimmat data-aineistot"
 
-#: ckanext/matomo/templates/report/organization_analytics.html:6
-msgid "Organization"
-msgstr "Tuottaja"
-
-#: ckanext/matomo/templates/report/organization_analytics.html:23
-msgid "No analytics found for organizations with most visited datasets."
-msgstr ""
-"Tilastoja tuottajista, joiden tietoaineistoja on katsottu eniten ei ole "
-"saatavilla"
-
-#: ckanext/matomo/templates/report/resource_analytics.html:6
+#: ckanext/matomo/templates/report/resource_analytics.html:29
 msgid "Resource"
 msgstr "Data-aineisto"
 
-#: ckanext/matomo/templates/report/resource_analytics.html:7
+#: ckanext/matomo/templates/report/resource_analytics.html:31
 msgid "Last accessed date"
 msgstr "Viimeisin vierailu"
 
-#: ckanext/matomo/templates/report/resource_analytics.html:8
-msgid "Downloads (since recording started)"
-msgstr "Lataukset (seurannan alusta asti)"
-
-#: ckanext/matomo/templates/report/resource_analytics.html:21
+#: ckanext/matomo/templates/report/resource_analytics.html:47
 msgid "No statistics found for most downloaded resources."
 msgstr "Eniten ladatuista data-aineistoista ei löytynyt statistiikkaa. "
 
-#: ckanext/matomo/templates/report/search_term_analytics.html:2
-msgid "Most popular search terms"
-msgstr "Suosituimmat hakusanat"
-
-#: ckanext/matomo/templates/report/search_term_analytics.html:6
+#: ckanext/matomo/templates/report/search_term_analytics.html:9
 msgid "Search term"
 msgstr "Hakusana"
 
-#: ckanext/matomo/templates/report/search_term_analytics.html:7
+#: ckanext/matomo/templates/report/search_term_analytics.html:10
 msgid "Total searches"
 msgstr "Haut yhteensä"
 
-#: ckanext/matomo/templates/report/search_term_analytics.html:17
+#: ckanext/matomo/templates/report/search_term_analytics.html:22
 msgid "No analytics found for most popular search terms"
 msgstr "Tilastoja suosituimmista hakusanoista ei löytynyt"

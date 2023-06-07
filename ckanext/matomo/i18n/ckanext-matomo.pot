@@ -1,14 +1,14 @@
 # Translations template for ckanext-matomo.
-# Copyright (C) 2022 ORGANIZATION
+# Copyright (C) 2023 ORGANIZATION
 # This file is distributed under the same license as the ckanext-matomo project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: ckanext-matomo 0.0.1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-12-15 12:50+0000\n"
+"POT-Creation-Date: 2023-06-01 12:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,97 +17,128 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.7.0\n"
 
-#: ckanext/matomo/templates/report/analytics.html:2
-#: ckanext/matomo/templates/report/dataset_analytics.html:19
-msgid "Most viewed datasets"
+#: ckanext/matomo/translations.py:8
+msgid "Matomo showing most audience locations (bot traffic is filtered out)"
 msgstr ""
 
-#: ckanext/matomo/templates/report/analytics.html:6
-#: ckanext/matomo/templates/report/dataset_analytics.html:23
-msgid "Dataset"
+#: ckanext/matomo/translations.py:9
+msgid "Most popular datasets"
 msgstr ""
 
-#: ckanext/matomo/templates/report/analytics.html:7
-msgid "Last accessed day"
+#: ckanext/matomo/translations.py:10
+msgid "Matomo showing top datasets with most views by organization"
 msgstr ""
 
-#: ckanext/matomo/templates/report/analytics.html:8
-msgid "Number views (since recording started)"
+#: ckanext/matomo/translations.py:11
+msgid "Most popular resources"
 msgstr ""
 
-#: ckanext/matomo/templates/report/analytics.html:19
-#: ckanext/matomo/templates/report/dataset_analytics.html:40
-msgid "No analytics found for most downloaded datasets."
+#: ckanext/matomo/translations.py:12
+msgid "Matomo showing most downloaded resources"
 msgstr ""
 
-#: ckanext/matomo/templates/report/analytics.html:21
-#: ckanext/matomo/templates/report/resource_analytics.html:2
-msgid "Most downloaded resources"
+#: ckanext/matomo/templates/report/search_term_analytics.html:3
+#: ckanext/matomo/translations.py:13
+msgid "Most popular search terms"
+msgstr ""
+
+#: ckanext/matomo/translations.py:14
+msgid "Matomo showing most popular search terms"
+msgstr ""
+
+#: ckanext/matomo/templates/report/search_term_analytics.html:11
+#: ckanext/matomo/translations.py:15
+msgid "Last searched date"
 msgstr ""
 
 #: ckanext/matomo/templates/report/dataset_analytics.html:5
+#: ckanext/matomo/templates/report/resource_analytics.html:5
 msgid "Organizations that have published data"
 msgstr ""
 
-#: ckanext/matomo/templates/report/dataset_analytics.html:24
-#: ckanext/matomo/templates/report/organization_analytics.html:7
+#: ckanext/matomo/templates/report/dataset_analytics.html:10
+#: ckanext/matomo/templates/report/resource_analytics.html:10
+msgid "Organization"
+msgstr ""
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:11
+#: ckanext/matomo/templates/report/dataset_analytics.html:39
 msgid "Total views"
 msgstr ""
 
-#: ckanext/matomo/templates/report/dataset_analytics.html:25
-#: ckanext/matomo/templates/report/organization_analytics.html:8
+#: ckanext/matomo/templates/report/dataset_analytics.html:12
+#: ckanext/matomo/templates/report/dataset_analytics.html:40
 msgid "Initial entrance"
 msgstr ""
 
-#: ckanext/matomo/templates/report/dataset_analytics.html:26
-#: ckanext/matomo/templates/report/organization_analytics.html:9
+#: ckanext/matomo/templates/report/dataset_analytics.html:13
+#: ckanext/matomo/templates/report/dataset_analytics.html:41
 msgid "Entrances of total views"
 msgstr ""
 
-#: ckanext/matomo/templates/report/dataset_analytics.html:27
-#: ckanext/matomo/templates/report/organization_analytics.html:10
+#: ckanext/matomo/templates/report/dataset_analytics.html:14
+#: ckanext/matomo/templates/report/dataset_analytics.html:42
+#: ckanext/matomo/templates/report/resource_analytics.html:11
+#: ckanext/matomo/templates/report/resource_analytics.html:30
 msgid "Downloads"
 msgstr ""
 
-#: ckanext/matomo/templates/report/location_analytics.html:43
+#: ckanext/matomo/templates/report/dataset_analytics.html:15
+#: ckanext/matomo/templates/report/dataset_analytics.html:43
+msgid "API events"
+msgstr ""
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:32
+msgid "Most viewed datasets"
+msgstr ""
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:38
+msgid "Dataset"
+msgstr ""
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:58
+msgid "No analytics found for most downloaded datasets."
+msgstr ""
+
+#: ckanext/matomo/templates/report/location_analytics.html:37
 msgid "Sessions by month"
 msgstr ""
 
-#: ckanext/matomo/templates/report/location_analytics.html:44
+#: ckanext/matomo/templates/report/location_analytics.html:38
 msgid "Dates"
 msgstr ""
 
-#: ckanext/matomo/templates/report/location_analytics.html:45
-#: ckanext/matomo/templates/report/location_analytics.html:84
+#: ckanext/matomo/templates/report/location_analytics.html:39
+#: ckanext/matomo/templates/report/location_analytics.html:78
 msgid "Sessions"
 msgstr ""
 
-#: ckanext/matomo/templates/report/location_analytics.html:53
-#: ckanext/matomo/templates/report/location_analytics.html:62
+#: ckanext/matomo/templates/report/location_analytics.html:47
+#: ckanext/matomo/templates/report/location_analytics.html:56
 msgid "Sessions last month"
 msgstr ""
 
-#: ckanext/matomo/templates/report/location_analytics.html:69
+#: ckanext/matomo/templates/report/location_analytics.html:63
 msgid "Sessions total"
 msgstr ""
 
-#: ckanext/matomo/templates/report/location_analytics.html:77
+#: ckanext/matomo/templates/report/location_analytics.html:71
 msgid "Audience locations"
 msgstr ""
 
-#: ckanext/matomo/templates/report/location_analytics.html:78
+#: ckanext/matomo/templates/report/location_analytics.html:72
 msgid "Collected since"
 msgstr ""
 
-#: ckanext/matomo/templates/report/location_analytics.html:82
+#: ckanext/matomo/templates/report/location_analytics.html:76
 msgid "Countries"
 msgstr ""
 
-#: ckanext/matomo/templates/report/location_analytics.html:83
+#: ckanext/matomo/templates/report/location_analytics.html:77
 msgid "Sessions (since recording started)"
 msgstr ""
 
-#: ckanext/matomo/templates/report/location_analytics.html:95
+#: ckanext/matomo/templates/report/location_analytics.html:89
 msgid "No statistics found for audience locations."
 msgstr ""
 
@@ -119,47 +150,31 @@ msgstr ""
 msgid "Timespan for records"
 msgstr ""
 
-#: ckanext/matomo/templates/report/organization_analytics.html:2
-msgid "Organizations with most viewed datasets"
+#: ckanext/matomo/templates/report/resource_analytics.html:23
+msgid "Most downloaded resources"
 msgstr ""
 
-#: ckanext/matomo/templates/report/organization_analytics.html:6
-msgid "Organization"
-msgstr ""
-
-#: ckanext/matomo/templates/report/organization_analytics.html:23
-msgid "No analytics found for organizations with most visited datasets."
-msgstr ""
-
-#: ckanext/matomo/templates/report/resource_analytics.html:6
+#: ckanext/matomo/templates/report/resource_analytics.html:29
 msgid "Resource"
 msgstr ""
 
-#: ckanext/matomo/templates/report/resource_analytics.html:7
+#: ckanext/matomo/templates/report/resource_analytics.html:31
 msgid "Last accessed date"
 msgstr ""
 
-#: ckanext/matomo/templates/report/resource_analytics.html:8
-msgid "Downloads (since recording started)"
-msgstr ""
-
-#: ckanext/matomo/templates/report/resource_analytics.html:21
+#: ckanext/matomo/templates/report/resource_analytics.html:47
 msgid "No statistics found for most downloaded resources."
 msgstr ""
 
-#: ckanext/matomo/templates/report/search_term_analytics.html:2
-msgid "Most popular search terms"
-msgstr ""
-
-#: ckanext/matomo/templates/report/search_term_analytics.html:6
+#: ckanext/matomo/templates/report/search_term_analytics.html:9
 msgid "Search term"
 msgstr ""
 
-#: ckanext/matomo/templates/report/search_term_analytics.html:7
+#: ckanext/matomo/templates/report/search_term_analytics.html:10
 msgid "Total searches"
 msgstr ""
 
-#: ckanext/matomo/templates/report/search_term_analytics.html:17
+#: ckanext/matomo/templates/report/search_term_analytics.html:22
 msgid "No analytics found for most popular search terms"
 msgstr ""
 
