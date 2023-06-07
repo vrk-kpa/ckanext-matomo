@@ -126,9 +126,9 @@ def fetch(dryrun, since, until):
         updated_package_ids = updated_package_ids_by_date.get(date_str, set())
 
         for stats in date_statistics:
-            regex = re.compile('.*id=(.*)&?.*$', re.I)
+            regex = re.compile('.*id=([a-zA-Z0-9-_]*)&?.*$', re.I)
             match = regex.match(stats.get('Events_EventName'))
-            if match:
+            if match and match[1]:
                 package_id_or_name = match[1]
                 try:
                     package = package_show({'ignore_auth': True}, {'id': package_id_or_name})
