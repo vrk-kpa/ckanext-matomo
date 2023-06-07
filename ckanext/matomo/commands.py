@@ -55,7 +55,7 @@ def fetch(dryrun, since, until):
                 try:
                     package = package_show({'ignore_auth': True}, {'id': package_name})
                 except toolkit.ObjectNotFound:
-                    print('Package "{}" not found, skipping...'.format(package_name.encode('iso-8859-1')))
+                    print('Package "{}" not found, skipping...'.format(package_name))
                     continue
                 if package.get('type') == 'dataset':
                     package_id: str = package['id']
@@ -133,7 +133,7 @@ def fetch(dryrun, since, until):
                 try:
                     package = package_show({'ignore_auth': True}, {'id': package_id_or_name})
                 except toolkit.ObjectNotFound:
-                    print('Package "{}" not found, skipping...'.format(package_id_or_name.encode('iso-8859-1')))
+                    print('Package "{}" not found, skipping...'.format(package_id_or_name))
                     continue
                 package_id = package.get('id')
                 if package_id and package_id not in updated_package_ids:
