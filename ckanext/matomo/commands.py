@@ -55,7 +55,7 @@ def fetch(dryrun, since, until):
                 try:
                     package = package_show({'ignore_auth': True}, {'id': package_name})
                 except toolkit.ObjectNotFound:
-                    print('Package "{}" not found, skipping...'.format(package_name.encode('iso-8859-1')))
+                    print('Package "{}" not found, skipping...'.format(package_name))
                     continue
                 if package.get('type') == 'dataset':
                     package_id: str = package['id']
@@ -126,14 +126,14 @@ def fetch(dryrun, since, until):
         updated_package_ids = updated_package_ids_by_date.get(date_str, set())
 
         for stats in date_statistics:
-            regex = re.compile('.*id=(.*)&?.*$', re.I)
+            regex = re.compile('.*id=([a-zA-Z0-9-_]*)&?.*$', re.I)
             match = regex.match(stats.get('Events_EventName'))
-            if match:
+            if match and match[1]:
                 package_id_or_name = match[1]
                 try:
                     package = package_show({'ignore_auth': True}, {'id': package_id_or_name})
                 except toolkit.ObjectNotFound:
-                    print('Package "{}" not found, skipping...'.format(package_id_or_name.encode('iso-8859-1')))
+                    print('Package "{}" not found, skipping...'.format(package_id_or_name))
                     continue
                 package_id = package.get('id')
                 if package_id and package_id not in updated_package_ids:
