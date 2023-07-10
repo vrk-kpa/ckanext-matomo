@@ -36,14 +36,14 @@ def matomo_organization_list(start_date: datetime,
                              end_date: datetime,
                              descending=True,
                              sort_by="visits",
-                             count="dataset") -> List[VisitsByOrganization]:
+                             report_type="dataset") -> List[VisitsByOrganization]:
     # Fetch all organizations which have at least 1 dataset
     organizations_with_datasets = report.get_all_organizations(
         only_orgs_with_packages=True)
 
 
     totals_by_organization: GroupedVisits = {}
-    if count == 'dataset':
+    if report_type == 'dataset':
         # Fetch total visits per dataset within given date range
         package_stats: List[VisitsByPackage] = PackageStats.get_total_visits(
             start_date, end_date, descending)
@@ -64,13 +64,12 @@ def matomo_organization_list(start_date: datetime,
                 totals_by_organization[organization_id]['events'] = totals_by_organization[organization_id].get(
                     'events', 0) + stat.get('events', 0)
 
-    elif count == 'resource':
+    elif report_type == 'resource':
         # Fetch total visits per resource within given date range
         resource_stats: List[VisitsByResource] = ResourceStats.get_total_downloads(
             start_date, end_date, descending)
 
         # Count org specific sums
-        log.debug(resource_stats)
         for stat in resource_stats:
             organization_id: Optional[str] = stat.get('owner_org', None)
             if organization_id:
@@ -98,7 +97,7 @@ def matomo_organization_list(start_date: datetime,
             "events": stats.get('events', 0)
         }
 
-        if count == 'dataset':
+        if report_type == 'dataset':
             org['entrances'] = stats.get('entrances', 0)
 
         organizations.append(org)
@@ -162,7 +161,7 @@ def matomo_dataset_report(organization: str, time: str) -> Dict[str, Any]:
     if organization_name is None:
         return {
             'report_name': 'matomo-dataset',
-            'table': matomo_organization_list(start_date, end_date, descending=True, sort_by='visits', count='dataset')
+            'table': matomo_organization_list(start_date, end_date, descending=True, sort_by='visits', report_type='dataset')
         }
     else:
         # get given organizations datasets with the popularity statistics
@@ -244,7 +243,8 @@ def matomo_resource_report(organization: str, time: str) -> Report:
     if organization_name is None:
         return {
             'report_name': 'matomo-resource',
-            'table': matomo_organization_list(start_date, end_date, descending=True, sort_by='downloads', count='resource')
+            'table': matomo_organization_list(start_date, end_date, descending=True,
+                                              sort_by='downloads', report_type='resource')
         }
 
     return {
