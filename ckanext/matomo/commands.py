@@ -1,4 +1,5 @@
 import datetime
+from urllib.parse import unquote
 import re
 import ckan.plugins.toolkit as toolkit
 from ckanext.matomo.matomo_api import MatomoAPI
@@ -28,16 +29,17 @@ def fetch(dryrun, since, until):
     matomo_url = toolkit.config.get('ckanext.matomo.domain')
     matomo_site_id = toolkit.config.get('ckanext.matomo.site_id')
     matomo_token_auth = toolkit.config.get('ckanext.matomo.token_auth')
-
     api = MatomoAPI(matomo_url, matomo_site_id, matomo_token_auth)
     params = {'period': 'day', 'date': MatomoAPI.date_range(since_date, until_date)}
     package_show = toolkit.get_action('package_show')
+    resource_show = toolkit.get_action('resource_show')
 
     # Dataset stats
 
     dataset_page_statistics: Dict[str, Any] = api.dataset_page_statistics(**params)
     resource_download_statistics: Dict[str, Any] = api.resource_download_statistics(**params)
-    event_statistics: Dict[str, Any] = api.events(**params)
+    package_show_events: Dict[str, Any] = api.events(**params, filter_pattern='package_show')
+
     updated_package_ids_by_date = {}
 
     # Parse visits for datasets
@@ -55,7 +57,7 @@ def fetch(dryrun, since, until):
                 try:
                     package = package_show({'ignore_auth': True}, {'id': package_name})
                 except toolkit.ObjectNotFound:
-                    print('Package "{}" not found, skipping...'.format(package_name.encode('iso-8859-1')))
+                    print('Package "{}" not found, skipping...'.format(package_name))
                     continue
                 if package.get('type') == 'dataset':
                     package_id: str = package['id']
@@ -70,7 +72,7 @@ def fetch(dryrun, since, until):
                                     for stats in resource_stats_list)
 
                     # Check if there's event stats (API usage / 'package_show') for this package
-                    package_event_statistics: List[Dict[str, Any]] = [event for event in event_statistics.get(date_str, [])
+                    package_event_statistics: List[Dict[str, Any]] = [event for event in package_show_events.get(date_str, [])
                                                                        if package_name in event.get('Events_EventName')
                                                                         or package_id in event.get('Events_EventName')]
                     events: int = sum(stats.get('nb_events', 0)
@@ -93,9 +95,19 @@ def fetch(dryrun, since, until):
         updated_package_ids = updated_package_ids_by_date.get(date_str, set())
 
         for package_id, stats_list in date_statistics.items():
+            try:
+                package = package_show({'ignore_auth': True}, {'id': package_id})
+            except toolkit.ObjectNotFound:
+                print('Package "{}" not found, skipping...'.format(package_id))
+                continue
             if package_id in updated_package_ids:
                 # Add download-stats for every resources
                 for resource_id, resource_stats in stats_list.items():
+                    try:
+                        resource_show({'ignore_auth': True}, {'id': resource_id})
+                    except toolkit.ObjectNotFound:
+                        print('Resource "{}" not found, skipping...'.format(resource_id))
+                        continue
                     try:
                         downloads = sum(stats.get('nb_hits', 0) for stats in resource_stats)
                         if dryrun:
@@ -121,19 +133,19 @@ def fetch(dryrun, since, until):
                 print('Error updating download statistics for {}: {}'.format(package_id, e))
 
     # Loop API event stats (as a fallback if dataset had no stats)
-    for date_str, date_statistics in event_statistics.items():
+    for date_str, date_statistics in package_show_events.items():
         date = datetime.datetime.strptime(date_str, DATE_FORMAT)
         updated_package_ids = updated_package_ids_by_date.get(date_str, set())
 
         for stats in date_statistics:
-            regex = re.compile('.*id=(.*)&?.*$', re.I)
+            regex = re.compile('.*id=([a-zA-Z0-9-_]*)&?.*$', re.I)
             match = regex.match(stats.get('Events_EventName'))
-            if match:
+            if match and match[1]:
                 package_id_or_name = match[1]
                 try:
                     package = package_show({'ignore_auth': True}, {'id': package_id_or_name})
                 except toolkit.ObjectNotFound:
-                    print('Package "{}" not found, skipping...'.format(package_id_or_name.encode('iso-8859-1')))
+                    print('Package "{}" not found, skipping...'.format(package_id_or_name))
                     continue
                 package_id = package.get('id')
                 if package_id and package_id not in updated_package_ids:
@@ -148,12 +160,18 @@ def fetch(dryrun, since, until):
                     except Exception as e:
                         print('Error updating API event statistics for {}: {}'.format(package_id, e))
 
-    # Resource page views
+    # Resource page statistics
     resource_page_statistics = api.resource_page_statistics(**params)
+    datastore_search_sql_events: Dict[str, Any] = api.events(**params, filter_pattern='datastore_search_sql')
 
     for date_str, date_statistics in resource_page_statistics.items():
         date = datetime.datetime.strptime(date_str, DATE_FORMAT)
         for resource_id, stats_list in date_statistics.items():
+            try:
+                resource_show({'ignore_auth': True}, {'id': resource_id})
+            except toolkit.ObjectNotFound:
+                print('Resource "{}" not found, skipping...'.format(resource_id))
+                continue
             try:
                 visits = sum(stats.get('nb_hits', 0) for stats in stats_list)
                 if dryrun:
@@ -162,6 +180,31 @@ def fetch(dryrun, since, until):
                     ResourceStats.update_visits(resource_id, date, visits)
             except Exception as e:
                 print('Error updating resource statistics for {}: {}'.format(resource_id, e))
+
+    # Resource datastore search sql events (API events)
+    for date_str, date_statistics in datastore_search_sql_events.items():
+        date = datetime.datetime.strptime(date_str, DATE_FORMAT)
+
+        for event in date_statistics:
+            regex = re.compile('^.*FROM "([a-zA-Z0-9-_]*)".*$', re.I|re.M)
+            match = regex.search(unquote(event.get('Events_EventName')))
+            if match and match[1]:
+                resource_id = match[1]
+                try:
+                    resource_show({'ignore_auth': True}, {'id': resource_id})
+                except toolkit.ObjectNotFound:
+                    print('Resource "{}" not found, skipping...'.format(resource_id))
+                    continue
+                # Add event stats for resourcee
+                try:
+                    events = event.get('nb_events', 0)
+                    if dryrun:
+                        print('Would create or update: resource_id={}, date={}, events={}'
+                            .format(resource_id, date, events))
+                    else:
+                        ResourceStats.update_events(resource_id, date, events)
+                except Exception as e:
+                    print('Error updating API event statistics for resource {}: {}'.format(resource_id, e))
 
     # Visits by country
     visits_by_country = api.visits_by_country(**params)

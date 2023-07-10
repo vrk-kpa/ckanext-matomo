@@ -380,6 +380,7 @@ class ResourceStats(Base):
     visit_date = Column(types.DateTime, default=datetime.now, primary_key=True)
     visits = Column(types.Integer, default=0)
     downloads = Column(types.Integer, default=0)
+    events = Column(types.Integer, default=0)
 
     @classmethod
     def get(cls, id):
@@ -436,13 +437,33 @@ class ResourceStats(Base):
         return True
 
     @classmethod
+    def update_events(cls, resource_id, visit_date, events):
+        '''
+        Adds events amount to resource.
+        If resource doesn't have any stats, adds stats object with empty visits, entrances and downloads
+        '''
+        resource = model.Session.query(cls).filter(
+            cls.resource_id == resource_id).filter(cls.visit_date == visit_date).first()
+        if resource is None:
+            resource = ResourceStats(
+                resource_id=resource_id, visit_date=visit_date, visits=0, downloads=0, events=events)
+            model.Session.add(resource)
+        else:
+            resource.events = events
+
+        log.debug("Updated the number of API events for date: %s and resource: %s",
+                  visit_date, resource_id)
+        model.Session.flush()
+        return True
+
+    @classmethod
     def get_resource_info_by_id(cls, resource_id) -> Resource:
         resource = get_action('resource_show')({}, {'id': resource_id})
         package = get_action('package_show')({}, {'id': resource.get('package_id')})
         result: Resource = {'resource_id': resource.get('id'), 'resource_name': resource.get('name'),
                         'resource_name_translated': resource.get('name_translated'), 'package_id': package.get('id'),
                         'package_name': package.get('name'), 'package_title': package.get('title'),
-                        'package_title_translated': package.get('title_translated')}
+                        'package_title_translated': package.get('title_translated'), 'owner_org': package.get('owner_org')}
 
         return result
 
@@ -542,6 +563,7 @@ class ResourceStats(Base):
             model.Resource.package_id,
             func.sum(cls.visits).label('visits'),
             func.sum(cls.downloads).label('downloads'),
+            func.sum(cls.events).label('events'),
             func.max(cls.visit_date).label('last_visit')
         ).filter(cls.visit_date >= start_date).filter(cls.visit_date <= end_date)
 
@@ -565,14 +587,15 @@ class ResourceStats(Base):
         for resource in visits_by_resource:
             rs = ResourceStats(resource_id=resource.id,
                                visit_date=resource.last_visit,
-                               visits=resource.visits,
-                               downloads=resource.downloads)
+                               visits=resource.visits or 0,
+                               downloads=resource.downloads or 0,
+                               events=resource.events or 0)
             resource_stats.append(rs)
         dictat: Visits = ResourceStats.convert_to_dict(
             resource_stats, None, None)
 
         return sorted(dictat.get(
-            'resources', []), key=lambda resource: resource.get('downloads', ''), reverse=True)
+            'resources', []), key=lambda resource: resource.get('downloads', 0), reverse=True)
 
     @classmethod
     def as_dict(cls, res) -> Optional[VisitsByResource]:
@@ -587,14 +610,16 @@ class ResourceStats(Base):
             result['package_name'] = res_info['package_name']
             result['package_title'] = res_info['package_title']
             result['package_title_translated'] = res_info['package_title_translated']
+            result['owner_org'] = res_info['owner_org']
             result['visits'] = res.visits
             result['downloads'] = res.downloads
+            result['events'] = res.events
             result['visit_date'] = res.visit_date.strftime(
                 "%d-%m-%Y") if res.visit_date else ''
             return result
 
         except ObjectNotFound:
-            print('Resource "{}" not found, skipping...'.format(res.resource_id.encode('iso-8859-1')))
+            print('Resource "{}" not found, skipping...'.format(res.resource_id))
             return None
 
     @classmethod

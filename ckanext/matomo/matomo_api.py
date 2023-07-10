@@ -62,8 +62,7 @@ class MatomoAPI(object):
                          'period': period,
                          'date': date,
                          'flat': 1,
-                         'filter_column': 'label',
-                         'filter_pattern': '/data/([^/]+/)?dataset/[^/]+$'})
+                         'filter_column': 'label'})
 
         def handle(data) -> Dict[str, Any]:
             result: Dict[str, Any] = {}
@@ -119,13 +118,18 @@ class MatomoAPI(object):
 
         return _process_one_or_more_dates_result(data, handle)
 
-    def events(self, period='month', date='today') -> Dict[str, Any]:
+    def events(self, period='month', date='today', filter_column='Events_EventAction', filter_pattern=None) -> Dict[str, Any]:
+        filter = {
+            'filter_column': filter_column,
+        }
+        if filter_pattern:
+            filter['filter_pattern'] = filter_pattern
         data: Dict[str, Any] = self.get({'method': 'Events.getAction',
                          'period': period,
                          'date': date,
-                         'filter_column': 'Events_EventAction',
-                         'filter_pattern': '^package_show',
-                         'flat': 1})
+                         'flat': 1,
+                        'filter_limit': -1,
+                         **filter})
 
         def handle(data) -> Dict[str, Any]:
             return data
