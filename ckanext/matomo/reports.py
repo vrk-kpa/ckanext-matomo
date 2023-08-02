@@ -35,44 +35,72 @@ def org_and_time_option_combinations() -> Generator[OrganizationAndTimeOptions, 
 def matomo_organization_list(start_date: datetime,
                              end_date: datetime,
                              descending=True,
-                             sort_by="visits") -> List[VisitsByOrganization]:
+                             sort_by="visits",
+                             report_type="dataset") -> List[VisitsByOrganization]:
     # Fetch all organizations which have at least 1 dataset
     organizations_with_datasets = report.get_all_organizations(
         only_orgs_with_packages=True)
-    # Fetch total visits per package within given date range
-    package_stats: List[VisitsByPackage] = PackageStats.get_total_visits(
-        start_date, end_date, descending)
 
-    # Count org specific sums
+
     totals_by_organization: GroupedVisits = {}
-    for stat in package_stats:
-        organization_id: Optional[str] = stat.get('owner_org', None)
-        if organization_id:
-            is_new = not bool(totals_by_organization.get(organization_id))
-            if is_new:
-                totals_by_organization[organization_id] = {}
-            totals_by_organization[organization_id]['visits'] = totals_by_organization[organization_id].get(
-                'visits', 0) + stat.get('visits', 0)
-            totals_by_organization[organization_id]['entrances'] = totals_by_organization[organization_id].get(
-                'entrances', 0) + stat.get('entrances', 0)
-            totals_by_organization[organization_id]['downloads'] = totals_by_organization[organization_id].get(
-                'downloads', 0) + stat.get('downloads', 0)
-            totals_by_organization[organization_id]['events'] = totals_by_organization[organization_id].get(
-                'events', 0) + stat.get('events', 0)
+    if report_type == 'dataset':
+        # Fetch total visits per dataset within given date range
+        package_stats: List[VisitsByPackage] = PackageStats.get_total_visits(
+            start_date, end_date, descending)
+
+        # Count org specific sums
+        for stat in package_stats:
+            organization_id: Optional[str] = stat.get('owner_org', None)
+            if organization_id:
+                is_new = not bool(totals_by_organization.get(organization_id))
+                if is_new:
+                    totals_by_organization[organization_id] = {}
+                totals_by_organization[organization_id]['visits'] = totals_by_organization[organization_id].get(
+                    'visits', 0) + stat.get('visits', 0)
+                totals_by_organization[organization_id]['entrances'] = totals_by_organization[organization_id].get(
+                    'entrances', 0) + stat.get('entrances', 0)
+                totals_by_organization[organization_id]['downloads'] = totals_by_organization[organization_id].get(
+                    'downloads', 0) + stat.get('downloads', 0)
+                totals_by_organization[organization_id]['events'] = totals_by_organization[organization_id].get(
+                    'events', 0) + stat.get('events', 0)
+
+    elif report_type == 'resource':
+        # Fetch total visits per resource within given date range
+        resource_stats: List[VisitsByResource] = ResourceStats.get_total_downloads(
+            start_date, end_date, descending)
+
+        # Count org specific sums
+        for stat in resource_stats:
+            organization_id: Optional[str] = stat.get('owner_org', None)
+            if organization_id:
+                is_new = not bool(totals_by_organization.get(organization_id))
+                if is_new:
+                    totals_by_organization[organization_id] = {}
+                totals_by_organization[organization_id]['visits'] = totals_by_organization[organization_id].get(
+                    'visits', 0) + stat.get('visits', 0)
+                totals_by_organization[organization_id]['downloads'] = totals_by_organization[organization_id].get(
+                    'downloads', 0) + stat.get('downloads', 0)
+                totals_by_organization[organization_id]['events'] = totals_by_organization[organization_id].get(
+                    'events', 0) + stat.get('events', 0)
+
     # Format into list of org dicts with stats totals
     organizations: List[VisitsByOrganization] = []
     for organization in organizations_with_datasets:
         org_id: str = organization.get('id', '')
         stats = totals_by_organization.get(org_id, {})
-        organizations.append({
+        org: VisitsByOrganization = {
             "organization_name": organization.get('name', ''),
             "organization_title": organization.get('title', ''),
             "organization_title_translated": organization.get('title_translated'),
             "visits": stats.get('visits', 0),
             "downloads": stats.get('downloads', 0),
-            "entrances": stats.get('entrances', 0),
             "events": stats.get('events', 0)
-        })
+        }
+
+        if report_type == 'dataset':
+            org['entrances'] = stats.get('entrances', 0)
+
+        organizations.append(org)
 
     return sorted(organizations, key=lambda organization: organization[sort_by], reverse=descending)
 
@@ -133,7 +161,7 @@ def matomo_dataset_report(organization: str, time: str) -> Dict[str, Any]:
     if organization_name is None:
         return {
             'report_name': 'matomo-dataset',
-            'table': matomo_organization_list(start_date, end_date, descending=True, sort_by='visits')
+            'table': matomo_organization_list(start_date, end_date, descending=True, sort_by='visits', report_type='dataset')
         }
     else:
         # get given organizations datasets with the popularity statistics
@@ -177,6 +205,7 @@ def matomo_resources_by_organization(organization_name: str,
     visits_by_resource: GroupedVisits = {
         res.get('resource_id', ''): {'visits': res.get('visits', 0),
                                      'downloads': res.get('downloads', 0),
+                                     'events': res.get('events', 0),
                                      'visit_date': res.get('visit_date', '')}
         for res in resource_stats}
 
@@ -195,6 +224,7 @@ def matomo_resources_by_organization(organization_name: str,
                  'owner_org': package.get('owner_org'),
                  'visits': visit.get('visits', 0),
                  'downloads': visit.get('downloads', 0),
+                 'events': visit.get('events', 0),
                  'visit_date': visit.get('visit_date', '')})
 
     return sorted(result, key=lambda dataset: dataset[sort_by], reverse=descending)
@@ -213,7 +243,8 @@ def matomo_resource_report(organization: str, time: str) -> Report:
     if organization_name is None:
         return {
             'report_name': 'matomo-resource',
-            'table': matomo_organization_list(start_date, end_date, descending=True, sort_by='downloads')
+            'table': matomo_organization_list(start_date, end_date, descending=True,
+                                              sort_by='downloads', report_type='resource')
         }
 
     return {

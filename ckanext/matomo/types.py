@@ -30,15 +30,16 @@ VisitsByOrganization = TypedDict('VisitsByOrganization', {
     'organization_name': str,
     'organization_title': str,
     'organization_title_translated': Optional[LocalizationObject],
-    'visits': int,
-    'entrances': int,
+    'visits': Optional[int],
+    'entrances': Optional[int],
     'downloads': int,
     'events': int
-})
+}, total=False)
 GroupedVisits = Dict[str, Visit]
 Report = TypedDict('Report', {'report_name': str,
                    'table': Union[List[VisitsByOrganization], List[VisitsByPackage], List[VisitsByResource]]}, total=False)
 Resource = TypedDict('Resource', {'resource_id': str, 'resource_name': str,
                                   'resource_name_translated': Optional[LocalizationObject], 'package_id': str,
                                   'package_name': str, 'package_title': str,
-                                  'package_title_translated': Optional[LocalizationObject]})
+                                  'package_title_translated': Optional[LocalizationObject],
+                                  'owner_org': Optional[str]})

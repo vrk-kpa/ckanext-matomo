@@ -9,6 +9,7 @@
       <tr>
         <th>{% trans %}Organization{% endtrans %}</th>
         <th>{% trans %}Downloads{% endtrans %}</th>
+        <th>{% trans %}API events{% endtrans %}</th>
       </tr>
         {% for row in data['table'] %}
           {% set org_name = row.get('organization_name') %}
@@ -16,6 +17,7 @@
           <tr>
             <td>{{ h.link_to(org_title, h.get_organization_url(org_name)) }}</td>
             <td>{{ row.get('downloads') }}</td>
+            <td>{{ row.get('events') }}</td>
           </tr>
         {% endfor %}
       </table>
@@ -29,6 +31,7 @@
       <th>{% trans %}Resource{% endtrans %}</th>
       <th>{% trans %}Downloads{% endtrans %}&nbsp;({{ _(options['time']) }})</th>
       <th>{% trans %}Last accessed date{% endtrans %}</th>
+      <th>{% trans %}API events{% endtrans %}</th>
     </tr>
         {% for resource in table %}
       <tr>
@@ -40,6 +43,7 @@
         </td>
         <td>{{ resource.get('downloads') }}</td>
         <td>{{ resource.get('visit_date') }}</td>
+        <td>{{ resource.get('events') }}</td>
       </tr>
       {% endfor %}
       </table>
