@@ -7,7 +7,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 import ckan.model as model
-from ckan.plugins.toolkit import get_action, ObjectNotFound
+from ckan.plugins.toolkit import get_action, ObjectNotFound, NotAuthorized
 
 from ckanext.matomo.utils import last_calendar_period
 from ckanext.matomo.types import Visit, Visits, VisitsByPackage, Resource, VisitsByResource
@@ -617,6 +617,10 @@ class ResourceStats(Base):
             result['visit_date'] = res.visit_date.strftime(
                 "%d-%m-%Y") if res.visit_date else ''
             return result
+
+        except NotAuthorized:
+            print('No access to private resource "{}", skipping...'.format(res.resource_id))
+            return None
 
         except ObjectNotFound:
             print('Resource "{}" not found, skipping...'.format(res.resource_id))
