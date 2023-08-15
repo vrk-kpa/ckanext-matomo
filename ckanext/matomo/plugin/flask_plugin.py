@@ -3,7 +3,6 @@ from ckanext.matomo.tracking import post_analytics, tracked_action
 from flask import Blueprint
 from ckan.views.resource import download as resource_download
 
-
 class MixinPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IBlueprint)
 
@@ -17,8 +16,10 @@ class MixinPlugin(plugins.SingletonPlugin):
             # ('/dataset/<package_id>/resource/<resource_id>/download', 'tracked_download', tracked_download),
             # ('/dataset/<package_id>/resource/<resource_id>/download/<filename>', 'tracked_download', tracked_download)
         ]
-        for rule in rules:
-            blueprint.add_url_rule(*rule)
+
+        if plugins.toolkit.asbool(plugins.toolkit.config.get('ckanext.matomo.track_api', False)):
+            for rule in rules:
+                blueprint.add_url_rule(*rule)
 
         return blueprint
 
