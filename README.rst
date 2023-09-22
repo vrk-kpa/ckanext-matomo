@@ -87,6 +87,13 @@ Config Settings
     # (optional, default ckanext.matomo.domain)
     ckanext.matomo.script_domain
 
+    # To track api events, set to true
+    ckanext.matomo.track_api = true
+
+    # To track downloads, set to true
+    ckanext.matoto.track_downloads = true
+
+
 ------------------------
 Development Installation
 ------------------------

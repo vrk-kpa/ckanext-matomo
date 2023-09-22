@@ -26,7 +26,7 @@ def fetch(dryrun, since, until):
         print('Start date must not be greater than end date')
         return
 
-    matomo_url = toolkit.config.get('ckanext.matomo.domain')
+    matomo_url = toolkit.config.get('ckanext.matomo.api_domain') or toolkit.config.get('ckanext.matomo.domain')
     matomo_site_id = toolkit.config.get('ckanext.matomo.site_id')
     matomo_token_auth = toolkit.config.get('ckanext.matomo.token_auth')
     api = MatomoAPI(matomo_url, matomo_site_id, matomo_token_auth)

@@ -12,7 +12,9 @@ def matomo_snippet():
     data = {
         "matomo_domain": config.get('ckanext.matomo.domain'),
         "matomo_script_domain": config.get('ckanext.matomo.script_domain', config.get('ckanext.matomo.domain')),
-        "matomo_site_id": config.get('ckanext.matomo.site_id')
+        "matomo_site_id": config.get('ckanext.matomo.site_id'),
+        "matomo_tracker_filename": config.get('ckanext.matomo.tracker_filename', "matomo.php"),
+        "matomo_script_filename": config.get('ckanext.matomo.script_filename', "matomo.js")
     }
 
     return render_snippet("matomo/snippets/matomo.html", data)
