@@ -74,3 +74,6 @@ def get_date_range(time: Optional[str] = None) -> Tuple[datetime, datetime]:
 
 def get_years() -> List[str]:
     return get_report_years()
+
+def get_current_date() -> datetime:
+    return datetime.now()

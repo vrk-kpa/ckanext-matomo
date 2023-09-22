@@ -74,7 +74,8 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin, DefaultTranslation):
             'get_organization_url': helpers.get_organization_url,
             'format_date': helpers.format_date,
             'get_date_range': helpers.get_date_range,
-            'get_years': helpers.get_years
+            'get_years': helpers.get_years,
+            'get_current_date': helpers.get_current_date
         }
 
     # IReport
