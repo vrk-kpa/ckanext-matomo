@@ -10,15 +10,16 @@
 # Eetu Mansikkamäki <eetu.mansikkamaki@gofore.com>, 2023
 # Roosa Lampinen, 2023
 # Suvi Nuttunen, 2023
+# Zharktas <jari-pekka.voutilainen@gofore.com>, 2023
 # 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: ckanext-matomo 0.0.1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-06-01 12:39+0000\n"
+"POT-Creation-Date: 2023-08-25 10:06+0000\n"
 "PO-Revision-Date: 2021-11-17 12:18+0000\n"
-"Last-Translator: Suvi Nuttunen, 2023\n"
+"Last-Translator: Zharktas <jari-pekka.voutilainen@gofore.com>, 2023\n"
 "Language-Team: Finnish (https://app.transifex.com/avoindata/teams/7979/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -63,6 +64,67 @@ msgstr "Suosituimmat hakusanat ja viimeisimmät hakupäivämäärät"
 msgid "Last searched date"
 msgstr "Viimeksi haettu"
 
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:2
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:2
+msgid "Stats"
+msgstr "Tilastot"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:4
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:5
+msgid "Weekly visits for last 12 months"
+msgstr "Viikoittaiset vierailut viimeisten 12kk ajalta"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:13
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:29
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:18
+msgid "Visits"
+msgstr "Sivunäytöt"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:14
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:18
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:15
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:19
+msgid "During last 30 days"
+msgstr "Viimeisten 30 päivän aikana"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:15
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:19
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:16
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:20
+msgid "During last 12 months"
+msgstr "Viimeisten 12 kk aikana"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:16
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:20
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:17
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:21
+msgid "All time:"
+msgstr "Koko ajalta:"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:17
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:14
+msgid "Download counts"
+msgstr "Lataukset"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:29
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:32
+msgid "Year"
+msgstr "edellinen vuosi"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:29
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:32
+#: ckanext/matomo/templates/report/dataset_analytics.html:14
+#: ckanext/matomo/templates/report/dataset_analytics.html:42
+#: ckanext/matomo/templates/report/resource_analytics.html:11
+#: ckanext/matomo/templates/report/resource_analytics.html:32
+msgid "Downloads"
+msgstr "Lataukset"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:31
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:34
+msgid "Week"
+msgstr "edellinen viikko"
+
 #: ckanext/matomo/templates/report/dataset_analytics.html:5
 #: ckanext/matomo/templates/report/resource_analytics.html:5
 msgid "Organizations that have published data"
@@ -88,15 +150,10 @@ msgstr "Uudet kävijät"
 msgid "Entrances of total views"
 msgstr "Uusien kävijöiden osuus kaikista"
 
-#: ckanext/matomo/templates/report/dataset_analytics.html:14
-#: ckanext/matomo/templates/report/dataset_analytics.html:42
-#: ckanext/matomo/templates/report/resource_analytics.html:11
-#: ckanext/matomo/templates/report/resource_analytics.html:30
-msgid "Downloads"
-msgstr "Lataukset"
-
 #: ckanext/matomo/templates/report/dataset_analytics.html:15
 #: ckanext/matomo/templates/report/dataset_analytics.html:43
+#: ckanext/matomo/templates/report/resource_analytics.html:12
+#: ckanext/matomo/templates/report/resource_analytics.html:34
 msgid "API events"
 msgstr "Rajapintakutsujen määrä"
 
@@ -162,19 +219,19 @@ msgstr "Näytettävien tilastojen määrä:"
 msgid "Timespan for records"
 msgstr "Tilastot ajalta"
 
-#: ckanext/matomo/templates/report/resource_analytics.html:23
+#: ckanext/matomo/templates/report/resource_analytics.html:25
 msgid "Most downloaded resources"
 msgstr "Ladatuimmat data-aineistot"
 
-#: ckanext/matomo/templates/report/resource_analytics.html:29
+#: ckanext/matomo/templates/report/resource_analytics.html:31
 msgid "Resource"
 msgstr "Data-aineisto"
 
-#: ckanext/matomo/templates/report/resource_analytics.html:31
+#: ckanext/matomo/templates/report/resource_analytics.html:33
 msgid "Last accessed date"
 msgstr "Viimeisin vierailu"
 
-#: ckanext/matomo/templates/report/resource_analytics.html:47
+#: ckanext/matomo/templates/report/resource_analytics.html:51
 msgid "No statistics found for most downloaded resources."
 msgstr "Eniten ladatuista data-aineistoista ei löytynyt statistiikkaa. "
 
