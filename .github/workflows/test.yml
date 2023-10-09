@@ -11,7 +11,7 @@ jobs:
       - name: Install requirements
         run: pip install ruff
       - name: Run ruff
-        run: ruff check --format=github .
+        run: ruff check --output-format=github .
 
   test:
     needs: ruff
