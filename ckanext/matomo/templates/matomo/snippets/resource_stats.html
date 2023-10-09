@@ -2,9 +2,11 @@
   <h2 class="module-heading">{{ _('Stats') }}</h2>
   <section class="module-content">
 
+    {% if h.show_download_graph() %}
     <span>{{ _('Weekly visits for last 12 months') }}</span>
     <div id="chart_div"></div>
-
+    {% endif %}
+  
     {% set visits =  h.get_visits_for_resource(res.id) %}
     {% set visit_count_last_12_month = h.get_visit_count_for_resource(res.id, 'year') %}
     {% set visit_count_last_30_days = h.get_visit_count_for_resource(res.id, 'month') %}
