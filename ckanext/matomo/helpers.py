@@ -78,3 +78,8 @@ def get_years() -> List[str]:
 
 def show_download_graph():
     return config.get('ckanext-matomo.show_download_graph', True)
+
+  
+def get_current_date() -> datetime:
+    return datetime.now()
+
