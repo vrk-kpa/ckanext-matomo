@@ -74,3 +74,7 @@ def get_date_range(time: Optional[str] = None) -> Tuple[datetime, datetime]:
 
 def get_years() -> List[str]:
     return get_report_years()
+
+
+def show_download_graph():
+    return config.get('ckanext-matomo.show_download_graph', True)
