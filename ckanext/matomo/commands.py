@@ -23,7 +23,7 @@ def fetch(dryrun, since, until):
     until_date = datetime.datetime.strptime(until, DATE_FORMAT).date() if until else datetime.date.today()
 
     if isinstance(since_date, datetime.date) and isinstance(until_date, datetime.date) and since_date > until_date:
-        print('Start date must not be greater than end date')
+        log.info('Start date must not be greater than end date')
         return
 
     matomo_url = toolkit.config.get('ckanext.matomo.api_domain') or toolkit.config.get('ckanext.matomo.domain')
@@ -57,7 +57,7 @@ def fetch(dryrun, since, until):
                 try:
                     package = package_show({'ignore_auth': True}, {'id': package_name})
                 except toolkit.ObjectNotFound:
-                    print('Package "{}" not found, skipping...'.format(package_name))
+                    log.info('Package "{}" not found, skipping...'.format(package_name))
                     continue
                 if package.get('type') == 'dataset':
                     package_id: str = package['id']
@@ -79,7 +79,7 @@ def fetch(dryrun, since, until):
                                     for stats in package_event_statistics)
 
                     if dryrun:
-                        print('Would create or update: package_id={}, date={}, visits={}, \
+                        log.info('Would create or update: package_id={}, date={}, visits={}, \
                                entrances={}, downloads={}, events={}'
                             .format(package_id, date, visits, entrances, downloads, events))
                     else:
@@ -87,7 +87,7 @@ def fetch(dryrun, since, until):
 
                     updated_package_ids.add(package_id)
             except Exception as e:
-                print('Error updating dataset statistics for {}: {}'.format(package_name, e))
+                log.error('Error updating dataset statistics for {}: {}'.format(package_name, e))
 
     # Loop resources download stats (as a fallback if dataset had no stats)
     for date_str, date_statistics in resource_download_statistics.items():
@@ -98,7 +98,7 @@ def fetch(dryrun, since, until):
             try:
                 package = package_show({'ignore_auth': True}, {'id': package_id})
             except toolkit.ObjectNotFound:
-                print('Package "{}" not found, skipping...'.format(package_id))
+                log.info('Package "{}" not found, skipping...'.format(package_id))
                 continue
             if package_id in updated_package_ids:
                 # Add download-stats for every resources
@@ -106,17 +106,17 @@ def fetch(dryrun, since, until):
                     try:
                         resource_show({'ignore_auth': True}, {'id': resource_id})
                     except toolkit.ObjectNotFound:
-                        print('Resource "{}" not found, skipping...'.format(resource_id))
+                        log.info('Resource "{}" not found, skipping...'.format(resource_id))
                         continue
                     try:
                         downloads = sum(stats.get('nb_hits', 0) for stats in resource_stats)
                         if dryrun:
-                            print('Would create or update: resource_id={}, date={}, downloads={}'
+                            log.info('Would create or update: resource_id={}, date={}, downloads={}'
                                   .format(resource_id, date, downloads))
                         else:
                             ResourceStats.update_downloads(resource_id, date, downloads)
                     except Exception as e:
-                        print('Error updating resource statistics for {}: {}'.format(resource_id, e))
+                        log.error('Error updating resource statistics for {}: {}'.format(resource_id, e))
 
                 # If dataset is already handled, don't parse again package stats
                 continue
@@ -125,12 +125,12 @@ def fetch(dryrun, since, until):
                 downloads = sum(stats.get('nb_hits', 0) for stats_lists in stats_list.values() for stats in stats_lists)
 
                 if dryrun:
-                    print('Would update download stats: package_id={}, date={}, downloads={}'
+                    log.info('Would update download stats: package_id={}, date={}, downloads={}'
                           .format(package_id, date, downloads))
                 else:
                     PackageStats.update_downloads(package_id, date, downloads)
             except Exception as e:
-                print('Error updating download statistics for {}: {}'.format(package_id, e))
+                log.error('Error updating download statistics for {}: {}'.format(package_id, e))
 
     # Loop API event stats (as a fallback if dataset had no stats)
     for date_str, date_statistics in package_show_events.items():
@@ -145,7 +145,7 @@ def fetch(dryrun, since, until):
                 try:
                     package = package_show({'ignore_auth': True}, {'id': package_id_or_name})
                 except toolkit.ObjectNotFound:
-                    print('Package "{}" not found, skipping...'.format(package_id_or_name))
+                    log.info('Package "{}" not found, skipping...'.format(package_id_or_name))
                     continue
                 package_id = package.get('id')
                 if package_id and package_id not in updated_package_ids:
@@ -153,12 +153,12 @@ def fetch(dryrun, since, until):
                     try:
                         events = stats.get('nb_events', 0)
                         if dryrun:
-                            print('Would create or update: package_id={}, date={}, events={}'
+                            log.info('Would create or update: package_id={}, date={}, events={}'
                                 .format(package_id, date, events))
                         else:
                             PackageStats.update_events(package_id, date, events)
                     except Exception as e:
-                        print('Error updating API event statistics for {}: {}'.format(package_id, e))
+                        log.error('Error updating API event statistics for {}: {}'.format(package_id, e))
 
     # Resource page statistics
     resource_page_statistics = api.resource_page_statistics(**params)
@@ -170,16 +170,16 @@ def fetch(dryrun, since, until):
             try:
                 resource_show({'ignore_auth': True}, {'id': resource_id})
             except toolkit.ObjectNotFound:
-                print('Resource "{}" not found, skipping...'.format(resource_id))
+                log.info('Resource "{}" not found, skipping...'.format(resource_id))
                 continue
             try:
                 visits = sum(stats.get('nb_hits', 0) for stats in stats_list)
                 if dryrun:
-                    print('Would create or update: resource_id={}, date={}, visits={}'.format(resource_id, date, visits))
+                    log.info('Would create or update: resource_id={}, date={}, visits={}'.format(resource_id, date, visits))
                 else:
                     ResourceStats.update_visits(resource_id, date, visits)
             except Exception as e:
-                print('Error updating resource statistics for {}: {}'.format(resource_id, e))
+                log.error('Error updating resource statistics for {}: {}'.format(resource_id, e))
 
     # Resource datastore search sql events (API events)
     for date_str, date_statistics in datastore_search_sql_events.items():
@@ -193,18 +193,18 @@ def fetch(dryrun, since, until):
                 try:
                     resource_show({'ignore_auth': True}, {'id': resource_id})
                 except toolkit.ObjectNotFound:
-                    print('Resource "{}" not found, skipping...'.format(resource_id))
+                    log.info('Resource "{}" not found, skipping...'.format(resource_id))
                     continue
                 # Add event stats for resourcee
                 try:
                     events = event.get('nb_events', 0)
                     if dryrun:
-                        print('Would create or update: resource_id={}, date={}, events={}'
+                        log.info('Would create or update: resource_id={}, date={}, events={}'
                             .format(resource_id, date, events))
                     else:
                         ResourceStats.update_events(resource_id, date, events)
                 except Exception as e:
-                    print('Error updating API event statistics for resource {}: {}'.format(resource_id, e))
+                    log.error('Error updating API event statistics for resource {}: {}'.format(resource_id, e))
 
     # Visits by country
     visits_by_country = api.visits_by_country(**params)
@@ -217,12 +217,12 @@ def fetch(dryrun, since, until):
 
             try:
                 if dryrun:
-                    print("Would update country statistics: date={}, country={}, visits={}"
+                    log.info("Would update country statistics: date={}, country={}, visits={}"
                           .format(date, country_name, visits))
                 else:
                     AudienceLocationDate.update_visits(country_name, date, visits)
             except Exception as e:
-                print('Error updating country statistics for {}: {}'.format(country_name, e))
+                log.error('Error updating country statistics for {}: {}'.format(country_name, e))
 
     # Search terms
     search_terms = api.search_terms(**params)
@@ -235,12 +235,12 @@ def fetch(dryrun, since, until):
 
             try:
                 if dryrun:
-                    print("Would search term statistics: date={}, search_term={}, count={}"
+                    log.info("Would search term statistics: date={}, search_term={}, count={}"
                           .format(date, search_term, count))
                 else:
                     SearchStats.update_search_term_count(search_term, date, count)
             except Exception as e:
-                print('Error updating search term statistics for {}: {}'.format(search_term, e))
+                log.error('Error updating search term statistics for {}: {}'.format(search_term, e))
 
 
 def init_db():
