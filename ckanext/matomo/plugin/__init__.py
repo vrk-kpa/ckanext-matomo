@@ -33,9 +33,6 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin, DefaultTranslation):
     plugins.implements(plugins.IActions)
     plugins.implements(plugins.ITranslation)
 
-    if IReport is not None:
-        plugins.implements(IReport)
-
     if toolkit.check_ckan_version(min_version="2.9"):
         plugins.implements(plugins.IClick)
 
@@ -78,14 +75,6 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin, DefaultTranslation):
             'get_current_date': helpers.get_current_date
         }
 
-    # IReport
-    def register_reports(self):
-        """Register details of an extension's reports"""
-        return [reports.matomo_dataset_report_info(),
-                reports.matomo_resource_report_info(),
-                reports.matomo_location_report_info(),
-                reports.matomo_most_popular_search_terms_info()]
-
     # IClick
 
     def get_commands(self):
@@ -103,3 +92,32 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin, DefaultTranslation):
             os.path.dirname(ckanext.matomo.__file__),
             'i18n'
         )
+
+class MatomoDatasetReport(plugins.SingletonPlugin):
+    plugins.implements(IReport)
+
+    # IReport
+    def register_reports(self):
+        return [reports.matomo_dataset_report_info()]
+
+class MatomoResourceReport(plugins.SingletonPlugin):
+    plugins.implements(IReport)
+
+    # IReport
+    def register_reports(self):
+        return [reports.matomo_resource_report_info()]
+
+class MatomoLocationReport(plugins.SingletonPlugin):
+    plugins.implements(IReport)
+
+    # IReport
+    def register_reports(self):
+        return [reports.matomo_location_report_info()]
+
+
+class MatomoSearchTermsReport(plugins.SingletonPlugin):
+    plugins.implements(IReport)
+
+    # IReport
+    def register_reports(self):
+        return [reports.matomo_most_popular_search_terms_info()]

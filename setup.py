@@ -81,6 +81,11 @@ setup(
     entry_points='''
         [ckan.plugins]
         matomo=ckanext.matomo.plugin:MatomoPlugin
+        matomo_dataset_report=ckanext.matomo.plugin:MatomoDatasetReport
+        matomo_resource_report=ckanext.matomo.plugin:MatomoResourceReport
+        matomo_location_report=ckanext.matomo.plugin:MatomoLocationReport
+        matomo_search_terms_report=ckanext.matomo.plugin:MatomoSearchTermsReport
+        
 
         [babel.extractors]
         ckan = ckan.lib.extract:extract_ckan
