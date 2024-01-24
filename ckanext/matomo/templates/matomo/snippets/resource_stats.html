@@ -2,7 +2,7 @@
   <h2 class="module-heading">{{ _('Stats') }}</h2>
   <section class="module-content">
 
-    {% if h.show_download_graph() %}
+    {% if h.matomo_show_download_graph() %}
     <span>{{ _('Weekly visits for last 12 months') }}</span>
     <div id="chart_div"></div>
     {% endif %}
@@ -13,7 +13,7 @@
     {% set download_count_last_12_month = h.get_download_count_for_resource(res.id, 'year') %}
     {% set download_count_last_30_days = h.get_download_count_for_resource(res.id, 'month') %}
     <dl class="list-unstyled">
-      {% if h.show_download_graph() %}
+      {% if h.matomo_show_download_graph() %}
       <dt>{{ _('Download counts') }}:</dt>
       <dd>{{ _('During last 30 days') }}: {{ download_count_last_30_days }}</dd>
       <dd>{{ _('During last 12 months') }}: {{ download_count_last_12_month }}</dd>
@@ -25,7 +25,7 @@
       <dd>{{ _('All time:') }} {{ visits.total_visits }}</dd>
     </dl>
 
-    {% if h.show_download_graph() %}
+    {% if h.matomo_show_download_graph() %}
     <script src="https://www.gstatic.com/charts/loader.js"></script>
 
     <script type="text/javascript">
