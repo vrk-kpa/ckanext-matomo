@@ -61,13 +61,13 @@ def fetch(dryrun, since, until):
                     continue
                 if package.get('type') == 'dataset':
                     package_id: str = package['id']
-                    visits: int = sum(stats.get('nb_hits', 0) for stats in stats_list)
+                    visits: int = sum(int(stats.get('nb_hits', 0)) for stats in stats_list)
                     entrances: int = sum(int(stats.get('entry_nb_visits', 0)) for stats in stats_list)
 
                     # Check if there's download stats for resources included in this package
                     package_resources_statistics: Dict[str, Any] = resource_download_statistics.get(date_str, {})\
                         .get(package_id, {})
-                    downloads: int = sum(stats.get('nb_hits', 0)
+                    downloads: int = sum(int(stats.get('nb_hits', 0))
                                     for resource_stats_list in package_resources_statistics.values()
                                     for stats in resource_stats_list)
 
@@ -75,7 +75,7 @@ def fetch(dryrun, since, until):
                     package_event_statistics: List[Dict[str, Any]] = [event for event in package_show_events.get(date_str, [])
                                                                        if package_name in event.get('Events_EventName')
                                                                         or package_id in event.get('Events_EventName')]
-                    events: int = sum(stats.get('nb_events', 0)
+                    events: int = sum(int(stats.get('nb_events', 0))
                                     for stats in package_event_statistics)
 
                     if dryrun:
@@ -87,7 +87,7 @@ def fetch(dryrun, since, until):
 
                     updated_package_ids.add(package_id)
             except Exception as e:
-                log.error('Error updating dataset statistics for {}: {}'.format(package_name, e))
+                log.exception('Error updating dataset statistics for {}: {}'.format(package_name, e))
 
     # Loop resources download stats (as a fallback if dataset had no stats)
     for date_str, date_statistics in resource_download_statistics.items():
@@ -109,20 +109,20 @@ def fetch(dryrun, since, until):
                         log.info('Resource "{}" not found, skipping...'.format(resource_id))
                         continue
                     try:
-                        downloads = sum(stats.get('nb_hits', 0) for stats in resource_stats)
+                        downloads = sum(int(stats.get('nb_hits', 0)) for stats in resource_stats)
                         if dryrun:
                             log.info('Would create or update: resource_id={}, date={}, downloads={}'
                                   .format(resource_id, date, downloads))
                         else:
                             ResourceStats.update_downloads(resource_id, date, downloads)
                     except Exception as e:
-                        log.error('Error updating resource statistics for {}: {}'.format(resource_id, e))
+                        log.exception('Error updating resource statistics for {}: {}'.format(resource_id, e))
 
                 # If dataset is already handled, don't parse again package stats
                 continue
 
             try:
-                downloads = sum(stats.get('nb_hits', 0) for stats_lists in stats_list.values() for stats in stats_lists)
+                downloads = sum(int(stats.get('nb_hits', 0)) for stats_lists in stats_list.values() for stats in stats_lists)
 
                 if dryrun:
                     log.info('Would update download stats: package_id={}, date={}, downloads={}'
@@ -130,7 +130,7 @@ def fetch(dryrun, since, until):
                 else:
                     PackageStats.update_downloads(package_id, date, downloads)
             except Exception as e:
-                log.error('Error updating download statistics for {}: {}'.format(package_id, e))
+                log.exception('Error updating download statistics for {}: {}'.format(package_id, e))
 
     # Loop API event stats (as a fallback if dataset had no stats)
     for date_str, date_statistics in package_show_events.items():
@@ -158,7 +158,7 @@ def fetch(dryrun, since, until):
                         else:
                             PackageStats.update_events(package_id, date, events)
                     except Exception as e:
-                        log.error('Error updating API event statistics for {}: {}'.format(package_id, e))
+                        log.exception('Error updating API event statistics for {}: {}'.format(package_id, e))
 
     # Resource page statistics
     resource_page_statistics = api.resource_page_statistics(**params)
@@ -173,13 +173,13 @@ def fetch(dryrun, since, until):
                 log.info('Resource "{}" not found, skipping...'.format(resource_id))
                 continue
             try:
-                visits = sum(stats.get('nb_hits', 0) for stats in stats_list)
+                visits = sum(int(stats.get('nb_hits', 0)) for stats in stats_list)
                 if dryrun:
                     log.info('Would create or update: resource_id={}, date={}, visits={}'.format(resource_id, date, visits))
                 else:
                     ResourceStats.update_visits(resource_id, date, visits)
             except Exception as e:
-                log.error('Error updating resource statistics for {}: {}'.format(resource_id, e))
+                log.exception('Error updating resource statistics for {}: {}'.format(resource_id, e))
 
     # Resource datastore search sql events (API events)
     for date_str, date_statistics in datastore_search_sql_events.items():
@@ -204,7 +204,7 @@ def fetch(dryrun, since, until):
                     else:
                         ResourceStats.update_events(resource_id, date, events)
                 except Exception as e:
-                    log.error('Error updating API event statistics for resource {}: {}'.format(resource_id, e))
+                    log.exception('Error updating API event statistics for resource {}: {}'.format(resource_id, e))
 
     # Visits by country
     visits_by_country = api.visits_by_country(**params)
@@ -222,7 +222,7 @@ def fetch(dryrun, since, until):
                 else:
                     AudienceLocationDate.update_visits(country_name, date, visits)
             except Exception as e:
-                log.error('Error updating country statistics for {}: {}'.format(country_name, e))
+                log.exception('Error updating country statistics for {}: {}'.format(country_name, e))
 
     # Search terms
     search_terms = api.search_terms(**params)
@@ -240,7 +240,7 @@ def fetch(dryrun, since, until):
                 else:
                     SearchStats.update_search_term_count(search_term, date, count)
             except Exception as e:
-                log.error('Error updating search term statistics for {}: {}'.format(search_term, e))
+                log.exception('Error updating search term statistics for {}: {}'.format(search_term, e))
 
 
 def init_db():
