@@ -111,8 +111,8 @@ def fetch(dryrun, since, until, dataset):
                     try:
                         downloads = sum(int(stats.get('nb_hits', 0)) for stats in resource_stats)
                         if dryrun:
-                            log.info('Would create or update: resource_id={}, date={}, downloads={}'
-                                  .format(resource_id, date, downloads))
+                            log.info('Would create or update: package_id={}, resource_id={}, date={}, downloads={}'
+                                  .format(package_id, resource_id, date, downloads))
                         else:
                             ResourceStats.update_downloads(resource_id, date, downloads)
                     except Exception as e:
