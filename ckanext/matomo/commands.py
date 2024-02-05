@@ -10,7 +10,7 @@ DATE_FORMAT = '%Y-%m-%d'
 
 log = __import__('logging').getLogger(__name__)
 
-def fetch(dryrun, since, until):
+def fetch(dryrun, since, until, dataset):
     if since:
         since_date = datetime.datetime.strptime(since, DATE_FORMAT).date()
     else:
@@ -36,8 +36,8 @@ def fetch(dryrun, since, until):
 
     # Dataset stats
 
-    dataset_page_statistics: Dict[str, Any] = api.dataset_page_statistics(**params)
-    resource_download_statistics: Dict[str, Any] = api.resource_download_statistics(**params)
+    dataset_page_statistics: Dict[str, Any] = api.dataset_page_statistics(**params, dataset=dataset)
+    resource_download_statistics: Dict[str, Any] = api.resource_download_statistics(**params, dataset=dataset)
     package_show_events: Dict[str, Any] = api.events(**params, filter_pattern='package_show')
 
     updated_package_ids_by_date = {}
@@ -111,8 +111,8 @@ def fetch(dryrun, since, until):
                     try:
                         downloads = sum(int(stats.get('nb_hits', 0)) for stats in resource_stats)
                         if dryrun:
-                            log.info('Would create or update: resource_id={}, date={}, downloads={}'
-                                  .format(resource_id, date, downloads))
+                            log.info('Would create or update: package_id={}, resource_id={}, date={}, downloads={}'
+                                  .format(package_id, resource_id, date, downloads))
                         else:
                             ResourceStats.update_downloads(resource_id, date, downloads)
                     except Exception as e:
@@ -141,6 +141,8 @@ def fetch(dryrun, since, until):
             regex = re.compile('.*id=([a-zA-Z0-9-_]*)&?.*$', re.I)
             match = regex.match(stats.get('Events_EventName'))
             if match and match[1]:
+                if dataset and dataset is not match[1]:
+                    continue
                 package_id_or_name = match[1]
                 try:
                     package = package_show({'ignore_auth': True}, {'id': package_id_or_name})
@@ -206,41 +208,42 @@ def fetch(dryrun, since, until):
                 except Exception as e:
                     log.exception('Error updating API event statistics for resource {}: {}'.format(resource_id, e))
 
-    # Visits by country
-    visits_by_country = api.visits_by_country(**params)
+    if not dataset:
+        # Visits by country
+        visits_by_country = api.visits_by_country(**params)
 
-    for date_str, date_statistics in visits_by_country.items():
-        date = datetime.datetime.strptime(date_str, DATE_FORMAT)
-        for country_stats in date_statistics:
-            country_name = country_stats.get('label', '(not set)')
-            visits = country_stats.get('nb_visits', 0)
+        for date_str, date_statistics in visits_by_country.items():
+            date = datetime.datetime.strptime(date_str, DATE_FORMAT)
+            for country_stats in date_statistics:
+                country_name = country_stats.get('label', '(not set)')
+                visits = country_stats.get('nb_visits', 0)
 
-            try:
-                if dryrun:
-                    log.info("Would update country statistics: date={}, country={}, visits={}"
-                          .format(date, country_name, visits))
-                else:
-                    AudienceLocationDate.update_visits(country_name, date, visits)
-            except Exception as e:
-                log.exception('Error updating country statistics for {}: {}'.format(country_name, e))
+                try:
+                    if dryrun:
+                        log.info("Would update country statistics: date={}, country={}, visits={}"
+                              .format(date, country_name, visits))
+                    else:
+                        AudienceLocationDate.update_visits(country_name, date, visits)
+                except Exception as e:
+                    log.exception('Error updating country statistics for {}: {}'.format(country_name, e))
 
-    # Search terms
-    search_terms = api.search_terms(**params)
+        # Search terms
+        search_terms = api.search_terms(**params)
 
-    for date_str, date_statistics in search_terms.items():
-        date = datetime.datetime.strptime(date_str, DATE_FORMAT)
-        for search_term_stats in date_statistics:
-            search_term = search_term_stats.get('label', '(not set)')
-            count = search_term_stats.get('nb_visits', 0)
+        for date_str, date_statistics in search_terms.items():
+            date = datetime.datetime.strptime(date_str, DATE_FORMAT)
+            for search_term_stats in date_statistics:
+                search_term = search_term_stats.get('label', '(not set)')
+                count = search_term_stats.get('nb_visits', 0)
 
-            try:
-                if dryrun:
-                    log.info("Would search term statistics: date={}, search_term={}, count={}"
-                          .format(date, search_term, count))
-                else:
-                    SearchStats.update_search_term_count(search_term, date, count)
-            except Exception as e:
-                log.exception('Error updating search term statistics for {}: {}'.format(search_term, e))
+                try:
+                    if dryrun:
+                        log.info("Would search term statistics: date={}, search_term={}, count={}"
+                              .format(date, search_term, count))
+                    else:
+                        SearchStats.update_search_term_count(search_term, date, count)
+                except Exception as e:
+                    log.exception('Error updating search term statistics for {}: {}'.format(search_term, e))
 
 
 def init_db():

@@ -21,8 +21,9 @@ def matomo():
 @click.option(u'--dryrun', is_flag=True, help="Prints what would be updated without making any changes.")
 @click.option(u'--since', help="First date to fetch in YYYY-MM-DD format. Default: latest PackageStats entry date.")
 @click.option(u'--until', help="Last date to fetch in YYYY-MM-DD format. Default: current date.")
-def fetch(dryrun, since, until):
-    commands.fetch(dryrun, since, until)
+@click.option(u'--dataset', required=False, help="Fetch analytics data for a single dataset")
+def fetch(dryrun, since, until, dataset):
+    commands.fetch(dryrun, since, until, dataset)
 
 
 @matomo.command(

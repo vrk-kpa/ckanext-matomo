@@ -36,13 +36,17 @@ class MatomoAPI(object):
 
         return result
 
-    def resource_download_statistics(self, period='month', date='today') -> Dict[str, Any]:
+    def resource_download_statistics(self, period='month', date='today', dataset=None) -> Dict[str, Any]:
+        pattern = '/data/([^/]+/)?dataset/[^/]+/resource/[^/]+/download/[^/]+$'
+        if dataset:
+            pattern = '/data/([^/]+/)?dataset/{dataset}/resource/[^/]+/download/[^/]+$'.format(dataset=dataset)
+
         data: Dict[str, Any] = self.get({'method': 'Actions.getDownloads',
                          'period': period,
                          'date': date,
                          'flat': 1,
                          'filter_column': 'label',
-                         'filter_pattern': '/data/([^/]+/)?dataset/[^/]+/resource/[^/]+/download/[^/]+$'})
+                         'filter_pattern': pattern })
 
         def handle(data) -> Dict[str, Any]:
             result: Dict[str, Any] = {}
@@ -57,12 +61,18 @@ class MatomoAPI(object):
 
         return _process_one_or_more_dates_result(data, handle)
 
-    def dataset_page_statistics(self, period='month', date='today') -> Dict[str, Any]:
+    def dataset_page_statistics(self, period='month', date='today', dataset=None) -> Dict[str, Any]:
+        # TODO: /data/ should be config based, fine for our projects for now
+        pattern = '[^/]*/data/([^/]+/)?dataset/[^/]+$'
+        if dataset:
+            pattern = '[^/]*/data/([^/]+/)?dataset/{dataset}$'.format(dataset=dataset)
+
         data: Dict[str, Any] = self.get({'method': 'Actions.getPageUrls',
                          'period': period,
                          'date': date,
                          'flat': 1,
-                         'filter_column': 'label'})
+                         'filter_column': 'label',
+                         'filter_pattern': pattern})
 
         def handle(data) -> Dict[str, Any]:
             result: Dict[str, Any] = {}
@@ -76,13 +86,17 @@ class MatomoAPI(object):
 
         return _process_one_or_more_dates_result(data, handle)
 
-    def resource_page_statistics(self, period='month', date='today') -> Dict[str, Any]:
+    def resource_page_statistics(self, period='month', date='today', dataset=None) -> Dict[str, Any]:
+        pattern = '[^/]*/data/([^/]+/)?dataset/[^/]+/resource/[^/]+$'
+        if dataset:
+            pattern = '[^/]*/data/([^/]+/)?dataset/{dataset}/resource/[^/]+$'.format(dataset=dataset)
+
         data: Dict[str, Any] = self.get({'method': 'Actions.getPageUrls',
                          'period': period,
                          'date': date,
                          'flat': 1,
                          'filter_column': 'label',
-                         'filter_pattern': '[^/]*/data/([^/]+/)?dataset/[^/]+/resource/[^/]+$'})
+                         'filter_pattern': pattern})
 
         def handle(data) -> Dict[str, Any]:
             result: Dict[str, Any] = {}
