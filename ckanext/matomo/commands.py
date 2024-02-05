@@ -141,7 +141,7 @@ def fetch(dryrun, since, until, dataset):
             regex = re.compile('.*id=([a-zA-Z0-9-_]*)&?.*$', re.I)
             match = regex.match(stats.get('Events_EventName'))
             if match and match[1]:
-                if dataset and dataset is not match[1]:
+                if dataset and dataset != match[1]:
                     continue
                 package_id_or_name = match[1]
                 try:
@@ -163,7 +163,7 @@ def fetch(dryrun, since, until, dataset):
                         log.exception('Error updating API event statistics for {}: {}'.format(package_id, e))
 
     # Resource page statistics
-    resource_page_statistics = api.resource_page_statistics(**params)
+    resource_page_statistics = api.resource_page_statistics(**params, dataset=dataset)
     datastore_search_sql_events: Dict[str, Any] = api.events(**params, filter_pattern='datastore_search_sql')
 
     for date_str, date_statistics in resource_page_statistics.items():
@@ -193,7 +193,11 @@ def fetch(dryrun, since, until, dataset):
             if match and match[1]:
                 resource_id = match[1]
                 try:
-                    resource_show({'ignore_auth': True}, {'id': resource_id})
+                    resource = resource_show({'ignore_auth': True}, {'id': resource_id})
+                    if dataset:
+                        pkg = package_show({'ignore_auth': True}, {'id': dataset})
+                        if pkg.id != resource['package_id']:
+                            continue
                 except toolkit.ObjectNotFound:
                     log.info('Resource "{}" not found, skipping...'.format(resource_id))
                     continue
