@@ -183,6 +183,10 @@ def fetch(dryrun, since, until, dataset):
             except Exception as e:
                 log.exception('Error updating resource statistics for {}: {}'.format(resource_id, e))
 
+    pkg = None
+    if dataset:
+        pkg = package_show({'ignore_auth': True}, {'id': dataset})
+
     # Resource datastore search sql events (API events)
     for date_str, date_statistics in datastore_search_sql_events.items():
         date = datetime.datetime.strptime(date_str, DATE_FORMAT)
@@ -194,8 +198,7 @@ def fetch(dryrun, since, until, dataset):
                 resource_id = match[1]
                 try:
                     resource = resource_show({'ignore_auth': True}, {'id': resource_id})
-                    if dataset:
-                        pkg = package_show({'ignore_auth': True}, {'id': dataset})
+                    if pkg:
                         if pkg.id != resource['package_id']:
                             continue
                 except toolkit.ObjectNotFound:
