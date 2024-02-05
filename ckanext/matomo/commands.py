@@ -185,7 +185,11 @@ def fetch(dryrun, since, until, dataset):
 
     pkg = None
     if dataset:
-        pkg = package_show({'ignore_auth': True}, {'id': dataset})
+        try:
+            pkg = package_show({'ignore_auth': True}, {'id': dataset})
+        except toolkit.ObjectNotFound:
+            log.info("Given dataset: %s not found" % dataset)
+            pass
 
     # Resource datastore search sql events (API events)
     for date_str, date_statistics in datastore_search_sql_events.items():
