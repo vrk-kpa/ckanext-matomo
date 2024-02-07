@@ -203,7 +203,7 @@ def fetch(dryrun, since, until, dataset):
                 try:
                     resource = resource_show({'ignore_auth': True}, {'id': resource_id})
                     if pkg:
-                        if pkg.id != resource['package_id']:
+                        if pkg['id'] != resource['package_id']:
                             continue
                 except toolkit.ObjectNotFound:
                     log.info('Resource "{}" not found, skipping...'.format(resource_id))
