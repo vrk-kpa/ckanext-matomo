@@ -48,7 +48,8 @@ def fetch(dryrun, since, until, dataset):
 
 
     # Resource downloads use package id in its url
-    resource_download_statistics: Dict[str, Any] = api.resource_download_statistics(**params, dataset=pkg['id'] if pkg else None)
+    resource_download_statistics: Dict[str, Any] = api.resource_download_statistics(**params,
+                                                                                    dataset=pkg['id'] if pkg else None)
     package_show_events: Dict[str, Any] = api.events(**params, filter_pattern='package_show')
 
     updated_package_ids_by_date = {}
@@ -122,7 +123,8 @@ def fetch(dryrun, since, until, dataset):
                 try:
                     downloads = sum(int(stats.get('nb_hits', 0)) for stats in resource_stats)
                     if dryrun:
-                        log.info('Would update downloads stats for resource: package_id={}, resource_id={}, date={}, downloads={}'
+                        log.info('Would update downloads stats for resource: package_id={}, '
+                                 'resource_id={}, date={}, downloads={}'
                               .format(package_id, resource_id, date, downloads))
                     else:
                         ResourceStats.update_downloads(resource_id, date, downloads)
@@ -133,7 +135,8 @@ def fetch(dryrun, since, until, dataset):
             if package_id not in updated_package_ids:
 
                 try:
-                    downloads = sum(int(stats.get('nb_hits', 0)) for stats_lists in stats_list.values() for stats in stats_lists)
+                    downloads = sum(int(stats.get('nb_hits', 0)) for stats_lists in stats_list.values()
+                                    for stats in stats_lists)
 
                     if dryrun:
                         log.info('Would update download stats: package_id={}, date={}, downloads={}'
