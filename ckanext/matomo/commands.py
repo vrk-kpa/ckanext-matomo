@@ -37,7 +37,19 @@ def fetch(dryrun, since, until, dataset):
     # Dataset stats
 
     dataset_page_statistics: Dict[str, Any] = api.dataset_page_statistics(**params, dataset=dataset)
-    resource_download_statistics: Dict[str, Any] = api.resource_download_statistics(**params, dataset=dataset)
+
+    pkg = None
+    if dataset:
+        try:
+            pkg = package_show({'ignore_auth': True}, {'id': dataset})
+        except toolkit.ObjectNotFound:
+            log.info("Given dataset: %s not found" % dataset)
+            pass
+
+
+    # Resource downloads use package id in its url
+    resource_download_statistics: Dict[str, Any] = api.resource_download_statistics(**params,
+                                                                                    dataset=pkg['id'] if pkg else None)
     package_show_events: Dict[str, Any] = api.events(**params, filter_pattern='package_show')
 
     updated_package_ids_by_date = {}
@@ -79,8 +91,8 @@ def fetch(dryrun, since, until, dataset):
                                     for stats in package_event_statistics)
 
                     if dryrun:
-                        log.info('Would create or update: package_id={}, date={}, visits={}, \
-                               entrances={}, downloads={}, events={}'
+                        log.info('Would create or update: package_id={}, date={}, visits={}, '
+                                 'entrances={}, downloads={}, events={}'
                             .format(package_id, date, visits, entrances, downloads, events))
                     else:
                         PackageStats.create_or_update(package_id, date, visits, entrances, downloads, events)
@@ -100,37 +112,39 @@ def fetch(dryrun, since, until, dataset):
             except toolkit.ObjectNotFound:
                 log.info('Package "{}" not found, skipping...'.format(package_id))
                 continue
-            if package_id in updated_package_ids:
-                # Add download-stats for every resources
-                for resource_id, resource_stats in stats_list.items():
-                    try:
-                        resource_show({'ignore_auth': True}, {'id': resource_id})
-                    except toolkit.ObjectNotFound:
-                        log.info('Resource "{}" not found, skipping...'.format(resource_id))
-                        continue
-                    try:
-                        downloads = sum(int(stats.get('nb_hits', 0)) for stats in resource_stats)
-                        if dryrun:
-                            log.info('Would create or update: package_id={}, resource_id={}, date={}, downloads={}'
-                                  .format(package_id, resource_id, date, downloads))
-                        else:
-                            ResourceStats.update_downloads(resource_id, date, downloads)
-                    except Exception as e:
-                        log.exception('Error updating resource statistics for {}: {}'.format(resource_id, e))
 
-                # If dataset is already handled, don't parse again package stats
-                continue
+            # Add download-stats for every resources
+            for resource_id, resource_stats in stats_list.items():
+                try:
+                    resource_show({'ignore_auth': True}, {'id': resource_id})
+                except toolkit.ObjectNotFound:
+                    log.info('Resource "{}" not found, skipping...'.format(resource_id))
+                    continue
+                try:
+                    downloads = sum(int(stats.get('nb_hits', 0)) for stats in resource_stats)
+                    if dryrun:
+                        log.info('Would update downloads stats for resource: package_id={}, '
+                                 'resource_id={}, date={}, downloads={}'
+                              .format(package_id, resource_id, date, downloads))
+                    else:
+                        ResourceStats.update_downloads(resource_id, date, downloads)
+                except Exception as e:
+                    log.exception('Error updating resource statistics for {}: {}'.format(resource_id, e))
 
-            try:
-                downloads = sum(int(stats.get('nb_hits', 0)) for stats_lists in stats_list.values() for stats in stats_lists)
+            # Dataset had no analytics for the day, parse download statistics for package
+            if package_id not in updated_package_ids:
 
-                if dryrun:
-                    log.info('Would update download stats: package_id={}, date={}, downloads={}'
-                          .format(package_id, date, downloads))
-                else:
-                    PackageStats.update_downloads(package_id, date, downloads)
-            except Exception as e:
-                log.exception('Error updating download statistics for {}: {}'.format(package_id, e))
+                try:
+                    downloads = sum(int(stats.get('nb_hits', 0)) for stats_lists in stats_list.values()
+                                    for stats in stats_lists)
+
+                    if dryrun:
+                        log.info('Would update download stats: package_id={}, date={}, downloads={}'
+                            .format(package_id, date, downloads))
+                    else:
+                        PackageStats.update_downloads(package_id, date, downloads)
+                except Exception as e:
+                    log.exception('Error updating download statistics for {}: {}'.format(package_id, e))
 
     # Loop API event stats (as a fallback if dataset had no stats)
     for date_str, date_statistics in package_show_events.items():
@@ -182,14 +196,6 @@ def fetch(dryrun, since, until, dataset):
                     ResourceStats.update_visits(resource_id, date, visits)
             except Exception as e:
                 log.exception('Error updating resource statistics for {}: {}'.format(resource_id, e))
-
-    pkg = None
-    if dataset:
-        try:
-            pkg = package_show({'ignore_auth': True}, {'id': dataset})
-        except toolkit.ObjectNotFound:
-            log.info("Given dataset: %s not found" % dataset)
-            pass
 
     # Resource datastore search sql events (API events)
     for date_str, date_statistics in datastore_search_sql_events.items():
