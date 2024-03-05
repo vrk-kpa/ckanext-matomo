@@ -1,0 +1,11 @@
+{% if options['organization'] == None %}
+  <p>
+    {% trans %}
+      Discover datasets' download and API request amounts on organization level. Please note that this data only includes statistics of datasets that have been uploaded to the service.      {% endtrans %}
+  </p>
+{% else %}
+  <p>
+    {% trans %}
+      Discover selected organization's download and API request amounts on dataset level. Please note that this data only includes statistics of datasets that have been uploaded to the service.     {% endtrans %}
+  </p>
+{% endif %}

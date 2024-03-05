@@ -1,21 +1,21 @@
 # Translations template for ckanext-matomo.
-# Copyright (C) 2023 ORGANIZATION
+# Copyright (C) 2024 ORGANIZATION
 # This file is distributed under the same license as the ckanext-matomo project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 # 
 # Translators:
 # Roosa Lampinen, 2023
-# Suvi Nuttunen, 2023
 # Zharktas <jari-pekka.voutilainen@gofore.com>, 2023
+# Suvi Nuttunen, 2023
 # 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: ckanext-matomo 0.0.1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-08-25 10:06+0000\n"
+"POT-Creation-Date: 2024-03-05 10:19+0000\n"
 "PO-Revision-Date: 2021-11-17 12:18+0000\n"
-"Last-Translator: Zharktas <jari-pekka.voutilainen@gofore.com>, 2023\n"
+"Last-Translator: Suvi Nuttunen, 2023\n"
 "Language-Team: Swedish (https://app.transifex.com/avoindata/teams/7979/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,24 +30,24 @@ msgstr "Besökarnas plats sorterade efter land (bottrafik filtreras bort)"
 
 #: ckanext/matomo/translations.py:9
 msgid "Most popular datasets"
-msgstr ""
+msgstr "Antalet visningar för datamängder"
 
 #: ckanext/matomo/translations.py:10
 msgid "Matomo showing top datasets with most views by organization"
-msgstr "Dataseten med de flesta vyer per organisation"
+msgstr "Datamängder med de flesta vyer per organisation"
 
 #: ckanext/matomo/translations.py:11
 msgid "Most popular resources"
-msgstr ""
+msgstr "Antalet nedladdningar för resurser"
 
 #: ckanext/matomo/translations.py:12
 msgid "Matomo showing most downloaded resources"
-msgstr "De mest nedladdade dataseten per organisation"
+msgstr "De mest nedladdade resurser per organisation"
 
 #: ckanext/matomo/templates/report/search_term_analytics.html:3
 #: ckanext/matomo/translations.py:13
 msgid "Most popular search terms"
-msgstr ""
+msgstr "De mest populära sökord"
 
 #: ckanext/matomo/translations.py:14
 msgid "Matomo showing most popular search terms"
@@ -58,55 +58,69 @@ msgstr "De mest populära sökord och de senaste sökdatumen"
 msgid "Last searched date"
 msgstr "Senast sökt"
 
+#: ckanext/matomo/translations.py:16
+msgid ""
+"You can choose to discover the statistics of datasets either on organization"
+" or dataset level. Total views include pageviews of the organization's all "
+"datasets counted together. Initial entrance includes visitors that visit the"
+" page for the first time. Downloads include all dataset downloads of the "
+"organization. Number of API requests include the total sum of API requests "
+"made for the organization's datasets. Please note downloads and number of "
+"API requests include only statistics of datasets that have been uploaded to "
+"the service."
+msgstr ""
+
 #: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:2
 #: ckanext/matomo/templates/matomo/snippets/resource_stats.html:2
 msgid "Stats"
 msgstr "Rapporter"
 
 #: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:4
-#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:5
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:6
 msgid "Weekly visits for last 12 months"
 msgstr "Veckovisa besök under de senaste 12 månaderna"
 
 #: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:13
-#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:29
-#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:18
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:32
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:37
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:22
 msgid "Visits"
 msgstr "Sidvisningar"
 
 #: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:14
-#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:18
-#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:15
-#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:19
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:19
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:18
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:23
 msgid "During last 30 days"
 msgstr "Under de senaste 30 dagarna"
 
 #: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:15
-#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:19
-#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:16
-#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:20
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:20
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:19
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:24
 msgid "During last 12 months"
 msgstr "Under de senaste 12 månaderna"
 
 #: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:16
-#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:20
-#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:17
-#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:21
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:21
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:20
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:25
 msgid "All time:"
 msgstr "Alla:"
 
-#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:17
-#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:14
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:18
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:17
 msgid "Download counts"
 msgstr "Antal nedladdningar"
 
-#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:29
-#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:32
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:32
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:37
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:37
 msgid "Year"
 msgstr "År"
 
-#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:29
-#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:32
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:32
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:37
 #: ckanext/matomo/templates/report/dataset_analytics.html:14
 #: ckanext/matomo/templates/report/dataset_analytics.html:42
 #: ckanext/matomo/templates/report/resource_analytics.html:11
@@ -114,15 +128,16 @@ msgstr "År"
 msgid "Downloads"
 msgstr "Nedladdningar"
 
-#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:31
-#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:34
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:34
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:39
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:39
 msgid "Week"
 msgstr "förra veckan"
 
 #: ckanext/matomo/templates/report/dataset_analytics.html:5
 #: ckanext/matomo/templates/report/resource_analytics.html:5
 msgid "Organizations that have published data"
-msgstr ""
+msgstr "Organisationer som har publicerat data"
 
 #: ckanext/matomo/templates/report/dataset_analytics.html:10
 #: ckanext/matomo/templates/report/resource_analytics.html:10
@@ -132,17 +147,17 @@ msgstr ""
 #: ckanext/matomo/templates/report/dataset_analytics.html:11
 #: ckanext/matomo/templates/report/dataset_analytics.html:39
 msgid "Total views"
-msgstr ""
+msgstr "Totalt antal visningar"
 
 #: ckanext/matomo/templates/report/dataset_analytics.html:12
 #: ckanext/matomo/templates/report/dataset_analytics.html:40
 msgid "Initial entrance"
-msgstr ""
+msgstr "Nya besökare"
 
 #: ckanext/matomo/templates/report/dataset_analytics.html:13
 #: ckanext/matomo/templates/report/dataset_analytics.html:41
 msgid "Entrances of total views"
-msgstr ""
+msgstr "Andel nya besökare av alla"
 
 #: ckanext/matomo/templates/report/dataset_analytics.html:15
 #: ckanext/matomo/templates/report/dataset_analytics.html:43
@@ -165,7 +180,7 @@ msgstr ""
 
 #: ckanext/matomo/templates/report/location_analytics.html:37
 msgid "Sessions by month"
-msgstr ""
+msgstr "Sessioner per månad"
 
 #: ckanext/matomo/templates/report/location_analytics.html:38
 msgid "Dates"
@@ -174,16 +189,16 @@ msgstr ""
 #: ckanext/matomo/templates/report/location_analytics.html:39
 #: ckanext/matomo/templates/report/location_analytics.html:78
 msgid "Sessions"
-msgstr ""
+msgstr "Sessioner"
 
 #: ckanext/matomo/templates/report/location_analytics.html:47
 #: ckanext/matomo/templates/report/location_analytics.html:56
 msgid "Sessions last month"
-msgstr ""
+msgstr "Sessioner förra månaden"
 
 #: ckanext/matomo/templates/report/location_analytics.html:63
 msgid "Sessions total"
-msgstr ""
+msgstr "Totalt antal sessioner"
 
 #: ckanext/matomo/templates/report/location_analytics.html:71
 msgid "Audience locations"
@@ -191,15 +206,15 @@ msgstr "Besökarnas plats"
 
 #: ckanext/matomo/templates/report/location_analytics.html:72
 msgid "Collected since"
-msgstr ""
+msgstr "Samlat in sedan"
 
 #: ckanext/matomo/templates/report/location_analytics.html:76
 msgid "Countries"
-msgstr ""
+msgstr "Länder"
 
 #: ckanext/matomo/templates/report/location_analytics.html:77
 msgid "Sessions (since recording started)"
-msgstr ""
+msgstr "Sessioner (sedan insamlingen började)"
 
 #: ckanext/matomo/templates/report/location_analytics.html:89
 msgid "No statistics found for audience locations."
@@ -211,11 +226,11 @@ msgstr ""
 
 #: ckanext/matomo/templates/report/option_time.html:9
 msgid "Timespan for records"
-msgstr ""
+msgstr "Statistik för perioden"
 
 #: ckanext/matomo/templates/report/resource_analytics.html:25
 msgid "Most downloaded resources"
-msgstr ""
+msgstr "De mest nedladdade resurser"
 
 #: ckanext/matomo/templates/report/resource_analytics.html:31
 msgid "Resource"
@@ -223,7 +238,7 @@ msgstr ""
 
 #: ckanext/matomo/templates/report/resource_analytics.html:33
 msgid "Last accessed date"
-msgstr ""
+msgstr "Senaste besökning"
 
 #: ckanext/matomo/templates/report/resource_analytics.html:51
 msgid "No statistics found for most downloaded resources."
@@ -231,11 +246,11 @@ msgstr ""
 
 #: ckanext/matomo/templates/report/search_term_analytics.html:9
 msgid "Search term"
-msgstr ""
+msgstr "Sökord"
 
 #: ckanext/matomo/templates/report/search_term_analytics.html:10
 msgid "Total searches"
-msgstr ""
+msgstr "Totalt antal sökningar"
 
 #: ckanext/matomo/templates/report/search_term_analytics.html:22
 msgid "No analytics found for most popular search terms"

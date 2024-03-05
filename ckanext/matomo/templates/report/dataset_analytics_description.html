@@ -1,0 +1,13 @@
+{% if options['organization'] == None %}
+  <p>
+    {% trans %}
+      You can choose to discover the statistics of datasets either on organization or dataset level. Total views include pageviews of the organization's all datasets counted together. Initial entrance includes visitors that visit the page for the first time. Downloads include all dataset downloads of the organization. Number of API requests include the total sum of API requests made for the organization's datasets. Please note downloads and number of API requests include only statistics of datasets that have been uploaded to the service.
+    {% endtrans %}
+  </p>
+{% else %}
+  <p>
+    {% trans %}
+      Discover statistics of the organization on dataset level. Total views include all pageviews of the specific dataset. Initial entrance includes visitors that visit the page for the first time. Downloads include all downloads of the specific dataset. Number of API requests include the total sum of API requests made on the dataset. Please note downloads and number of API requests include only statistics of datasets that have been uploaded to the service.
+    {% endtrans %}
+  </p>
+{% endif %}
