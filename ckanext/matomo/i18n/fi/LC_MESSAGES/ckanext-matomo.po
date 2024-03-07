@@ -10,15 +10,16 @@
 # Suvi Nuttunen, 2023
 # Zharktas <jari-pekka.voutilainen@gofore.com>, 2023
 # Roosa Lampinen, 2023
+# Pinja Perttunen, 2024
 # 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: ckanext-matomo 0.0.1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-05 10:19+0000\n"
+"POT-Creation-Date: 2024-03-05 12:07+0000\n"
 "PO-Revision-Date: 2021-11-17 12:18+0000\n"
-"Last-Translator: Roosa Lampinen, 2023\n"
+"Last-Translator: Pinja Perttunen, 2024\n"
 "Language-Team: Finnish (https://app.transifex.com/avoindata/teams/7979/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -62,18 +63,6 @@ msgstr "Suosituimmat hakusanat ja viimeisimmät hakupäivämäärät"
 #: ckanext/matomo/translations.py:15
 msgid "Last searched date"
 msgstr "Viimeksi haettu"
-
-#: ckanext/matomo/translations.py:16
-msgid ""
-"You can choose to discover the statistics of datasets either on organization"
-" or dataset level. Total views include pageviews of the organization's all "
-"datasets counted together. Initial entrance includes visitors that visit the"
-" page for the first time. Downloads include all dataset downloads of the "
-"organization. Number of API requests include the total sum of API requests "
-"made for the organization's datasets. Please note downloads and number of "
-"API requests include only statistics of datasets that have been uploaded to "
-"the service."
-msgstr ""
 
 #: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:2
 #: ckanext/matomo/templates/matomo/snippets/resource_stats.html:2
@@ -183,6 +172,34 @@ msgstr "Tietoaineisto"
 msgid "No analytics found for most downloaded datasets."
 msgstr "Eniten ladatuista tietoaineistoista ei löytynyt statistiikkaa. "
 
+#: ckanext/matomo/templates/report/dataset_analytics_description.html:3
+msgid ""
+"You can choose to discover the statistics of datasets either on organization"
+" or dataset level. Total views include pageviews of the organization's all "
+"datasets counted together. Initial entrance includes visitors that visit the"
+" page for the first time. Downloads include all dataset downloads of the "
+"organization. Number of API requests include the total sum of API requests "
+"made for the organization's datasets. Please note downloads and number of "
+"API requests include only statistics of datasets that have been uploaded to "
+"the service."
+msgstr ""
+"Näyttökerrat yhteensä pitää sisällään organisaation kaikkien tietoaineistosivujen sivulatausten määrän. Uusien kävijöiden määrä ja niiden osuus kaikista kävijöistä koostuu sellaisista kävijöistä, jotka tulevat sivustolle ensimmäistä kertaa. Tietoaineistojen latausmäärät käsittää käyttäjien tekemien latausten määrän käyttöliittymästä. Tämä ottaa huomioon vain palveluun lisättyjen tiedostojen lataukset koko organisaation osalta. Rajapintakutsujen määrä kertoo kuinka monta kertaa tietoaineiston sisältöä on haettu rajapinnan kautta. Tämä tieto koskee vain taulukkomuotoisia tietoaineistoja.\n"
+"Valitsemalla organisaation, voi tarkastella tarkemmin tilastojen jakautumista kyseisen organisaation tietoaineistojen välillä.\n"
+"Huom! Olemme huomanneet virheen rajapintakutsujen määrässä ja korjaamme tilastoa tältä osin parhaillaan. Pahoittelemme tapahtunutta."
+
+#: ckanext/matomo/templates/report/dataset_analytics_description.html:9
+msgid ""
+"Discover statistics of the organization on dataset level. Total views "
+"include all pageviews of the specific dataset. Initial entrance includes "
+"visitors that visit the page for the first time. Downloads include all "
+"downloads of the specific dataset. Number of API requests include the total "
+"sum of API requests made on the dataset. Please note downloads and number of"
+" API requests include only statistics of datasets that have been uploaded to"
+" the service."
+msgstr ""
+"Tilasto sisältää tietoa valitun organisaation osalta. Näyttökerrat yhteensä pitää sisällään tietoaineistosivun sivulatausten määrän. Uusien kävijöiden määrä ja niiden osuus kaikista kävijöistä koostuu sellaisista kävijöistä, jotka tulevat sivustolle ensimmäistä kertaa. Tietoaineiston latausmäärät käsittää käyttäjien tekemien latausten määrän käyttöliittymästä. Tämä ottaa huomioon vain palveluun lisätyn tiedoston lataukset. Rajapintakutsujen määrä kertoo kuinka monta kertaa tietoaineiston sisältöä on haettu rajapinnan kautta. Tämä tieto koskee vain taulukkomuotoista tietoaineistoa.\n"
+"Huom! Olemme huomanneet virheen rajapintakutsujen määrässä ja korjaamme tilastoa tältä osin parhaillaan. Pahoittelemme tapahtunutta."
+
 #: ckanext/matomo/templates/report/location_analytics.html:37
 msgid "Sessions by month"
 msgstr "Istuntoja kuukausittain"
@@ -248,6 +265,25 @@ msgstr "Viimeisin vierailu"
 #: ckanext/matomo/templates/report/resource_analytics.html:51
 msgid "No statistics found for most downloaded resources."
 msgstr "Eniten ladatuista data-aineistoista ei löytynyt statistiikkaa. "
+
+#: ckanext/matomo/templates/report/resource_analytics_description.html:3
+msgid ""
+"Discover datasets' download and API request amounts on organization level. "
+"Please note that this data only includes statistics of datasets that have "
+"been uploaded to the service."
+msgstr ""
+"Tilasto sisältää data-aineistojen latauskerrat sekä rajapintakutsujen määrät organisaatioittain. Tietoaineistojen latausmäärät käsittää käyttäjien tekemien latausten määrän käyttöliittymästä koko organisaation osalta. Tämä ottaa huomioon vain palveluun lisättyjen tiedostojen lataukset. Rajapintakutsujen määrä kertoo kuinka monta kertaa organisaation tietoaineistojen sisältöä on haettu rajapinnan kautta. Tämä tieto koskettaa vain taulukkomuotoisia tietoaineistoja.\n"
+"Valitsemalla organisaation, voi tarkastella tarkemmin tilastojen jakautumista kyseisen organisaation tietoaineistojen välillä.\n"
+"Huom! Olemme huomanneet virheen rajapintakutsujen määrässä ja korjaamme tilastoa tältä osin parhaillaan. Pahoittelemme tapahtunutta."
+
+#: ckanext/matomo/templates/report/resource_analytics_description.html:8
+msgid ""
+"Discover selected organization's download and API request amounts on dataset"
+" level. Please note that this data only includes statistics of datasets that"
+" have been uploaded to the service."
+msgstr ""
+"Tilasto sisältää data-aineistojen latauskerrat sekä rajapintakutsujen määrät valitun organisaation osalta. Tietoaineiston latausmäärät käsittää käyttäjien tekemien latausten määrän käyttöliittymästä. Tämä ottaa huomioon vain palveluun lisätyn tiedoston lataukset. Rajapintakutsujen määrä kertoo kuinka monta kertaa tietoaineiston sisältöä on haettu rajapinnan kautta. Tämä tieto koskettaa vain taulukkomuotoisia tietoaineistoja.\n"
+"Huom! Olemme huomanneet virheen rajapintakutsujen määrässä ja korjaamme tilastoa tältä osin parhaillaan. Pahoittelemme tapahtunutta."
 
 #: ckanext/matomo/templates/report/search_term_analytics.html:9
 msgid "Search term"

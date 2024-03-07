@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ckanext-matomo 0.0.1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-05 10:19+0000\n"
+"POT-Creation-Date: 2024-03-05 12:07+0000\n"
 "PO-Revision-Date: 2021-11-17 12:18+0000\n"
 "Last-Translator: Suvi Nuttunen, 2023\n"
 "Language-Team: Swedish (https://app.transifex.com/avoindata/teams/7979/sv/)\n"
@@ -57,18 +57,6 @@ msgstr "De mest populära sökord och de senaste sökdatumen"
 #: ckanext/matomo/translations.py:15
 msgid "Last searched date"
 msgstr "Senast sökt"
-
-#: ckanext/matomo/translations.py:16
-msgid ""
-"You can choose to discover the statistics of datasets either on organization"
-" or dataset level. Total views include pageviews of the organization's all "
-"datasets counted together. Initial entrance includes visitors that visit the"
-" page for the first time. Downloads include all dataset downloads of the "
-"organization. Number of API requests include the total sum of API requests "
-"made for the organization's datasets. Please note downloads and number of "
-"API requests include only statistics of datasets that have been uploaded to "
-"the service."
-msgstr ""
 
 #: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:2
 #: ckanext/matomo/templates/matomo/snippets/resource_stats.html:2
@@ -178,6 +166,29 @@ msgstr ""
 msgid "No analytics found for most downloaded datasets."
 msgstr ""
 
+#: ckanext/matomo/templates/report/dataset_analytics_description.html:3
+msgid ""
+"You can choose to discover the statistics of datasets either on organization"
+" or dataset level. Total views include pageviews of the organization's all "
+"datasets counted together. Initial entrance includes visitors that visit the"
+" page for the first time. Downloads include all dataset downloads of the "
+"organization. Number of API requests include the total sum of API requests "
+"made for the organization's datasets. Please note downloads and number of "
+"API requests include only statistics of datasets that have been uploaded to "
+"the service."
+msgstr ""
+
+#: ckanext/matomo/templates/report/dataset_analytics_description.html:9
+msgid ""
+"Discover statistics of the organization on dataset level. Total views "
+"include all pageviews of the specific dataset. Initial entrance includes "
+"visitors that visit the page for the first time. Downloads include all "
+"downloads of the specific dataset. Number of API requests include the total "
+"sum of API requests made on the dataset. Please note downloads and number of"
+" API requests include only statistics of datasets that have been uploaded to"
+" the service."
+msgstr ""
+
 #: ckanext/matomo/templates/report/location_analytics.html:37
 msgid "Sessions by month"
 msgstr "Sessioner per månad"
@@ -242,6 +253,20 @@ msgstr "Senaste besökning"
 
 #: ckanext/matomo/templates/report/resource_analytics.html:51
 msgid "No statistics found for most downloaded resources."
+msgstr ""
+
+#: ckanext/matomo/templates/report/resource_analytics_description.html:3
+msgid ""
+"Discover datasets' download and API request amounts on organization level. "
+"Please note that this data only includes statistics of datasets that have "
+"been uploaded to the service."
+msgstr ""
+
+#: ckanext/matomo/templates/report/resource_analytics_description.html:8
+msgid ""
+"Discover selected organization's download and API request amounts on dataset"
+" level. Please note that this data only includes statistics of datasets that"
+" have been uploaded to the service."
 msgstr ""
 
 #: ckanext/matomo/templates/report/search_term_analytics.html:9
