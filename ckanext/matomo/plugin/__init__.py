@@ -73,7 +73,8 @@ class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin, DefaultTranslation):
             'get_date_range': helpers.get_date_range,
             'get_years': helpers.get_years,
             'matomo_show_download_graph': helpers.show_download_graph,
-            'get_current_date': helpers.get_current_date
+            'get_current_date': helpers.get_current_date,
+            'get_downloads_in_date_range_for_resource': helpers.get_downloads_in_date_range_for_resource
         }
 
     # IClick

@@ -1,10 +1,10 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from flask import request
 from typing import List, Tuple, Optional
 from ckan.plugins.toolkit import render_snippet, config
 from ckan.plugins import toolkit as tk
 from ckanext.matomo.reports import last_calendar_period, get_report_years
-from ckanext.matomo.model import PackageStats, ResourceStats
+from ckanext.matomo.model import PackageStats, ResourceStats, get_end_of_last_week, get_beginning_of_next_week
 from ckanext.matomo.types import Visits
 
 
@@ -39,6 +39,11 @@ def get_visits_for_dataset(id: str) -> Visits:
 def get_visits_for_resource(id: str) -> Visits:
     return ResourceStats.get_all_visits(id)
 
+def get_downloads_in_date_range_for_resource(id: str) -> Visits:
+    end_of_last_week = get_end_of_last_week(datetime.now())
+    start_date = get_beginning_of_next_week(end_of_last_week.replace(hour=0, minute=0, second=0, microsecond=0)
+                                            - timedelta(days=365))
+    return ResourceStats.get_downloads_in_date_range_by_id(id, start_date, end_of_last_week)
 
 def get_download_count_for_dataset(id: str, time: str) -> int:
     start_date, end_date = get_date_range(time)
