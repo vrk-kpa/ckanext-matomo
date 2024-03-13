@@ -492,20 +492,22 @@ class ResourceStats(Base):
                          .group_by('weekly').order_by('weekly').all())
 
 
-        total_visits_and_downloads = model.Session.query(func.sum(cls.visits).label('visits'),
-                                                         func.sum(cls.downloads).label('downloads')).filter(
-            cls.resource_id == resource_id).first()
+        total_visits_and_downloads = (model.Session.query(func.sum(cls.visits).label('visits'),
+                                                         func.sum(cls.downloads).label('downloads'))
+                                      .filter(cls.resource_id == resource_id).first())
 
-        visits: Visits = []
+        visits = [{'year': (start_date + timedelta(weeks=x)).year,
+                   'week': (start_date + timedelta(weeks=x)).isocalendar()[1],
+                   'downloads': 0} for x in range(0,52)]
 
-        for week_visits in weekly_visits:
-            visits.append({'year': week_visits.weekly.year, 'week': week_visits.weekly.isocalendar()[1],
-                           'downloads': week_visits.weekly_downloads})
-
+        for date in visits:
+            for week_visits in weekly_visits:
+                if date['year'] == week_visits.weekly.year and date['week'] == week_visits.weekly.isocalendar()[1]:
+                    date['downloads'] = week_visits.weekly_downloads
 
         results = {'visits': visits,
-                   'total_visits': total_visits_and_downloads.visits,
-                   'total_downloads': total_visits_and_downloads.downloads}
+                   'total_visits': total_visits_and_downloads.visits if total_visits_and_downloads.visits else 0,
+                   'total_downloads': total_visits_and_downloads.downloads if total_visits_and_downloads.downloads else 0}
 
         return results
 
