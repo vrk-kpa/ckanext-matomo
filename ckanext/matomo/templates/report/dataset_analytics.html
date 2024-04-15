@@ -12,7 +12,7 @@
         <th>{% trans %}Initial entrance{% endtrans %}</th>
         <th>{% trans %}Entrances of total views{% endtrans %}</th>
         <th>{% trans %}Downloads{% endtrans %}</th>
-        <th>{% trans %}API events{% endtrans %}</th>
+        <th>{% trans %}Number of API requests (package_show){% endtrans %}</th>
       </tr>
         {% for row in data['table'] %}
           {% set org_name = row.get('organization_name') %}
