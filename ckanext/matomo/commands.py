@@ -178,7 +178,8 @@ def fetch(dryrun, since, until, dataset):
 
     # Resource page statistics
     resource_page_statistics = api.resource_page_statistics(**params, dataset=dataset)
-    datastore_search_sql_events: Dict[str, Any] = api.events(**params, filter_pattern='datastore_search_sql')
+    # pattern is used as regex so it includes both datastore_search and datastore_search_sql
+    datastore_search_sql_events: Dict[str, Any] = api.events(**params, filter_pattern='datastore_search')
 
     for date_str, date_statistics in resource_page_statistics.items():
         date = datetime.datetime.strptime(date_str, DATE_FORMAT)
@@ -202,28 +203,39 @@ def fetch(dryrun, since, until, dataset):
         date = datetime.datetime.strptime(date_str, DATE_FORMAT)
 
         for event in date_statistics:
-            regex = re.compile('^.*FROM "([a-zA-Z0-9-_]*)".*$', re.I|re.M)
-            match = regex.search(unquote(event.get('Events_EventName')))
-            if match and match[1]:
-                resource_id = match[1]
-                try:
-                    resource = resource_show({'ignore_auth': True}, {'id': resource_id})
-                    if pkg:
-                        if pkg['id'] != resource['package_id']:
-                            continue
-                except toolkit.ObjectNotFound:
-                    log.info('Resource "{}" not found, skipping...'.format(resource_id))
-                    continue
-                # Add event stats for resourcee
-                try:
-                    events = event.get('nb_events', 0)
-                    if dryrun:
-                        log.info('Would create or update: resource_id={}, date={}, events={}'
-                            .format(resource_id, date, events))
-                    else:
-                        ResourceStats.update_events(resource_id, date, events)
-                except Exception as e:
-                    log.exception('Error updating API event statistics for resource {}: {}'.format(resource_id, e))
+            resource_id = None
+            if event.get('Events_EventAction') == "datastore_search_sql":
+                regex = re.compile('^.*FROM "([a-zA-Z0-9-_]*)".*$', re.I|re.M)
+                match = regex.search(unquote(event.get('Events_EventName')))
+                if match and match[1]:
+                    resource_id = match[1]
+            elif event.get('Events_EventAction') == "datastore_search":
+                regex = re.compile('.*resource_id=([a-zA-Z0-9-_]*)&?.*$', re.I)
+                match = regex.search(unquote(event.get('Events_EventName')))
+                if match and match[1]:
+                    resource_id = match[1]
+            else:
+                log.info("No resource_id found from EventName, skipping...")
+                continue
+
+            try:
+                resource = resource_show({'ignore_auth': True}, {'id': resource_id})
+                if pkg:
+                    if pkg['id'] != resource['package_id']:
+                        continue
+            except toolkit.ObjectNotFound:
+                log.info('Resource "{}" not found, skipping...'.format(resource_id))
+                continue
+            # Add event stats for resourcee
+            try:
+                events = event.get('nb_events', 0)
+                if dryrun:
+                    log.info('Would create or update: resource_id={}, date={}, events={}'
+                        .format(resource_id, date, events))
+                else:
+                    ResourceStats.update_events(resource_id, date, events)
+            except Exception as e:
+                log.exception('Error updating API event statistics for resource {}: {}'.format(resource_id, e))
 
     if not dataset:
         # Visits by country
