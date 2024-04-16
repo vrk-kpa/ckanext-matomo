@@ -2,6 +2,7 @@ import requests
 import datetime
 import uuid
 
+from urllib.parse import urlencode
 from typing import Dict, Any
 
 log = __import__('logging').getLogger(__name__)
@@ -167,6 +168,22 @@ class MatomoAPI(object):
             params['token_auth'] = self.token_auth
 
         return requests.get(self.tracking_url, params=params)
+
+    def tracking_bulk(self, events, token_auth=None):
+        # URL encode events as required by Matomo:
+        # https://developer.matomo.org/api-reference/tracking-api#bulk-tracking
+        requests = []
+        for event in events:
+            params = self.tracking_params.copy()
+            params.update(event)
+            requests.append(f'?{urlencode(params)}')
+
+        data = {
+            'requests': requests,
+            'token_auth': token_auth or self.token_auth
+        }
+
+        return requests.post(self.tracking_url, data=data)
 
 
 def _process_one_or_more_dates_result(data, handler) -> Dict[str, Any]:
