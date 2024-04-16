@@ -174,7 +174,7 @@ class MatomoAPI(object):
         # https://developer.matomo.org/api-reference/tracking-api#bulk-tracking
         requests = []
         for event in events:
-            params = self.default_params.copy()
+            params = self.tracking_params.copy()
             params.update(event)
             requests.append(f'?{urlencode(params)}')
 
