@@ -2,7 +2,6 @@ import logging
 import datetime
 
 from concurrent.futures import ThreadPoolExecutor
-from queue import Queue, Full, Empty
 
 from ckan.views.api import action as ckan_action
 import ckan.plugins.toolkit as toolkit
@@ -12,7 +11,6 @@ from ckanext.matomo.matomo_api import MatomoAPI
 MAX_EVENTS_PER_MATOMO_REQUEST = 32
 log = logging.getLogger(__name__)
 tracking_executor = ThreadPoolExecutor(max_workers=1)
-tracking_queue = Queue()
 
 
 def tracked_action(logic_function, ver=3):
@@ -58,39 +56,25 @@ def post_analytics(category, action, name, download=False):
         event['download'] = event['url']
 
     log.info('Logging tracking event: %s', event)
-    try:
-        tracking_queue.put_nowait(event)
-        tracking_executor.submit(matomo_track)
-    except Full:
-        log.warning(f'Matomo tracking event queue full, discarding {event}')
+    tracking_executor.submit(matomo_track, event)
 
 
 # Required to be a free function to work with background jobs
-def matomo_track():
+def matomo_track(event):
     # Gather events to send
-    events = []
-    try:
-        while not tracking_queue.empty() and len(events) < MAX_EVENTS_PER_MATOMO_REQUEST:
-            events.append(tracking_queue.get_nowait())
-    except Empty:
-        pass  # Just continue if the queue was empty
-
-    if not events:
-        return  # No events to send
-
     log = logging.getLogger('ckanext.matomo.tracking')
     test_mode = toolkit.config.get('ckanext.matomo.test_mode', False)
 
     if test_mode:
-        log.info(f"Would send API events to Matomo: {events}")
+        log.info(f"Would send API event to Matomo: {event}")
         return
 
-    log.info(f"Sending API events to Matomo: {events}")
+    log.info(f"Sending API event to Matomo: {event}")
     matomo_url = toolkit.config.get(u'ckanext.matomo.domain')
     matomo_site_id = toolkit.config.get(u'ckanext.matomo.site_id')
     token_auth = toolkit.config.get('ckanext.matomo.token_auth')
     api = MatomoAPI(matomo_url, matomo_site_id, token_auth=token_auth)
-    r = api.tracking_bulk(events)
+    r = api.tracking(event)
     if not r.ok:
         log.warn('Error when posting tracking events to matomo: %s %s' % (r.status_code, r.reason))
         log.warn('With request: %s' % r.url)
