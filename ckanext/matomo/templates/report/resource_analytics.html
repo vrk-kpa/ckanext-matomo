@@ -9,7 +9,7 @@
       <tr>
         <th>{% trans %}Organization{% endtrans %}</th>
         <th>{% trans %}Downloads{% endtrans %}</th>
-        <th>{% trans %}API events{% endtrans %}</th>
+        <th>{% trans %}Number of API requests (datastore_search, datastore_search_sql){% endtrans %}</th>
       </tr>
         {% for row in data['table'] %}
           {% set org_name = row.get('organization_name') %}
