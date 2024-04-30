@@ -6,15 +6,16 @@
 # Translators:
 # Roosa Lampinen, 2023
 # Suvi Nuttunen, 2023
+# Pinja Perttunen, 2024
 # 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: ckanext-matomo 0.0.1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-05 12:07+0000\n"
+"POT-Creation-Date: 2024-04-12 07:27+0000\n"
 "PO-Revision-Date: 2021-11-17 12:18+0000\n"
-"Last-Translator: Suvi Nuttunen, 2023\n"
+"Last-Translator: Pinja Perttunen, 2024\n"
 "Language-Team: English (United Kingdom) (https://app.transifex.com/avoindata/teams/7979/en_GB/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -147,11 +148,8 @@ msgid "Entrances of total views"
 msgstr ""
 
 #: ckanext/matomo/templates/report/dataset_analytics.html:15
-#: ckanext/matomo/templates/report/dataset_analytics.html:43
-#: ckanext/matomo/templates/report/resource_analytics.html:12
-#: ckanext/matomo/templates/report/resource_analytics.html:34
-msgid "API events"
-msgstr "Number of API requests"
+msgid "Number of API requests (package_show)"
+msgstr "Antal API-förfrågningar (package_show)"
 
 #: ckanext/matomo/templates/report/dataset_analytics.html:32
 msgid "Most viewed datasets"
@@ -160,6 +158,11 @@ msgstr ""
 #: ckanext/matomo/templates/report/dataset_analytics.html:38
 msgid "Dataset"
 msgstr ""
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:43
+#: ckanext/matomo/templates/report/resource_analytics.html:12
+msgid "API events"
+msgstr "Number of API requests"
 
 #: ckanext/matomo/templates/report/dataset_analytics.html:58
 msgid "No analytics found for most downloaded datasets."
@@ -249,6 +252,10 @@ msgstr ""
 #: ckanext/matomo/templates/report/resource_analytics.html:33
 msgid "Last accessed date"
 msgstr ""
+
+#: ckanext/matomo/templates/report/resource_analytics.html:34
+msgid "Number of API requests (datastore_search, datastore_search_sql)"
+msgstr "Antal API-förfrågningar (datastore_search, datastore_search_sql)"
 
 #: ckanext/matomo/templates/report/resource_analytics.html:51
 msgid "No statistics found for most downloaded resources."
