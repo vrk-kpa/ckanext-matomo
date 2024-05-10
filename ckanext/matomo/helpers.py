@@ -3,7 +3,7 @@ from flask import request
 from typing import List, Tuple, Optional
 from ckan.plugins.toolkit import render_snippet, config
 from ckan.plugins import toolkit as tk
-from ckanext.matomo.reports import last_calendar_period, get_report_years
+from ckanext.matomo.utils import last_calendar_period, get_report_years
 from ckanext.matomo.model import PackageStats, ResourceStats, get_end_of_last_week, get_beginning_of_next_week
 from ckanext.matomo.types import Visits
 
@@ -84,7 +84,7 @@ def get_years() -> List[str]:
 def show_download_graph():
     return tk.asbool(config.get('ckanext-matomo.show_download_graph', True))
 
-  
+
 def get_current_date() -> datetime:
     return datetime.now()
 

@@ -7,7 +7,7 @@ import ckan.plugins.toolkit as toolkit
 from ckan.lib.plugins import DefaultTranslation
 
 from ckanext.matomo.cli import get_commands
-from ckanext.matomo import helpers, reports
+from ckanext.matomo import helpers
 import ckanext.matomo.logic as logic
 
 try:
@@ -100,6 +100,7 @@ class MatomoDatasetReport(plugins.SingletonPlugin):
 
     # IReport
     def register_reports(self):
+        from ckanext.matomo import reports
         return [reports.matomo_dataset_report_info()]
 
 class MatomoResourceReport(plugins.SingletonPlugin):
@@ -107,6 +108,7 @@ class MatomoResourceReport(plugins.SingletonPlugin):
 
     # IReport
     def register_reports(self):
+        from ckanext.matomo import reports
         return [reports.matomo_resource_report_info()]
 
 class MatomoLocationReport(plugins.SingletonPlugin):
@@ -114,6 +116,7 @@ class MatomoLocationReport(plugins.SingletonPlugin):
 
     # IReport
     def register_reports(self):
+        from ckanext.matomo import reports
         return [reports.matomo_location_report_info()]
 
 
@@ -122,4 +125,5 @@ class MatomoSearchTermsReport(plugins.SingletonPlugin):
 
     # IReport
     def register_reports(self):
+        from ckanext.matomo import reports
         return [reports.matomo_most_popular_search_terms_info()]
