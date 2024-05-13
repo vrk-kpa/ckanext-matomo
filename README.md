@@ -81,6 +81,30 @@ To install ckanext-matomo:
     ckanext.matoto.track_downloads = true
 
 
+# Graphs
+
+Dataset and resource pages can have following the graphs by adding empty blocks to ``package/read_base.html`` and ``package/resource_read.html``
+
+```
+  {% block stats %}
+  {% endblock %}
+```
+
+Requires configuring matomo auth token:
+
+```
+  ckanext.matomo.token_auth = <your token here>
+```
+
+and running cli command to fetch the data:
+
+```
+  ckan -c ckan.ini matomo fetch
+```
+
+![Dataset stats](./images/dataset.png)
+
+![Resource stats](./images/resource.png)
 # Development Installation
 
 To install ckanext-matomo for development, activate your CKAN virtualenv and do:
