@@ -36,6 +36,7 @@ To install ckanext-matomo:
 
 2. Clone the source and install it on the virtualenv
 
+
 ```
     git clone https://github.com/vrk-kpa/ckanext-matomo.git
     cd ckanext-matomo

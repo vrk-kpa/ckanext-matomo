@@ -6,7 +6,7 @@ from os import path
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the relevant file
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
@@ -85,7 +85,7 @@ setup(
         matomo_resource_report=ckanext.matomo.plugin:MatomoResourceReport
         matomo_location_report=ckanext.matomo.plugin:MatomoLocationReport
         matomo_search_terms_report=ckanext.matomo.plugin:MatomoSearchTermsReport
-        
+
 
         [babel.extractors]
         ckan = ckan.lib.extract:extract_ckan
