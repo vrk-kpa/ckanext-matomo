@@ -49,7 +49,13 @@ To install ckanext-matomo:
    ``/etc/ckan/default/ckan.ini``).
 
 
-4. Restart CKAN. For example if you've deployed CKAN with uWSGI on Ubuntu:
+4. Initialize database for local matomo data
+
+```
+     ckan -c ckan.ini db upgrade -p matomo
+```
+
+5. Restart CKAN. For example if you've deployed CKAN with uWSGI on Ubuntu:
 
 ```
      sudo supervisorctl restart all
