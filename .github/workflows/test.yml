@@ -63,5 +63,7 @@ jobs:
           ckan -c test.ini matomo init_db
       - name: Run tests
         run: pytest --ckan-ini=test.ini --cov=ckanext.matomo --disable-warnings ckanext/matomo/tests
-      - name: Coveralls
-        uses: AndreMiras/coveralls-python-action@develop
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
