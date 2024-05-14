@@ -4,8 +4,7 @@
 [![Tests](https://github.com/vrk-kpa/ckanext-matomo/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/vrk-kpa/ckanext-matomo/actions)
 
 
-[![Coverage Status](https://coveralls.io/repos/github/vrk-kpa/ckanext-matomo/badge.svg?branch=main)](https://coveralls.io/github/vrk-kpa/ckanext-matomo?branch=main)
-
+[![codecov](https://codecov.io/gh/vrk-kpa/ckanext-matomo/graph/badge.svg?token=S4XZYKL4CF)](https://codecov.io/gh/vrk-kpa/ckanext-matomo)
 
 Adds matomo analytics tracking to ckan. By default only posts tracking data to configured matomo instance.
 
