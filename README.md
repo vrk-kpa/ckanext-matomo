@@ -74,12 +74,17 @@ To install ckanext-matomo:
     # (optional, default ckanext.matomo.domain)
     ckanext.matomo.script_domain
 
+    # matomo api token, required for posting api events and downloading analytics
+    ckanext.matomo.token_auth = <your token here>
+
     # To track api events, set to true
     ckanext.matomo.track_api = true
 
     # To track downloads, set to true
     ckanext.matoto.track_downloads = true
 
+    # you can disable downloads on graphs, default is true
+    ckanext-matomo.show_download_graph = false
 
 # Graphs
 
@@ -101,10 +106,11 @@ and running cli command to fetch the data:
 ```
   ckan -c ckan.ini matomo fetch
 ```
+| Dataset page | Resource Page |
+|--------------|---------------|
+|![Dataset stats](./images/dataset.png) | ![Resource stats](./images/resource.png)|
 
-![Dataset stats](./images/dataset.png)
 
-![Resource stats](./images/resource.png)
 # Development Installation
 
 To install ckanext-matomo for development, activate your CKAN virtualenv and do:
