@@ -141,7 +141,7 @@ msgstr "Tuottaja"
 #: ckanext/matomo/templates/report/dataset_analytics.html:11
 #: ckanext/matomo/templates/report/dataset_analytics.html:39
 msgid "Total views"
-msgstr "Näyttökerrat yhteensä"
+msgstr "Näyttökerrat"
 
 #: ckanext/matomo/templates/report/dataset_analytics.html:12
 #: ckanext/matomo/templates/report/dataset_analytics.html:40
@@ -185,9 +185,8 @@ msgid ""
 "API requests include only statistics of datasets that have been uploaded to "
 "the service."
 msgstr ""
-"Näyttökerrat yhteensä pitää sisällään organisaation kaikkien tietoaineistosivujen sivulatausten määrän. Uusien kävijöiden määrä ja niiden osuus kaikista kävijöistä koostuu sellaisista kävijöistä, jotka tulevat sivustolle ensimmäistä kertaa. Tietoaineistojen latausmäärät käsittää käyttäjien tekemien latausten määrän käyttöliittymästä. Tämä ottaa huomioon vain palveluun lisättyjen tiedostojen lataukset koko organisaation osalta. Rajapintakutsujen määrä kertoo kuinka monta kertaa tietoaineiston metatietoja on haettu rajapinnan kautta.\n"
-"Valitsemalla organisaation, voit tarkastella tarkemmin tilastojen jakautumista kyseisen organisaation tietoaineistojen välillä.\n"
-"Huom! Olemme huomanneet virheen rajapintakutsujen määrässä ja korjaamme tilastoa tältä osin parhaillaan. Pahoittelemme tapahtunutta."
+"Näyttökerrat yhteensä pitää sisällään organisaation kaikkien tietoaineistosivujen sivulatausten kokonaismäärän. Uusien kävijöiden määrä ja niiden osuus kaikista kävijöistä koostuu sellaisista kävijöistä, jotka tulevat sivustolle ensimmäistä kertaa. Tietoaineistojen latausmäärät käsittää käyttäjien tekemien tiedostojen latausten määrän käyttöliittymästä. Tämä ottaa huomioon vain palveluun lisättyjen tiedostojen lataukset. Rajapintakutsujen määrä kertoo kuinka monta kertaa tietoaineiston metatietoja on haettu rajapinnan kautta.\n"
+"Valitsemalla organisaation, voit tarkastella tarkemmin tilastojen jakautumista kyseisen organisaation tietoaineistojen välillä."
 
 #: ckanext/matomo/templates/report/dataset_analytics_description.html:9
 msgid ""
@@ -199,8 +198,14 @@ msgid ""
 " API requests include only statistics of datasets that have been uploaded to"
 " the service."
 msgstr ""
-"Tilasto sisältää tietoa valitun organisaation osalta. Näyttökerrat yhteensä pitää sisällään tietoaineistosivun sivulatausten määrän. Uusien kävijöiden määrä ja niiden osuus kaikista kävijöistä koostuu sellaisista kävijöistä, jotka tulevat sivustolle ensimmäistä kertaa. Tietoaineiston latausmäärät käsittää käyttäjien tekemien latausten määrän käyttöliittymästä. Tämä ottaa huomioon vain palveluun lisätyn tiedoston lataukset. Rajapintakutsujen määrä kertoo kuinka monta kertaa tietoaineiston metatietoja on haettu rajapinnan kautta.\n"
-"Huom! Olemme huomanneet virheen rajapintakutsujen määrässä ja korjaamme tilastoa tältä osin parhaillaan. Pahoittelemme tapahtunutta."
+"Tilasto sisältää tietoa valitun organisaation osalta. Näyttökerrat yhteensä "
+"pitää sisällään tietoaineistosivun sivulatausten määrän. Uusien kävijöiden "
+"määrä ja niiden osuus kaikista kävijöistä koostuu sellaisista kävijöistä, "
+"jotka tulevat sivustolle ensimmäistä kertaa. Tietoaineiston latausmäärät "
+"käsittää käyttäjien tekemien tiedoston latausten määrän käyttöliittymästä. "
+"Tämä ottaa huomioon vain palveluun lisätyn tiedoston lataukset. "
+"Rajapintakutsujen määrä kertoo kuinka monta kertaa tietoaineiston "
+"metatietoja on haettu rajapinnan kautta."
 
 #: ckanext/matomo/templates/report/location_analytics.html:37
 msgid "Sessions by month"
@@ -278,9 +283,8 @@ msgid ""
 "Please note that this data only includes statistics of datasets that have "
 "been uploaded to the service."
 msgstr ""
-"Tilasto sisältää data-aineistojen latauskerrat sekä rajapintakutsujen määrät organisaatioittain. Tietoaineistojen latausmäärät käsittää käyttäjien tekemien latausten määrän käyttöliittymästä koko organisaation osalta. Tämä ottaa huomioon vain palveluun lisättyjen tiedostojen lataukset. Rajapintakutsujen määrä kertoo kuinka monta kertaa organisaation tietoaineistojen sisältöä on haettu rajapinnan kautta. Tämä tieto koskettaa vain taulukkomuotoisia tietoaineistoja.\n"
-"Valitsemalla organisaation, voi tarkastella tarkemmin tilastojen jakautumista kyseisen organisaation tietoaineistojen välillä.\n"
-"Huom! Olemme huomanneet virheen rajapintakutsujen määrässä ja korjaamme tilastoa tältä osin parhaillaan. Pahoittelemme tapahtunutta."
+"Tilasto sisältää data-aineistojen latauskerrat sekä rajapintakutsujen määrät organisaatioittain. Tietoaineistojen latausmäärät käsittää käyttäjien tekemien latausten määrän käyttöliittymästä koko organisaation osalta. Tämä ottaa huomioon vain palveluun lisättyjen tiedostojen lataukset. Rajapintakutsujen määrä kertoo kuinka monta kertaa organisaation tiedostojen sisältöä on haettu rajapinnan kautta. Tämä tieto koskettaa vain taulukkomuotoisia tiedostoja.\n"
+"Valitsemalla organisaation, voi tarkastella tarkemmin tilastojen jakautumista kyseisen organisaation data-aineistojen välillä."
 
 #: ckanext/matomo/templates/report/resource_analytics_description.html:8
 msgid ""
@@ -288,8 +292,15 @@ msgid ""
 " level. Please note that this data only includes statistics of datasets that"
 " have been uploaded to the service."
 msgstr ""
-"Tilasto sisältää data-aineistojen latauskerrat sekä rajapintakutsujen määrät valitun organisaation osalta. Tietoaineiston latausmäärät käsittää käyttäjien tekemien latausten määrän käyttöliittymästä. Tämä ottaa huomioon vain palveluun lisätyn tiedoston lataukset. Viimeisin tapahtuma näyttää viimeisimmän päivämäärän, jolloin on tehty sivulataus, tietoaineiston lataus tai rajapintatapahtuma valitulla aikavälillä. Jos kenttä on tyhjä, ei yhtäkään tapahtumaa ole tapahtunut valitulla aikavälillä. Rajapintakutsujen määrä kertoo kuinka monta kertaa tietoaineiston sisältöä on haettu rajapinnan kautta. Tämä tieto koskettaa vain taulukkomuotoisia tietoaineistoja.\n"
-"Huom! Olemme huomanneet virheen rajapintakutsujen määrässä ja korjaamme tilastoa tältä osin parhaillaan. Pahoittelemme tapahtunutta."
+"Tilasto sisältää data-aineistojen latauskerrat sekä rajapintakutsujen määrät"
+" valitun organisaation osalta. Data-aineiston latausmäärät käsittää "
+"käyttäjien tekemien latausten määrän käyttöliittymästä. Tämä ottaa huomioon "
+"vain palveluun lisätyn tiedoston lataukset. Viimeisin tapahtuma näyttää "
+"viimeisimmän päivämäärän, jolloin on tehty sivulataus, tietoaineiston lataus"
+" tai rajapintatapahtuma valitulla aikavälillä. Jos kenttä on tyhjä, ei "
+"yhtäkään tapahtumaa ole tapahtunut valitulla aikavälillä. Rajapintakutsujen "
+"määrä kertoo kuinka monta kertaa tiedoston sisältöä on haettu rajapinnan "
+"kautta. Tämä tieto koskettaa vain taulukkomuotoisia tiedostoja."
 
 #: ckanext/matomo/templates/report/search_term_analytics.html:9
 msgid "Search term"

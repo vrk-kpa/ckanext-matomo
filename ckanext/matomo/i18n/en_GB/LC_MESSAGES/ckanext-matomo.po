@@ -6,7 +6,6 @@
 # Translators:
 # Roosa Lampinen, 2023
 # Suvi Nuttunen, 2023
-# Pinja Perttunen, 2024
 # 
 #, fuzzy
 msgid ""
@@ -15,7 +14,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2024-04-12 07:27+0000\n"
 "PO-Revision-Date: 2021-11-17 12:18+0000\n"
-"Last-Translator: Pinja Perttunen, 2024\n"
+"Last-Translator: Suvi Nuttunen, 2023\n"
 "Language-Team: English (United Kingdom) (https://app.transifex.com/avoindata/teams/7979/en_GB/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -149,7 +148,7 @@ msgstr ""
 
 #: ckanext/matomo/templates/report/dataset_analytics.html:15
 msgid "Number of API requests (package_show)"
-msgstr "Antal API-förfrågningar (package_show)"
+msgstr ""
 
 #: ckanext/matomo/templates/report/dataset_analytics.html:32
 msgid "Most viewed datasets"
@@ -255,7 +254,7 @@ msgstr ""
 
 #: ckanext/matomo/templates/report/resource_analytics.html:34
 msgid "Number of API requests (datastore_search, datastore_search_sql)"
-msgstr "Antal API-förfrågningar (datastore_search, datastore_search_sql)"
+msgstr ""
 
 #: ckanext/matomo/templates/report/resource_analytics.html:51
 msgid "No statistics found for most downloaded resources."
