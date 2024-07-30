@@ -185,7 +185,7 @@ msgid ""
 "API requests include only statistics of datasets that have been uploaded to "
 "the service."
 msgstr ""
-"Näyttökerrat yhteensä pitää sisällään organisaation kaikkien tietoaineistosivujen sivulatausten kokonaismäärän. Uusien kävijöiden määrä ja niiden osuus kaikista kävijöistä koostuu sellaisista kävijöistä, jotka tulevat sivustolle ensimmäistä kertaa. Tietoaineistojen latausmäärät käsittää käyttäjien tekemien tiedostojen latausten määrän käyttöliittymästä. Tämä ottaa huomioon vain palveluun lisättyjen tiedostojen lataukset. Rajapintakutsujen määrä kertoo kuinka monta kertaa tietoaineiston metatietoja on haettu rajapinnan kautta.\n"
+"Näyttökerrat yhteensä pitää sisällään organisaation kaikkien tietoaineistosivujen sivulatausten kokonaismäärän. Uusien kävijöiden määrä ja niiden osuus kaikista kävijöistä koostuu sellaisista kävijöistä, jotka tulevat sivustolle ensimmäistä kertaa. Tietoaineistojen latausmäärät käsittää käyttäjien tekemien tiedostojen latausten määrän käyttöliittymästä. Tämä ottaa huomioon vain palveluun lisättyjen tiedostojen lataukset. On hyvä huomata, että riippuen vierailijan selainasetuksista, vierailua ei voi tilastoida. Rajapintakutsujen määrä kertoo kuinka monta kertaa tietoaineiston metatietoja on haettu rajapinnan kautta.\n"
 "Valitsemalla organisaation, voit tarkastella tarkemmin tilastojen jakautumista kyseisen organisaation tietoaineistojen välillä."
 
 #: ckanext/matomo/templates/report/dataset_analytics_description.html:9
@@ -203,9 +203,10 @@ msgstr ""
 "määrä ja niiden osuus kaikista kävijöistä koostuu sellaisista kävijöistä, "
 "jotka tulevat sivustolle ensimmäistä kertaa. Tietoaineiston latausmäärät "
 "käsittää käyttäjien tekemien tiedoston latausten määrän käyttöliittymästä. "
-"Tämä ottaa huomioon vain palveluun lisätyn tiedoston lataukset. "
-"Rajapintakutsujen määrä kertoo kuinka monta kertaa tietoaineiston "
-"metatietoja on haettu rajapinnan kautta."
+"Tämä ottaa huomioon vain palveluun lisätyn tiedoston lataukset. On hyvä "
+"huomata, että riippuen vierailijan selainasetuksista, vierailua ei voi "
+"tilastoida. Rajapintakutsujen määrä kertoo kuinka monta kertaa "
+"tietoaineiston metatietoja on haettu rajapinnan kautta."
 
 #: ckanext/matomo/templates/report/location_analytics.html:37
 msgid "Sessions by month"
