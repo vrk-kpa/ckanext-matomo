@@ -1,0 +1,9 @@
+git:
+  filters:
+    - filter_type: file
+      file_format: PO
+      source_language: en
+      source_file: 'ckanext/matomo/i18n/ckanext-matomo.pot'
+      translation_files_expression: 'ckanext/matomo/i18n/<lang>/LC_MESSAGES/ckanext-matomo.po'
+
+
