@@ -4,19 +4,16 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 # 
 # Translators:
-# Roosa Lampinen, 2023
-# Zharktas <jari-pekka.voutilainen@gofore.com>, 2023
-# Suvi Nuttunen, 2023
-# Pinja Perttunen, 2024
+# Zharktas <jari-pekka.voutilainen@gofore.com>, 2024
 # 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: ckanext-matomo 0.0.1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-04-12 07:27+0000\n"
-"PO-Revision-Date: 2021-11-17 12:18+0000\n"
-"Last-Translator: Pinja Perttunen, 2024\n"
+"POT-Creation-Date: 2024-07-31 10:22+0000\n"
+"PO-Revision-Date: 2024-07-30 11:30+0000\n"
+"Last-Translator: Zharktas <jari-pekka.voutilainen@gofore.com>, 2024\n"
 "Language-Team: Swedish (https://app.transifex.com/avoindata/teams/7979/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -58,6 +55,1002 @@ msgstr "De mest populära sökord och de senaste sökdatumen"
 #: ckanext/matomo/translations.py:15
 msgid "Last searched date"
 msgstr "Senast sökt"
+
+#: ckanext/matomo/translations.py:17
+msgid "Andorra"
+msgstr "Andorra"
+
+#: ckanext/matomo/translations.py:18
+msgid "United Arab Emirates"
+msgstr "Förenade arabemiraten"
+
+#: ckanext/matomo/translations.py:19
+msgid "Afghanistan"
+msgstr "Afghanistan"
+
+#: ckanext/matomo/translations.py:20
+msgid "Antigua and Barbuda"
+msgstr "Antigua och Barbuda"
+
+#: ckanext/matomo/translations.py:21
+msgid "Anguilla"
+msgstr "Anguilla"
+
+#: ckanext/matomo/translations.py:22
+msgid "Albania"
+msgstr "Albanien"
+
+#: ckanext/matomo/translations.py:23
+msgid "Armenia"
+msgstr "Armenien"
+
+#: ckanext/matomo/translations.py:24
+msgid "Angola"
+msgstr "Angola"
+
+#: ckanext/matomo/translations.py:25
+msgid "Antarctica"
+msgstr "Antarktis"
+
+#: ckanext/matomo/translations.py:26
+msgid "Argentina"
+msgstr "Argentina"
+
+#: ckanext/matomo/translations.py:27
+msgid "American Samoa"
+msgstr "Amerikanska Samoa"
+
+#: ckanext/matomo/translations.py:28
+msgid "Austria"
+msgstr "Österrike"
+
+#: ckanext/matomo/translations.py:29
+msgid "Australia"
+msgstr "Australien"
+
+#: ckanext/matomo/translations.py:30
+msgid "Aruba"
+msgstr "Aruba"
+
+#: ckanext/matomo/translations.py:31
+msgid "Åland Islands"
+msgstr "Åland"
+
+#: ckanext/matomo/translations.py:32
+msgid "Azerbaijan"
+msgstr "Azerbajdzjan"
+
+#: ckanext/matomo/translations.py:33
+msgid "Bosnia and Herzegovina"
+msgstr "Bosnien-Hercegovina"
+
+#: ckanext/matomo/translations.py:34
+msgid "Barbados"
+msgstr "Barbados"
+
+#: ckanext/matomo/translations.py:35
+msgid "Bangladesh"
+msgstr "Bangladesh"
+
+#: ckanext/matomo/translations.py:36
+msgid "Belgium"
+msgstr "Belgien"
+
+#: ckanext/matomo/translations.py:37
+msgid "Burkina Faso"
+msgstr "Burkina Faso"
+
+#: ckanext/matomo/translations.py:38
+msgid "Bulgaria"
+msgstr "Bulgarien"
+
+#: ckanext/matomo/translations.py:39
+msgid "Bahrain"
+msgstr "Bahrain"
+
+#: ckanext/matomo/translations.py:40
+msgid "Burundi"
+msgstr "Burundi"
+
+#: ckanext/matomo/translations.py:41
+msgid "Benin"
+msgstr "Benin"
+
+#: ckanext/matomo/translations.py:42
+msgid "Saint Barthélemy"
+msgstr "Saint Barthélemy"
+
+#: ckanext/matomo/translations.py:43
+msgid "Bermuda"
+msgstr "Bermuda"
+
+#: ckanext/matomo/translations.py:44
+msgid "Brunei Darussalam"
+msgstr "Brunei"
+
+#: ckanext/matomo/translations.py:45
+msgid "Bolivia"
+msgstr "Bolivia"
+
+#: ckanext/matomo/translations.py:46
+msgid "Caribbean Netherlands "
+msgstr "Karibiska Nederländerna"
+
+#: ckanext/matomo/translations.py:47
+msgid "Brazil"
+msgstr "Brasilien"
+
+#: ckanext/matomo/translations.py:48
+msgid "Bahamas"
+msgstr "Bahamas"
+
+#: ckanext/matomo/translations.py:49
+msgid "Bhutan"
+msgstr "Bhutan"
+
+#: ckanext/matomo/translations.py:50
+msgid "Bouvet Island"
+msgstr "Bouvetön"
+
+#: ckanext/matomo/translations.py:51
+msgid "Botswana"
+msgstr "Botswana"
+
+#: ckanext/matomo/translations.py:52
+msgid "Belarus"
+msgstr "Belarus"
+
+#: ckanext/matomo/translations.py:53
+msgid "Belize"
+msgstr "Belize"
+
+#: ckanext/matomo/translations.py:54
+msgid "Canada"
+msgstr "Kanada"
+
+#: ckanext/matomo/translations.py:55
+msgid "Cocos (Keeling) Islands"
+msgstr "Kokosöarna (Keelingöarna)"
+
+#: ckanext/matomo/translations.py:56
+msgid "Congo, Democratic Republic of"
+msgstr "Demokratiska Republiken Kongo"
+
+#: ckanext/matomo/translations.py:57
+msgid "Central African Republic"
+msgstr "Centralafrikanska republiken"
+
+#: ckanext/matomo/translations.py:58
+msgid "Congo"
+msgstr "Republiken Kongo"
+
+#: ckanext/matomo/translations.py:59
+msgid "Switzerland"
+msgstr "Schweiz"
+
+#: ckanext/matomo/translations.py:60
+msgid "Côte d'Ivoire"
+msgstr "Elfenbenskusten"
+
+#: ckanext/matomo/translations.py:61
+msgid "Cook Islands"
+msgstr "Cooköarna"
+
+#: ckanext/matomo/translations.py:62
+msgid "Chile"
+msgstr "Chile"
+
+#: ckanext/matomo/translations.py:63
+msgid "Cameroon"
+msgstr "Komorerna"
+
+#: ckanext/matomo/translations.py:64
+msgid "China"
+msgstr "Kina"
+
+#: ckanext/matomo/translations.py:65
+msgid "Colombia"
+msgstr "Colombia"
+
+#: ckanext/matomo/translations.py:66
+msgid "Costa Rica"
+msgstr "Costa Rica"
+
+#: ckanext/matomo/translations.py:67
+msgid "Cuba"
+msgstr "Kuba"
+
+#: ckanext/matomo/translations.py:68
+msgid "Cape Verde"
+msgstr "Kap Verde"
+
+#: ckanext/matomo/translations.py:69
+msgid "Curaçao"
+msgstr "Curaçao"
+
+#: ckanext/matomo/translations.py:70
+msgid "Christmas Island"
+msgstr "Julön"
+
+#: ckanext/matomo/translations.py:71
+msgid "Cyprus"
+msgstr "Cypern"
+
+#: ckanext/matomo/translations.py:72
+msgid "Czech Republic"
+msgstr "Tjeckien"
+
+#: ckanext/matomo/translations.py:73
+msgid "Germany"
+msgstr "Tyskland"
+
+#: ckanext/matomo/translations.py:74
+msgid "Djibouti"
+msgstr "Djibouti"
+
+#: ckanext/matomo/translations.py:75
+msgid "Denmark"
+msgstr "Danmark"
+
+#: ckanext/matomo/translations.py:76
+msgid "Dominica"
+msgstr "Dominica"
+
+#: ckanext/matomo/translations.py:77
+msgid "Dominican Republic"
+msgstr "Dominikanska republiken"
+
+#: ckanext/matomo/translations.py:78
+msgid "Algeria"
+msgstr "Algeriet"
+
+#: ckanext/matomo/translations.py:79
+msgid "Ecuador"
+msgstr "Ecuador"
+
+#: ckanext/matomo/translations.py:80
+msgid "Estonia"
+msgstr "Estland"
+
+#: ckanext/matomo/translations.py:81
+msgid "Egypt"
+msgstr "Egypten"
+
+#: ckanext/matomo/translations.py:82
+msgid "Western Sahara"
+msgstr "Västsahara"
+
+#: ckanext/matomo/translations.py:83
+msgid "Eritrea"
+msgstr "Eritrea"
+
+#: ckanext/matomo/translations.py:84
+msgid "Spain"
+msgstr "Spanien"
+
+#: ckanext/matomo/translations.py:85
+msgid "Ethiopia"
+msgstr "Etiopien"
+
+#: ckanext/matomo/translations.py:86
+msgid "Finland"
+msgstr "Finland"
+
+#: ckanext/matomo/translations.py:87
+msgid "Fiji"
+msgstr "Fiji"
+
+#: ckanext/matomo/translations.py:88
+msgid "Falkland Islands"
+msgstr "Falklandsöarna"
+
+#: ckanext/matomo/translations.py:89
+msgid "Micronesia, Federated States of"
+msgstr "Mikronesiens federerade stater"
+
+#: ckanext/matomo/translations.py:90
+msgid "Faroe Islands"
+msgstr "Färöarna"
+
+#: ckanext/matomo/translations.py:91
+msgid "France"
+msgstr "Frankrike"
+
+#: ckanext/matomo/translations.py:92
+msgid "Gabon"
+msgstr "Gabon"
+
+#: ckanext/matomo/translations.py:93
+msgid "United Kingdom"
+msgstr "Förenade kungariket"
+
+#: ckanext/matomo/translations.py:94
+msgid "Grenada"
+msgstr "Grenada"
+
+#: ckanext/matomo/translations.py:95
+msgid "Georgia"
+msgstr "Georgien"
+
+#: ckanext/matomo/translations.py:96
+msgid "French Guiana"
+msgstr "Franska Guyana"
+
+#: ckanext/matomo/translations.py:97
+msgid "Guernsey"
+msgstr "Guernsey"
+
+#: ckanext/matomo/translations.py:98
+msgid "Ghana"
+msgstr "Ghana"
+
+#: ckanext/matomo/translations.py:99
+msgid "Gibraltar"
+msgstr "Gibraltar"
+
+#: ckanext/matomo/translations.py:100
+msgid "Greenland"
+msgstr "Grönland"
+
+#: ckanext/matomo/translations.py:101
+msgid "Gambia"
+msgstr "Gambia"
+
+#: ckanext/matomo/translations.py:102
+msgid "Guinea"
+msgstr "Guinea"
+
+#: ckanext/matomo/translations.py:103
+msgid "Guadeloupe"
+msgstr "Guadeloupe"
+
+#: ckanext/matomo/translations.py:104
+msgid "Equatorial Guinea"
+msgstr "Guinea"
+
+#: ckanext/matomo/translations.py:105
+msgid "Greece"
+msgstr "Grekland"
+
+#: ckanext/matomo/translations.py:106
+msgid "South Georgia and the South Sandwich Islands"
+msgstr "Sydgeorgien och Sydsandwichöarna"
+
+#: ckanext/matomo/translations.py:107
+msgid "Guatemala"
+msgstr "Guatemala"
+
+#: ckanext/matomo/translations.py:108
+msgid "Guam"
+msgstr "Guam"
+
+#: ckanext/matomo/translations.py:109
+msgid "Guinea-Bissau"
+msgstr "Guinea-Bissau"
+
+#: ckanext/matomo/translations.py:110
+msgid "Guyana"
+msgstr "Guyana"
+
+#: ckanext/matomo/translations.py:111
+msgid "Hong Kong"
+msgstr "Hongkong"
+
+#: ckanext/matomo/translations.py:112
+msgid "Heard and McDonald Islands"
+msgstr "Heard- och McDonaldöarna"
+
+#: ckanext/matomo/translations.py:113
+msgid "Honduras"
+msgstr "Honduras"
+
+#: ckanext/matomo/translations.py:114
+msgid "Croatia"
+msgstr "Kroatien"
+
+#: ckanext/matomo/translations.py:115
+msgid "Haiti"
+msgstr "Haiti"
+
+#: ckanext/matomo/translations.py:116
+msgid "Hungary"
+msgstr "Ungern"
+
+#: ckanext/matomo/translations.py:117
+msgid "Indonesia"
+msgstr "Indonesien"
+
+#: ckanext/matomo/translations.py:118
+msgid "Ireland"
+msgstr "Irland"
+
+#: ckanext/matomo/translations.py:119
+msgid "Israel"
+msgstr "Israel"
+
+#: ckanext/matomo/translations.py:120
+msgid "Isle of Man"
+msgstr "Isle of Man"
+
+#: ckanext/matomo/translations.py:121
+msgid "India"
+msgstr "Indien"
+
+#: ckanext/matomo/translations.py:122
+msgid "British Indian Ocean Territory"
+msgstr "Brittiska territoriet i Indiska oceanen"
+
+#: ckanext/matomo/translations.py:123
+msgid "Iraq"
+msgstr "Irak"
+
+#: ckanext/matomo/translations.py:124
+msgid "Iran"
+msgstr "Iran"
+
+#: ckanext/matomo/translations.py:125
+msgid "Iceland"
+msgstr "Island"
+
+#: ckanext/matomo/translations.py:126
+msgid "Italy"
+msgstr "Italien"
+
+#: ckanext/matomo/translations.py:127
+msgid "Jersey"
+msgstr "Jersey"
+
+#: ckanext/matomo/translations.py:128
+msgid "Jamaica"
+msgstr "Jamaica"
+
+#: ckanext/matomo/translations.py:129
+msgid "Jordan"
+msgstr "Jordanien"
+
+#: ckanext/matomo/translations.py:130
+msgid "Japan"
+msgstr "Japan"
+
+#: ckanext/matomo/translations.py:131
+msgid "Kenya"
+msgstr "Kenya"
+
+#: ckanext/matomo/translations.py:132
+msgid "Kyrgyzstan"
+msgstr "Kirgizistan"
+
+#: ckanext/matomo/translations.py:133
+msgid "Cambodia"
+msgstr "Kambodja"
+
+#: ckanext/matomo/translations.py:134
+msgid "Kiribati"
+msgstr "Kiribati"
+
+#: ckanext/matomo/translations.py:135
+msgid "Comoros"
+msgstr "Komorerna"
+
+#: ckanext/matomo/translations.py:136
+msgid "Saint Kitts and Nevis"
+msgstr "Saint Kitts och Nevis"
+
+#: ckanext/matomo/translations.py:137
+msgid "North Korea"
+msgstr "Nordkorea"
+
+#: ckanext/matomo/translations.py:138
+msgid "South Korea"
+msgstr "Sydkorea"
+
+#: ckanext/matomo/translations.py:139
+msgid "Kuwait"
+msgstr "Kuwait"
+
+#: ckanext/matomo/translations.py:140
+msgid "Cayman Islands"
+msgstr "Caymanöarna"
+
+#: ckanext/matomo/translations.py:141
+msgid "Kazakhstan"
+msgstr "Kazakstan"
+
+#: ckanext/matomo/translations.py:142
+msgid "Lao People's Democratic Republic"
+msgstr "Laos"
+
+#: ckanext/matomo/translations.py:143
+msgid "Lebanon"
+msgstr "Libanon"
+
+#: ckanext/matomo/translations.py:144
+msgid "Saint Lucia"
+msgstr "Saint Lucia"
+
+#: ckanext/matomo/translations.py:145
+msgid "Liechtenstein"
+msgstr "Liechtenstein"
+
+#: ckanext/matomo/translations.py:146
+msgid "Sri Lanka"
+msgstr "Sri Lanka"
+
+#: ckanext/matomo/translations.py:147
+msgid "Liberia"
+msgstr "Liberia"
+
+#: ckanext/matomo/translations.py:148
+msgid "Lesotho"
+msgstr "Lesotho"
+
+#: ckanext/matomo/translations.py:149
+msgid "Lithuania"
+msgstr "Litauen"
+
+#: ckanext/matomo/translations.py:150
+msgid "Luxembourg"
+msgstr "Luxemburg"
+
+#: ckanext/matomo/translations.py:151
+msgid "Latvia"
+msgstr "Lettland"
+
+#: ckanext/matomo/translations.py:152
+msgid "Libya"
+msgstr "Libyen"
+
+#: ckanext/matomo/translations.py:153
+msgid "Morocco"
+msgstr "Marocko"
+
+#: ckanext/matomo/translations.py:154
+msgid "Monaco"
+msgstr "Monaco"
+
+#: ckanext/matomo/translations.py:155
+msgid "Moldova"
+msgstr "Moldavien"
+
+#: ckanext/matomo/translations.py:156
+msgid "Montenegro"
+msgstr "Montenegro"
+
+#: ckanext/matomo/translations.py:157
+msgid "Saint-Martin (France)"
+msgstr "Saint-Martin (France)"
+
+#: ckanext/matomo/translations.py:158
+msgid "Madagascar"
+msgstr "Madagaskar"
+
+#: ckanext/matomo/translations.py:159
+msgid "Marshall Islands"
+msgstr "Marshallöarna"
+
+#: ckanext/matomo/translations.py:160
+msgid "Macedonia"
+msgstr "Makedonien"
+
+#: ckanext/matomo/translations.py:161
+msgid "Mali"
+msgstr "Mali"
+
+#: ckanext/matomo/translations.py:162
+msgid "Myanmar"
+msgstr "Myanmar"
+
+#: ckanext/matomo/translations.py:163
+msgid "Mongolia"
+msgstr "Mongoliet"
+
+#: ckanext/matomo/translations.py:164
+msgid "Macau"
+msgstr "Macao"
+
+#: ckanext/matomo/translations.py:165
+msgid "Northern Mariana Islands"
+msgstr "Nordmarianerna"
+
+#: ckanext/matomo/translations.py:166
+msgid "Martinique"
+msgstr "Martinique"
+
+#: ckanext/matomo/translations.py:167
+msgid "Mauritania"
+msgstr "Mauretanien"
+
+#: ckanext/matomo/translations.py:168
+msgid "Montserrat"
+msgstr "Montserrat"
+
+#: ckanext/matomo/translations.py:169
+msgid "Malta"
+msgstr "Malta"
+
+#: ckanext/matomo/translations.py:170
+msgid "Mauritius"
+msgstr "Mauretanien"
+
+#: ckanext/matomo/translations.py:171
+msgid "Maldives"
+msgstr "Maldiverna"
+
+#: ckanext/matomo/translations.py:172
+msgid "Malawi"
+msgstr "Malawi"
+
+#: ckanext/matomo/translations.py:173
+msgid "Mexico"
+msgstr "Mexiko"
+
+#: ckanext/matomo/translations.py:174
+msgid "Malaysia"
+msgstr "Malaysia"
+
+#: ckanext/matomo/translations.py:175
+msgid "Mozambique"
+msgstr "Moçambique"
+
+#: ckanext/matomo/translations.py:176
+msgid "Namibia"
+msgstr "Namibia"
+
+#: ckanext/matomo/translations.py:177
+msgid "New Caledonia"
+msgstr "Nya Kaledonien"
+
+#: ckanext/matomo/translations.py:178
+msgid "Niger"
+msgstr "Niger"
+
+#: ckanext/matomo/translations.py:179
+msgid "Norfolk Island"
+msgstr "Norfolkön"
+
+#: ckanext/matomo/translations.py:180
+msgid "Nigeria"
+msgstr "Nigeria"
+
+#: ckanext/matomo/translations.py:181
+msgid "Nicaragua"
+msgstr "Nicaragua"
+
+#: ckanext/matomo/translations.py:182
+msgid "The Netherlands"
+msgstr "Nederländerna"
+
+#: ckanext/matomo/translations.py:183
+msgid "Norway"
+msgstr "Norge"
+
+#: ckanext/matomo/translations.py:184
+msgid "Nepal"
+msgstr "Nepal"
+
+#: ckanext/matomo/translations.py:185
+msgid "Nauru"
+msgstr "Nauru"
+
+#: ckanext/matomo/translations.py:186
+msgid "Niue"
+msgstr "Niue"
+
+#: ckanext/matomo/translations.py:187
+msgid "New Zealand"
+msgstr "Nya Zeeland"
+
+#: ckanext/matomo/translations.py:188
+msgid "Oman"
+msgstr "Oman"
+
+#: ckanext/matomo/translations.py:189
+msgid "Panama"
+msgstr "Panama"
+
+#: ckanext/matomo/translations.py:190
+msgid "Peru"
+msgstr "Peru"
+
+#: ckanext/matomo/translations.py:191
+msgid "French Polynesia"
+msgstr "Franska Polynesien"
+
+#: ckanext/matomo/translations.py:192
+msgid "Papua New Guinea"
+msgstr "Papua Nya Guinea"
+
+#: ckanext/matomo/translations.py:193
+msgid "Philippines"
+msgstr "Filippinerna"
+
+#: ckanext/matomo/translations.py:194
+msgid "Pakistan"
+msgstr "Pakistan"
+
+#: ckanext/matomo/translations.py:195
+msgid "Poland"
+msgstr "Polen"
+
+#: ckanext/matomo/translations.py:196
+msgid "St. Pierre and Miquelon"
+msgstr "Saint-Pierre och Miquelon"
+
+#: ckanext/matomo/translations.py:197
+msgid "Pitcairn"
+msgstr "Pitcairnöarna"
+
+#: ckanext/matomo/translations.py:198
+msgid "Puerto Rico"
+msgstr "Puerto Rico"
+
+#: ckanext/matomo/translations.py:199
+msgid "Palestine, State of"
+msgstr "Palestina (stat)"
+
+#: ckanext/matomo/translations.py:200
+msgid "Portugal"
+msgstr "Portugal"
+
+#: ckanext/matomo/translations.py:201
+msgid "Palau"
+msgstr "Palau"
+
+#: ckanext/matomo/translations.py:202
+msgid "Paraguay"
+msgstr "Paraguay"
+
+#: ckanext/matomo/translations.py:203
+msgid "Qatar"
+msgstr "Qatar"
+
+#: ckanext/matomo/translations.py:204
+msgid "Réunion"
+msgstr "Réunion"
+
+#: ckanext/matomo/translations.py:205
+msgid "Romania"
+msgstr "Rumänien"
+
+#: ckanext/matomo/translations.py:206
+msgid "Serbia"
+msgstr "Serbien"
+
+#: ckanext/matomo/translations.py:207
+msgid "Russian Federation"
+msgstr "Ryssland"
+
+#: ckanext/matomo/translations.py:208
+msgid "Rwanda"
+msgstr "Rwanda"
+
+#: ckanext/matomo/translations.py:209
+msgid "Saudi Arabia"
+msgstr "Saudiarabien"
+
+#: ckanext/matomo/translations.py:210
+msgid "Solomon Islands"
+msgstr "Salomonöarna"
+
+#: ckanext/matomo/translations.py:211
+msgid "Seychelles"
+msgstr "Seychellerna"
+
+#: ckanext/matomo/translations.py:212
+msgid "Sudan"
+msgstr "Sudan"
+
+#: ckanext/matomo/translations.py:213
+msgid "Sweden"
+msgstr "Sverige"
+
+#: ckanext/matomo/translations.py:214
+msgid "Singapore"
+msgstr "Singapore"
+
+#: ckanext/matomo/translations.py:215
+msgid "Saint Helena"
+msgstr "Sankta Helena"
+
+#: ckanext/matomo/translations.py:216
+msgid "Slovenia"
+msgstr "Slovenien"
+
+#: ckanext/matomo/translations.py:217
+msgid "Svalbard and Jan Mayen Islands"
+msgstr "Svalbard och Jan Mayen"
+
+#: ckanext/matomo/translations.py:218
+msgid "Slovakia"
+msgstr "Slovakien"
+
+#: ckanext/matomo/translations.py:219
+msgid "Sierra Leone"
+msgstr "Sierra Leone"
+
+#: ckanext/matomo/translations.py:220
+msgid "San Marino"
+msgstr "San Marino"
+
+#: ckanext/matomo/translations.py:221
+msgid "Senegal"
+msgstr "Senegal"
+
+#: ckanext/matomo/translations.py:222
+msgid "Somalia"
+msgstr "Somalia"
+
+#: ckanext/matomo/translations.py:223
+msgid "Suriname"
+msgstr "Surinam"
+
+#: ckanext/matomo/translations.py:224
+msgid "South Sudan"
+msgstr "Sydsudan"
+
+#: ckanext/matomo/translations.py:225
+msgid "Sao Tome and Principe"
+msgstr "São Tomé och Príncipe"
+
+#: ckanext/matomo/translations.py:226
+msgid "El Salvador"
+msgstr "El Salvador"
+
+#: ckanext/matomo/translations.py:227
+msgid "Sint Maarten (Dutch part)"
+msgstr "Sint Maarten"
+
+#: ckanext/matomo/translations.py:228
+msgid "Syria"
+msgstr "Syrien"
+
+#: ckanext/matomo/translations.py:229
+msgid "Swaziland"
+msgstr "Swaziland"
+
+#: ckanext/matomo/translations.py:230
+msgid "Turks and Caicos Islands"
+msgstr "Turks- och Caicosöarna"
+
+#: ckanext/matomo/translations.py:231
+msgid "Chad"
+msgstr "Tchad"
+
+#: ckanext/matomo/translations.py:232
+msgid "French Southern Territories"
+msgstr "Franska sydterritorierna"
+
+#: ckanext/matomo/translations.py:233
+msgid "Togo"
+msgstr "Togo"
+
+#: ckanext/matomo/translations.py:234
+msgid "Thailand"
+msgstr "Thailand"
+
+#: ckanext/matomo/translations.py:235
+msgid "Tajikistan"
+msgstr "Tadzjikistan"
+
+#: ckanext/matomo/translations.py:236
+msgid "Tokelau"
+msgstr "Tokelau"
+
+#: ckanext/matomo/translations.py:237
+msgid "Timor-Leste"
+msgstr "Östtimor"
+
+#: ckanext/matomo/translations.py:238
+msgid "Turkmenistan"
+msgstr "Turkmenistan"
+
+#: ckanext/matomo/translations.py:239
+msgid "Tunisia"
+msgstr "Tunisien"
+
+#: ckanext/matomo/translations.py:240
+msgid "Tonga"
+msgstr "Tonga"
+
+#: ckanext/matomo/translations.py:241
+msgid "Turkey"
+msgstr "Turkiet"
+
+#: ckanext/matomo/translations.py:242
+msgid "Trinidad and Tobago"
+msgstr "Trinidad och Tobago"
+
+#: ckanext/matomo/translations.py:243
+msgid "Tuvalu"
+msgstr "Tuvalu"
+
+#: ckanext/matomo/translations.py:244
+msgid "Taiwan"
+msgstr "Taiwan"
+
+#: ckanext/matomo/translations.py:245
+msgid "Tanzania"
+msgstr "Tanzania"
+
+#: ckanext/matomo/translations.py:246
+msgid "Ukraine"
+msgstr "Ukraina"
+
+#: ckanext/matomo/translations.py:247
+msgid "Uganda"
+msgstr "Uganda"
+
+#: ckanext/matomo/translations.py:248
+msgid "United States Minor Outlying Islands"
+msgstr "Förenta staternas mindre öar i Oceanien och Västindien"
+
+#: ckanext/matomo/translations.py:249
+msgid "United States"
+msgstr "Förenta staterna"
+
+#: ckanext/matomo/translations.py:250
+msgid "Uruguay"
+msgstr "Uruguay"
+
+#: ckanext/matomo/translations.py:251
+msgid "Uzbekistan"
+msgstr "Uzbekistan"
+
+#: ckanext/matomo/translations.py:252
+msgid "Vatican"
+msgstr "Vatikanstaten"
+
+#: ckanext/matomo/translations.py:253
+msgid "Saint Vincent and the Grenadines"
+msgstr "Saint Vincent och Grenadinerna"
+
+#: ckanext/matomo/translations.py:254
+msgid "Venezuela"
+msgstr "Venezuela"
+
+#: ckanext/matomo/translations.py:255
+msgid "Virgin Islands (British)"
+msgstr "Brittiska Jungfruöarna"
+
+#: ckanext/matomo/translations.py:256
+msgid "Virgin Islands (U.S.)"
+msgstr "Amerikanska Jungfruöarna"
+
+#: ckanext/matomo/translations.py:257
+msgid "Vietnam"
+msgstr "Vietnam"
+
+#: ckanext/matomo/translations.py:258
+msgid "Vanuatu"
+msgstr "Vanuatu"
+
+#: ckanext/matomo/translations.py:259
+msgid "Wallis and Futuna Islands"
+msgstr "Wallis- och Futunaöarna"
+
+#: ckanext/matomo/translations.py:260
+msgid "Samoa"
+msgstr "Samoa"
+
+#: ckanext/matomo/translations.py:261
+msgid "Yemen"
+msgstr "Jemen"
+
+#: ckanext/matomo/translations.py:262
+msgid "Mayotte"
+msgstr "Mayotte"
+
+#: ckanext/matomo/translations.py:263
+msgid "South Africa"
+msgstr "Sydafrika"
+
+#: ckanext/matomo/translations.py:264
+msgid "Zambia"
+msgstr "Zambia"
+
+#: ckanext/matomo/translations.py:265
+msgid "Zimbabwe"
+msgstr "Zimbabwe"
 
 #: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:2
 #: ckanext/matomo/templates/matomo/snippets/resource_stats.html:2
@@ -149,6 +1142,7 @@ msgid "Entrances of total views"
 msgstr "Andel nya besökare av alla"
 
 #: ckanext/matomo/templates/report/dataset_analytics.html:15
+#: ckanext/matomo/templates/report/dataset_analytics.html:43
 msgid "Number of API requests (package_show)"
 msgstr "Antal API-förfrågningar (package_show)"
 
@@ -159,11 +1153,6 @@ msgstr ""
 #: ckanext/matomo/templates/report/dataset_analytics.html:38
 msgid "Dataset"
 msgstr ""
-
-#: ckanext/matomo/templates/report/dataset_analytics.html:43
-#: ckanext/matomo/templates/report/resource_analytics.html:12
-msgid "API events"
-msgstr "Antal API-förfrågningar"
 
 #: ckanext/matomo/templates/report/dataset_analytics.html:58
 msgid "No analytics found for most downloaded datasets."
@@ -242,6 +1231,11 @@ msgstr ""
 msgid "Timespan for records"
 msgstr "Statistik för perioden"
 
+#: ckanext/matomo/templates/report/resource_analytics.html:12
+#: ckanext/matomo/templates/report/resource_analytics.html:34
+msgid "Number of API requests (datastore_search, datastore_search_sql)"
+msgstr "Antal API-förfrågningar (datastore_search, datastore_search_sql)"
+
 #: ckanext/matomo/templates/report/resource_analytics.html:25
 msgid "Most downloaded resources"
 msgstr "De mest nedladdade resurser"
@@ -253,10 +1247,6 @@ msgstr ""
 #: ckanext/matomo/templates/report/resource_analytics.html:33
 msgid "Last accessed date"
 msgstr "Senaste besökning"
-
-#: ckanext/matomo/templates/report/resource_analytics.html:34
-msgid "Number of API requests (datastore_search, datastore_search_sql)"
-msgstr "Antal API-förfrågningar (datastore_search, datastore_search_sql)"
 
 #: ckanext/matomo/templates/report/resource_analytics.html:51
 msgid "No statistics found for most downloaded resources."
