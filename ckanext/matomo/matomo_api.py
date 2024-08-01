@@ -168,7 +168,6 @@ class MatomoAPI(object):
         if self.token_auth is not None:
             params['token_auth'] = self.token_auth
 
-        log.info(extra_headers)
         return requests.get(self.tracking_url, params=params, headers=extra_headers)
 
 
