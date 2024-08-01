@@ -55,12 +55,20 @@ def post_analytics(category, action, name, download=False):
     if download:
         event['download'] = event['url']
 
+
+    headers = {}
+    if toolkit.request.headers.get('DNT'):
+        headers = {'dnt': toolkit.request.headers.get('DNT')}
+
     log.info('Logging tracking event: %s', event)
-    tracking_executor.submit(matomo_track, event)
+    tracking_executor.submit(matomo_track, event, headers)
 
 
 # Required to be a free function to work with background jobs
-def matomo_track(event):
+def matomo_track(event, extra_headers=None):
+    if extra_headers is None:
+        extra_headers = {}
+
     # Gather events to send
     log = logging.getLogger('ckanext.matomo.tracking')
     test_mode = toolkit.config.get('ckanext.matomo.test_mode', False)
@@ -74,7 +82,7 @@ def matomo_track(event):
     matomo_site_id = toolkit.config.get(u'ckanext.matomo.site_id')
     token_auth = toolkit.config.get('ckanext.matomo.token_auth')
     api = MatomoAPI(matomo_url, matomo_site_id, token_auth=token_auth)
-    r = api.tracking(event)
+    r = api.tracking(event, extra_headers=extra_headers)
     if not r.ok:
         log.warn('Error when posting tracking events to matomo: %s %s' % (r.status_code, r.reason))
         log.warn('With request: %s' % r.url)

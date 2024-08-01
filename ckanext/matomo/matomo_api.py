@@ -158,7 +158,9 @@ class MatomoAPI(object):
             end = end.strftime('%Y-%m-%d')
         return '{},{}'.format(start, end)
 
-    def tracking(self, extra_params):
+    def tracking(self, extra_params, extra_headers=None):
+        if extra_headers is None:
+            extra_headers = {}
         params = self.tracking_params.copy()
         params.update(extra_params)
         params['rand'] = str(uuid.uuid4())
@@ -166,7 +168,8 @@ class MatomoAPI(object):
         if self.token_auth is not None:
             params['token_auth'] = self.token_auth
 
-        return requests.get(self.tracking_url, params=params)
+        log.info(extra_headers)
+        return requests.get(self.tracking_url, params=params, headers=extra_headers)
 
 
 def _process_one_or_more_dates_result(data, handler) -> Dict[str, Any]:
