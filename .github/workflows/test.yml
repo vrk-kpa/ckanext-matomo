@@ -23,7 +23,7 @@ jobs:
     name: CKAN ${{ matrix.ckan-version }}
     runs-on: ubuntu-latest
     container:
-      image: openknowledge/ckan-dev:${{ matrix.ckan-version }}
+      image: ckan/ckan-dev:${{ matrix.ckan-version }}
     services:
       solr:
         image: ckan/ckan-solr:${{ matrix.ckan-version }}
@@ -63,7 +63,13 @@ jobs:
           ckan -c test.ini matomo init_db
       - name: Run tests
         run: pytest --ckan-ini=test.ini --cov=ckanext.matomo --disable-warnings ckanext/matomo/tests
+
+      - name: install codecov requirements
+        run: |
+          apk add gpg gpg-agent
+
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          os: alpine
