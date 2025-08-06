@@ -8,7 +8,7 @@
       {% for row in data['data']['finland_vs_world_last_month'] %}
         {
           value: {{ row.total_visits or 0}},
-          label: '{{ row.location_name }}'
+          label: '{{ _(row.location_name) }}'
         },
       {% endfor %}
     ],
@@ -16,7 +16,7 @@
       {% for row in data['data']['finland_vs_world_all'] %}
         {
           value: {{ row.total_visits }},
-          label: '{{ row.location_name }}'
+          label: '{{ _(row.location_name) }}'
         },
       {% endfor %}
     ],

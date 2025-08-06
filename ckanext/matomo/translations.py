@@ -14,6 +14,8 @@ def _translations():
     _("Matomo showing most popular search terms")
     _("Last searched date")
 
+    _('Other')
+
     _('Andorra')
     _('United Arab Emirates')
     _('Afghanistan')
