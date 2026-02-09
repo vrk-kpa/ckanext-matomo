@@ -24,11 +24,3 @@ def matomo():
 @click.option(u'--dataset', required=False, help="Fetch analytics data for a single dataset")
 def fetch(dryrun, since, until, dataset):
     commands.fetch(dryrun, since, until, dataset)
-
-
-@matomo.command(
-    u'init_db',
-    help='Initializes analytics database tables'
-)
-def init_db():
-    commands.init_db()

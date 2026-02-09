@@ -1,7 +1,7 @@
 """Add downloads field for resource_stats
 
 Revision ID: f492c1786c97
-Revises:
+Revises: 5a2342a4f2e8
 Create Date: 2022-11-14 07:43:25.308276
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'f492c1786c97'
-down_revision = None
+down_revision = '5a2342a4f2e8'
 branch_labels = None
 depends_on = None
 
