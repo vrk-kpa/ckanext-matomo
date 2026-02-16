@@ -68,13 +68,7 @@ jobs:
       - name: Run tests
         run: pytest --ckan-ini=test.ini --cov=ckanext.matomo --disable-warnings ckanext/matomo/tests
 
-      - name: install codecov requirements (apk)
-        if: ${{ matrix.ckan-version == '2.10' }}
-        run: |
-          apk add gpg gpg-agent
-          
-      - name: install codecov requirements (apt)
-        if: ${{ matrix.ckan-version != '2.10' }}
+      - name: install codecov requirements
         run: |
           apt-get update
           apt-get install -y curl gpg
