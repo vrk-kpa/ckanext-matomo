@@ -17,7 +17,11 @@ jobs:
     needs: ruff
     strategy:
       matrix:
-        ckan-version: ["2.11"]
+         include:
+          - ckan-version: "2.11"
+            ckan-image: "ckan/ckan-dev:2.11-py3.10"
+          - ckan-version: "2.10"
+            ckan-image: "ckan/ckan-dev:2.10-py3.10"
       fail-fast: false
 
     name: CKAN ${{ matrix.ckan-version }}
