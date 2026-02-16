@@ -27,7 +27,7 @@ jobs:
     name: CKAN ${{ matrix.ckan-version }}
     runs-on: ubuntu-latest
     container:
-      image: ckan/ckan-dev:${{ matrix.ckan-version }}
+     image: ${{ matrix.ckan-image }}
       options: --user root
     services:
       solr:
