@@ -38,7 +38,7 @@
         {% set resource_name = h.get_translated(resource, 'resource_name') or resource_name %}
         {% set package_title = h.get_translated(resource, 'package_title') or package_name %}
 
-        <td>{{ h.link_to(h.truncate(resource_name, length=50,whole_word=True), h.url_for('dataset_resource.read',id=resource.package_id,resource_id=resource.resource_id)) }}<br />
+        <td>{{ h.link_to(resource_name| truncate(50, True), h.url_for('dataset_resource.read',id=resource.package_id,resource_id=resource.resource_id)) }}<br />
           <em>in {{ h.link_to(package_title, h.url_for('dataset.read', id=resource.package_id)) }}</em>
         </td>
         <td>{{ resource.get('downloads') }}</td>
