@@ -17,7 +17,7 @@ class MixinPlugin(plugins.SingletonPlugin):
             # ('/dataset/<package_id>/resource/<resource_id>/download/<filename>', 'tracked_download', tracked_download)
         ]
 
-        if plugins.toolkit.asbool(plugins.toolkit.config.get('ckanext.matomo.track_api', False)):
+        if plugins.toolkit.config.get('ckanext.matomo.track_api'):
             for rule in rules:
                 blueprint.add_url_rule(*rule)
 

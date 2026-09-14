@@ -71,7 +71,7 @@ def matomo_track(event, extra_headers=None):
 
     # Gather events to send
     log = logging.getLogger('ckanext.matomo.tracking')
-    test_mode = toolkit.config.get('ckanext.matomo.test_mode', False)
+    test_mode = toolkit.config.get('ckanext.matomo.test_mode')
 
     if test_mode:
         log.info(f"Would send API event to Matomo: {event}")

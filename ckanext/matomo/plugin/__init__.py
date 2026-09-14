@@ -26,6 +26,7 @@ else:
 log = logging.getLogger(__name__)
 
 
+@toolkit.blanket.config_declarations
 class MatomoPlugin(MixinPlugin, plugins.SingletonPlugin, DefaultTranslation):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.ITemplateHelpers)
