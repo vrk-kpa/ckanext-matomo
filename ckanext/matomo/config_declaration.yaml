@@ -1,0 +1,66 @@
+version: 1
+groups:
+  - annotation: Matomo settings
+    options:
+      - key: ckanext.matomo.domain
+        description: |
+          Domain for matomo instance
+        example: http://example.com
+
+      - key: ckanext.matomo.site_id
+        description: |
+          Site id for the site in matomo
+        example: 1
+        type: int
+
+      - key: ckanext.matomo.script_domain
+        description: |
+          Alternative domain where matomo scripts are downloaded, e.g. cdn host, defaults to ckanext.matomo.domain
+        example: http://example.com
+
+      - key: ckanext.matomo.api_domain
+        description: |
+          Alternative domain for matomo api, defaults to ckanext.matomo.domain
+        example: http://example.com
+
+      - key: ckanext.matomo.token_auth
+        description: |
+          Token for matomo api
+
+      - key: ckanext.matomo.tracker_filename
+        description: |
+          Filename for tracker
+        default: matomo.php
+
+      - key: ckanext.matomo.script_filename
+        description: |
+          Filename for matomo script
+        default: matomo.js
+
+      - key: ckanext.matomo.track_api
+        description: |
+          Boolean if use of ckan api is tracked as events in matomo or not
+        example: false
+        default: false
+        type: bool
+
+      - key: ckanext.matomo.track_downloads
+        description: |
+          Boolean if file downloads are tracked as events by the extensions
+        example: false
+        default: false
+        type: bool
+
+      - key: ckanext.matomo.ignored_user_agents
+        description: |
+          User agent ignored in api tracking, currently supports only one user agent
+        example: docker-healthcheck
+
+      - key: ckanext.matomo.test_mode
+        description: |
+          Test mode for tracking, prevents sending data to matomo.
+        example: false
+        default: false
+        type: bool
+
+

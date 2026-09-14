@@ -11,7 +11,7 @@ class MixinPlugin:
     # IRoutes
 
     def before_map(self, map):
-        if plugins.toolkit.asbool(plugins.toolkit.config.get('ckanext.matomo.track_downloads', False)):
+        if plugins.toolkit.config.get('ckanext.matomo.track_downloads'):
             with SubMapper(map, controller='ckanext.matomo.plugin.pylons_plugin:TrackedResourceController') as m:
                 m.connect('/dataset/{id}/resource/{resource_id}/download', action='resource_download')
                 m.connect('/dataset/{id}/resource/{resource_id}/download/{filename}', action='resource_download')
